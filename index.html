@@ -1193,16 +1193,7 @@ function vInvites(s){
       </div>
 
       <div class="card mt">
-        <h3>Message templates</h3>
-        <div class="tabs">${tabs.map(([k,l])=>`<button data-action="tpl-tab" data-k="${k}" class="${ui.tplTab===k?'on':''}">${l}</button>`).join('')}</div>
-        ${ui.tplTab==='body'?`<div class="field"><label>Email subject</label><input class="input tplf" data-k="subject" value="${esc(T.subject)}"></div>`:''}
-        <div class="field"><label>${tabs.find(t=>t[0]===ui.tplTab)[1]} message</label><textarea class="input tplf" data-k="${ui.tplTab}" rows="9">${esc(T[ui.tplTab])}</textarea></div>
-        <div class="chips">${['first_name','name','event','date','time','venue','code','plus_one','rsvp_by','company','sender'].map(k=>`<span class="chip" data-action="ph" data-ph="{{${k}}}">{{${k}}}</span>`).join('')}</div>
-        <div class="row"><span class="muted" style="font-size:12px">${ui.tplTab==='accept'?'Sent automatically the moment a guest taps “I’ll attend”. Includes their QR pass.':ui.tplTab==='decline'?'Sent automatically when a guest taps “Can’t make it”.':ui.tplTab==='reminder'?'Sent to guests who haven’t RSVP’d when you click Remind.':'Every invitation includes the guest’s personal QR pass and RSVP buttons.'}</span><button class="btn sm ghost" data-action="tpl-reset" style="margin-left:auto">${ic('reset')} Reset</button></div>
-      </div>
-
-      <div class="card mt">
-        <h3>${ic('file')} Email image<span class="sub">shown at the top of your emails</span></h3>
+        <h3>${ic('upload')} Email image / flyer<span class="sub">shown at the top of your emails</span></h3>
         <div class="bn-grid">
           ${Object.keys(BANNERS).map(k=>`<button class="bn ${e.banner==='preset:'+k?'on':''}" data-action="banner" data-v="preset:${k}"><img src="${bannerSrc('preset:'+k)}" alt=""><span class="bn-l">${BANNER_NAMES[k]}</span></button>`).join('')}
           ${e.banner&&!e.banner.startsWith('preset:')?`<button class="bn on" data-action="banner" data-v="__keep"><img src="${e.banner}" alt=""><span class="bn-l">Your image</span></button>`:''}
@@ -1211,6 +1202,15 @@ function vInvites(s){
         </div>
         <div class="toggle" style="padding-bottom:0;margin-top:6px"><div><b>Also show on confirmation email</b><small>The auto-reply guests get after they RSVP</small></div><label class="sw"><input type="checkbox" data-action="banner-confirm" ${e.bannerConfirm?'checked':''}><span></span></label></div>
         <div class="note">${ic('info')}<span>Best size: 1200 × 500 px, JPG or PNG — a flyer, venue photo or brand visual. Large images are compressed automatically.</span></div>
+      </div>
+
+      <div class="card mt">
+        <h3>Message templates</h3>
+        <div class="tabs">${tabs.map(([k,l])=>`<button data-action="tpl-tab" data-k="${k}" class="${ui.tplTab===k?'on':''}">${l}</button>`).join('')}</div>
+        ${ui.tplTab==='body'?`<div class="field"><label>Email subject</label><input class="input tplf" data-k="subject" value="${esc(T.subject)}"></div>`:''}
+        <div class="field"><label>${tabs.find(t=>t[0]===ui.tplTab)[1]} message</label><textarea class="input tplf" data-k="${ui.tplTab}" rows="9">${esc(T[ui.tplTab])}</textarea></div>
+        <div class="chips">${['first_name','name','event','date','time','venue','code','plus_one','rsvp_by','company','sender'].map(k=>`<span class="chip" data-action="ph" data-ph="{{${k}}}">{{${k}}}</span>`).join('')}</div>
+        <div class="row"><span class="muted" style="font-size:12px">${ui.tplTab==='accept'?'Sent automatically the moment a guest taps “I’ll attend”. Includes their QR pass.':ui.tplTab==='decline'?'Sent automatically when a guest taps “Can’t make it”.':ui.tplTab==='reminder'?'Sent to guests who haven’t RSVP’d when you click Remind.':'Every invitation includes the guest’s personal QR pass and RSVP buttons.'}</span><button class="btn sm ghost" data-action="tpl-reset" style="margin-left:auto">${ic('reset')} Reset</button></div>
       </div>
 
       <div class="grid g2 mt">
