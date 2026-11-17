@@ -360,6 +360,7 @@ body.present .exit-present{display:inline-flex}
 .mc.phone .em-det td:first-child{width:92px}
 .mc.phone .mr-head{padding:12px 16px}
 .mc.phone .mr-head h2{font-size:17px}
+.mc.phone .mr-t{display:none}
 .chat{background:#efeae2;padding:22px;border-radius:12px}
 .chat .bub{background:#fff;border-radius:10px;padding:12px 14px;max-width:440px;white-space:pre-wrap;font-size:14px;color:#111;box-shadow:0 1px 1px rgba(0,0,0,.08)}
 
@@ -448,6 +449,24 @@ body.present .exit-present{display:inline-flex}
 @media (max-width:1180px){.gv-grid{grid-template-columns:1fr}}
 @media (max-width:700px){.mc-main{grid-template-columns:1fr}.mc:not(.has-sel) .mc-read{display:none}.mc.has-sel .mc-list{display:none}.rp-grid{grid-template-columns:1fr}.em-pass{flex-direction:column;text-align:center}}
 
+.em-banner{display:block;width:100%;height:auto;background:#0a0a0a}
+.bn-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.bn{position:relative;border:1.5px solid #2a2a2a;border-radius:12px;overflow:hidden;cursor:pointer;background:#0b0b0b;aspect-ratio:12/5;display:grid;place-items:center;color:#9a9a9a;font-size:12px;font-weight:600;padding:0}
+.bn img{width:100%;height:100%;object-fit:cover;display:block}
+.bn:hover{border-color:#666}
+.bn.on{border-color:#e5e5e5;box-shadow:0 0 0 3px rgba(255,255,255,.12)}
+.bn.on::after{content:"✓";position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:50%;background:#fff;color:#0a0a0a;font-size:11px;font-weight:900;display:grid;place-items:center}
+.bn .bn-l{position:absolute;left:0;right:0;bottom:0;padding:4px 8px;font-size:11px;background:linear-gradient(transparent,rgba(0,0,0,.8));color:#ddd;text-align:left}
+.bn.up{border-style:dashed;flex-direction:column;gap:4px;display:flex;align-items:center;justify-content:center}
+.bn.up svg{width:20px;height:20px}
+@media (max-width:860px){
+  .gv-stage.phone>.mc,.gv-stage.phone>.br{width:100%;max-width:392px;border-width:7px;border-radius:30px;height:720px}
+  .mc,.br{height:720px}
+  .stepper{display:grid;grid-template-columns:1fr 1fr;min-width:0;width:100%}
+  .stepper div{white-space:normal}
+  .gv-ctrl{width:100%}
+  .bn-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
 .hide{display:none!important}
 svg[viewBox="0 0 24 24"]{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none;vertical-align:-4px}
 .viewfinder .cta svg{width:42px;height:42px;stroke-width:1.5;margin-bottom:8px;display:block;margin-inline:auto}
@@ -503,6 +522,7 @@ svg[viewBox="0 0 24 24"]{width:18px;height:18px;stroke:currentColor;fill:none;st
 </div>
 
 <input type="file" id="fileImport" accept=".xlsx,.xls,.csv" class="hide">
+<input type="file" id="fileBanner" accept="image/*" class="hide">
 <input type="file" id="fileScan" accept="image/*" capture="environment" class="hide">
 <div class="modal-bg" id="modalBg"><div class="modal" id="modal"></div></div>
 <div class="toasts" id="toasts"></div>
@@ -574,7 +594,7 @@ const DEFAULT_TPL={
   decline:"Thank you for letting us know. We're sorry you can't make it to {{event}}, and we'll be sure to keep you in the loop for the next one.",
   reminder:"Just a gentle reminder that {{event}} is coming up on {{date}}. We haven't received your RSVP yet — please let us know below whether you can make it."
 };
-const EVENT_EXTRAS={tagline:'An exclusive evening unveiling what\u2019s next',dress:'Smart casual',rsvpBy:'2026-12-03',allowPlusOne:true};
+const EVENT_EXTRAS={banner:'preset:spotlight',bannerConfirm:true,tagline:'An exclusive evening unveiling what\u2019s next',dress:'Smart casual',rsvpBy:'2026-12-03',allowPlusOne:true};
 function freshState(){
   return{
     event:{...EVENT_EXTRAS,name:'KODE Launch Night',date:'2026-12-10',time:'19:00',venue:'Dubai Design District, Building 7',sender:'The KODE Team',eventId:'EVT'+Math.random().toString(36).slice(2,6).toUpperCase()},
@@ -589,7 +609,7 @@ if(!state||!state.event||!Array.isArray(state.guests))state=freshState();
 state.event={...EVENT_EXTRAS,...state.event};
 if(state.tplV!==2){state.tpl={...DEFAULT_TPL};state.tplV=2}
 state.tpl={...DEFAULT_TPL,...state.tpl};
-function persist(){try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){}}
+function persist(){try{localStorage.setItem(LS,JSON.stringify(state));return true}catch(e){return false}}
 function commit(){persist();render()}
 function log(type,text,gid,t=now()){state.log.unshift({t,type,text,gid});if(state.log.length>3000)state.log.length=3000}
 
@@ -913,6 +933,30 @@ function calLinks(code){
   return{g:`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${E(e.name)}&dates=${f(st)}/${f(en)}&location=${E(e.venue)}&details=${det}`,
          o:`https://outlook.live.com/calendar/0/deeplink/compose?subject=${E(e.name)}&startdt=${iso(st)}&enddt=${iso(en)}&location=${E(e.venue)}&body=${det}`};
 }
+const BANNERS={
+  spotlight:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500"><defs><radialGradient id="a" cx="50%" cy="0%" r="75%"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".35" stop-color="#9a9a9a" stop-opacity=".18"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient><linearGradient id="b" x1="0" x2="1"><stop offset="0" stop-color="#555"/><stop offset=".5" stop-color="#f2f2f2"/><stop offset="1" stop-color="#555"/></linearGradient></defs><rect width="1200" height="500" fill="#070707"/><rect width="1200" height="500" fill="url(#a)"/><g fill="none" stroke="url(#b)" stroke-opacity=".5"><ellipse cx="600" cy="560" rx="560" ry="230"/><ellipse cx="600" cy="560" rx="460" ry="190" stroke-opacity=".35"/><ellipse cx="600" cy="560" rx="360" ry="150" stroke-opacity=".25"/></g><g transform="translate(520 150)" fill="none" stroke="#fff" stroke-opacity=".9"><rect x="0" y="0" width="160" height="160" stroke-width="9"/></g><g font-family="Montserrat,Arial Black,sans-serif" font-weight="800" fill="#fff" font-size="62"><text x="548" y="222" textLength="104" lengthAdjust="spacingAndGlyphs">KO</text><rect x="548" y="236" width="104" height="7"/><text x="548" y="294" textLength="104" lengthAdjust="spacingAndGlyphs">DE</text></g></svg>`,
+  waves:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500"><defs><linearGradient id="w" x1="0" x2="1"><stop offset="0" stop-color="#3a3a3a"/><stop offset=".45" stop-color="#f5f5f5"/><stop offset=".7" stop-color="#8a8a8a"/><stop offset="1" stop-color="#2a2a2a"/></linearGradient></defs><rect width="1200" height="500" fill="#060606"/><g fill="none" stroke="url(#w)">${Array.from({length:22},(_,i)=>`<path d="M-50 ${170+i*9} C 250 ${60+i*14}, 450 ${380-i*6}, 700 ${230+i*4} S 1100 ${90+i*12}, 1260 ${200+i*7}" stroke-opacity="${(0.15+0.75*(1-Math.abs(i-11)/11)).toFixed(2)}" stroke-width="1.4"/>`).join('')}</g></svg>`,
+  grid:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500"><defs><linearGradient id="h" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000"/><stop offset=".55" stop-color="#1a1a1a"/><stop offset=".62" stop-color="#e9e9e9"/><stop offset=".64" stop-color="#2a2a2a"/><stop offset="1" stop-color="#050505"/></linearGradient><radialGradient id="s" cx="50%" cy="62%" r="40%"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs><rect width="1200" height="500" fill="url(#h)"/><rect width="1200" height="500" fill="url(#s)"/><g stroke="#cfcfcf" stroke-opacity=".28">${Array.from({length:25},(_,i)=>`<line x1="600" y1="312" x2="${-1200+i*150}" y2="500"/>`).join('')}${Array.from({length:7},(_,i)=>{const y=318+Math.pow(i+1,1.9)*4.2;return`<line x1="0" y1="${y.toFixed(1)}" x2="1200" y2="${y.toFixed(1)}"/>`}).join('')}</g><g fill="#fff" fill-opacity=".7">${Array.from({length:60},(_,i)=>`<circle cx="${(i*197)%1200}" cy="${(i*83)%280}" r="${(i%3)*.6+.6}"/>`).join('')}</g></svg>`,
+  pixels:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500"><rect width="1200" height="500" fill="#070707"/><g fill="#e6e6e6">${(()=>{let o='',k=7;for(let y=0;y<500;y+=20)for(let x=0;x<1200;x+=20){k=(k*9301+49297)%233280;const r=k/233280,d=Math.abs(x-600)/600;if(r>0.45+d*0.5)o+=`<rect x="${x}" y="${y}" width="18" height="18" opacity="${(0.08+(1-d)*0.55*r).toFixed(2)}"/>`}return o})()}</g><rect x="470" y="120" width="260" height="260" fill="#070707"/><g transform="translate(500 150)" fill="none" stroke="#fff"><rect width="200" height="200" stroke-width="11"/></g><g font-family="Montserrat,Arial Black,sans-serif" font-weight="800" fill="#fff" font-size="78"><text x="535" y="240" textLength="130" lengthAdjust="spacingAndGlyphs">KO</text><rect x="535" y="257" width="130" height="9"/><text x="535" y="330" textLength="130" lengthAdjust="spacingAndGlyphs">DE</text></g></svg>`
+};
+const BANNER_NAMES={spotlight:'Spotlight',waves:'Silver waves',grid:'Horizon',pixels:'Pixel field'};
+function bannerSrc(b){if(!b)return'';if(b.startsWith('preset:')){const k=b.slice(7);return BANNERS[k]?'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(BANNERS[k]):''}return b}
+function setBannerFromFile(file){
+  if(!file||!/^image\//.test(file.type)){toast('Choose a JPG or PNG image');return}
+  const img=new Image(),u=URL.createObjectURL(file);
+  img.onload=()=>{
+    const W=Math.min(1200,img.naturalWidth),H=Math.round(img.naturalHeight*W/img.naturalWidth);
+    const c=document.createElement('canvas');c.width=W;c.height=Math.min(H,1600);
+    const x=c.getContext('2d');x.fillStyle='#000';x.fillRect(0,0,c.width,c.height);x.drawImage(img,0,0,W,H);
+    URL.revokeObjectURL(u);
+    let q=.85,d=c.toDataURL('image/jpeg',q);while(d.length>900000&&q>.4){q-=.15;d=c.toDataURL('image/jpeg',q)}
+    const prev=state.event.banner;state.event.banner=d;
+    if(!persist()){state.event.banner=prev;persist();toast('That image is too large — try a smaller one');return}
+    render();toast('Image added to your emails');
+  };
+  img.onerror=()=>{URL.revokeObjectURL(u);toast('Couldn’t read that image')};
+  img.src=u;
+}
 const EMAIL_KIND={invite:'invite',reminder:'reminder','auto-accept':'confirm','auto-decline':'decline'};
 const paras=t=>esc(t).split(/\n{2,}/).map(x=>`<p>${x.replace(/\n/g,'<br>')}</p>`).join('');
 function emDetails(){const e=state.event;return`<table class="em-det">
@@ -945,7 +989,8 @@ function renderEmail(kind,g,opt={}){
     body=`<p>Dear ${esc(first)},</p>${paras(fill(state.tpl.decline,g))}<div class="em-btns"><a class="em-no" ${rsvpAttr(g,'accepted',I)}>Changed your mind? Update RSVP</a></div><p class="em-sign">Warm regards,<br><b>${esc(e.sender)}</b></p>`;
   }
   const label={invite:'Private invitation',reminder:'Reminder',confirm:'Confirmation',decline:'RSVP received'}[kind];
-  return`<div class="em"><div class="em-head">${logo()}<span>${label}</span></div>${hero}<div class="em-body">${body}</div>${emFoot(g)}</div>`;
+  const bsrc=bannerSrc(e.banner),showB=bsrc&&(kind==='invite'||kind==='reminder'||(kind==='confirm'&&e.bannerConfirm));
+  return`<div class="em"><div class="em-head">${logo()}<span>${label}</span></div>${showB?`<img class="em-banner" src="${bsrc}" alt="${esc(e.name)}">`:''}${hero}<div class="em-body">${body}</div>${emFoot(g)}</div>`;
 }
 function guestEmailHtml(g,interactive){return`<div class="em-wrap" style="border-radius:14px">${renderEmail('invite',g,{interactive})}</div>`}
 function mailMeta(m,g){return`<div class="mr-head"><h2>${esc(m.subject)}</h2><div class="mr-from"><div class="mr-av">${logo()}</div><div><b>${esc(state.event.sender)}</b> <span>&lt;events@kode.events&gt;</span><br><span>to ${esc(g.name)} &lt;${esc(m.to)}&gt;</span></div><span class="mr-t">${fmtDT(m.t)}</span></div></div>`}
@@ -1012,7 +1057,7 @@ const VIEWS={
   dashboard:{t:'Dashboard',s:()=>`${state.event.name} · ${fmtDate(state.event.date)}`,ic:'dash',r:vDashboard},
   guests:{t:'Guests',s:()=>`${state.guests.length} on the list · import from Excel or CSV`,ic:'users',r:vGuests},
   invitations:{t:'Invitations',s:()=>'Event details, message templates, auto-replies and sending',ic:'send',r:vInvites},
-  'guest-view':{t:'Guest experience',s:()=>'Exactly what your guest sees — invitation, RSVP with +1, auto-reply, check-in',ic:'mail',r:vGuestView},
+  'guest-view':{t:'Guest experience',n:'Guest view',s:()=>'Exactly what your guest sees — invitation, RSVP with +1, auto-reply, check-in',ic:'mail',r:vGuestView},
   messages:{t:'Messages',s:()=>'Every invitation, reminder and auto-reply sent',ic:'inbox',r:vMessages},
   scanner:{t:'Scanner',s:()=>'Check guests in at the door',ic:'scan',r:vScanner},
   reports:{t:'Reports',s:()=>`Live report · generated ${fmtDT(now())}`,ic:'chart',r:vReports}
@@ -1021,7 +1066,7 @@ function cur(){const h=location.hash.slice(1);return VIEWS[h]?h:'dashboard'}
 function render(){
   const v=cur(),s=stats();
   const badges={guests:s.total||'',messages:state.outbox.length||'',scanner:s.checkedAll?`${s.checkedAll}`:''};
-  $('#nav').innerHTML=Object.entries(VIEWS).map(([k,o])=>`<a href="#${k}" class="${k===v?'on':''}">${ic(o.ic,'ico')}<span class="lbl">${o.t}</span>${badges[k]?`<span class="badge">${badges[k]}</span>`:''}</a>`).join('');
+  $('#nav').innerHTML=Object.entries(VIEWS).map(([k,o])=>`<a href="#${k}" class="${k===v?'on':''}">${ic(o.ic,'ico')}<span class="lbl">${o.n&&innerWidth<860?o.n:o.t}</span>${badges[k]?`<span class="badge">${badges[k]}</span>`:''}</a>`).join('');
   const days=Math.ceil((new Date(state.event.date+'T'+(state.event.time||'00:00'))-now())/864e5);
   $('#sideEvent').innerHTML=`<div class="lbl">Current event</div><div class="nm">${esc(state.event.name)}</div><div class="dt">${esc(fmtDate(state.event.date))} · ${esc(state.event.time)}</div><div class="dt muted" style="font-size:12px">${esc(state.event.venue)}</div><div class="cd">${isNaN(days)?'':days>0?`<b>${days}</b> days to go`:days===0?'<b>Today</b>':'Event passed'} · <b>${s.accepted}</b> confirmed</div>`;
   $('#vTitle').textContent=VIEWS[v].t;$('#vSub').textContent=VIEWS[v].s();
@@ -1154,6 +1199,18 @@ function vInvites(s){
         <div class="field"><label>${tabs.find(t=>t[0]===ui.tplTab)[1]} message</label><textarea class="input tplf" data-k="${ui.tplTab}" rows="9">${esc(T[ui.tplTab])}</textarea></div>
         <div class="chips">${['first_name','name','event','date','time','venue','code','plus_one','rsvp_by','company','sender'].map(k=>`<span class="chip" data-action="ph" data-ph="{{${k}}}">{{${k}}}</span>`).join('')}</div>
         <div class="row"><span class="muted" style="font-size:12px">${ui.tplTab==='accept'?'Sent automatically the moment a guest taps “I’ll attend”. Includes their QR pass.':ui.tplTab==='decline'?'Sent automatically when a guest taps “Can’t make it”.':ui.tplTab==='reminder'?'Sent to guests who haven’t RSVP’d when you click Remind.':'Every invitation includes the guest’s personal QR pass and RSVP buttons.'}</span><button class="btn sm ghost" data-action="tpl-reset" style="margin-left:auto">${ic('reset')} Reset</button></div>
+      </div>
+
+      <div class="card mt">
+        <h3>${ic('file')} Email image<span class="sub">shown at the top of your emails</span></h3>
+        <div class="bn-grid">
+          ${Object.keys(BANNERS).map(k=>`<button class="bn ${e.banner==='preset:'+k?'on':''}" data-action="banner" data-v="preset:${k}"><img src="${bannerSrc('preset:'+k)}" alt=""><span class="bn-l">${BANNER_NAMES[k]}</span></button>`).join('')}
+          ${e.banner&&!e.banner.startsWith('preset:')?`<button class="bn on" data-action="banner" data-v="__keep"><img src="${e.banner}" alt=""><span class="bn-l">Your image</span></button>`:''}
+          <button class="bn up" data-action="banner-upload">${ic('upload')}<span>Upload image</span></button>
+          <button class="bn ${e.banner?'':'on'}" data-action="banner" data-v="">No image</button>
+        </div>
+        <div class="toggle" style="padding-bottom:0;margin-top:6px"><div><b>Also show on confirmation email</b><small>The auto-reply guests get after they RSVP</small></div><label class="sw"><input type="checkbox" data-action="banner-confirm" ${e.bannerConfirm?'checked':''}><span></span></label></div>
+        <div class="note">${ic('info')}<span>Best size: 1200 × 500 px, JPG or PNG — a flyer, venue photo or brand visual. Large images are compressed automatically.</span></div>
       </div>
 
       <div class="grid g2 mt">
@@ -1426,6 +1483,7 @@ function afterRender(v){
     d.addEventListener('drop',e=>{e.preventDefault();d.classList.remove('over');const f=e.dataTransfer.files[0];if(!f)return;id==='vf'?scanImage(f):handleImportFile(f)})});
 }
 $('#fileImport').addEventListener('change',e=>{handleImportFile(e.target.files[0]);e.target.value=''});
+$('#fileBanner').addEventListener('change',e=>{setBannerFromFile(e.target.files[0]);e.target.value=''});
 $('#fileScan').addEventListener('change',e=>{scanImage(e.target.files[0]);e.target.value=''});
 window.addEventListener('hashchange',()=>{if(ui.keepModal)ui.keepModal=false;else closeModal();render();window.scrollTo(0,0)});
 
@@ -1446,6 +1504,9 @@ document.addEventListener('click',async e=>{
     case 'gv-reset':{const gg=gvGuest();if(!gg)break;gvReset(gg);commit();toast(`Restarted the demo for ${gg.name}`)}break;
     case 'gv-scan':{const gg=gvGuest();if(!gg)break;const code=el.dataset.k==='p'&&gg.plusOne?gg.plusOne.code:gg.code;processScan(`KODE|${state.event.eventId}|${code}`);ui.gv.door=ui.lastScan;render()}break;
     case 'present':document.body.classList.toggle('present');window.scrollTo(0,0);break;
+    case 'banner':if(el.dataset.v!=='__keep'){state.event.banner=el.dataset.v;persist();render()}break;
+    case 'banner-upload':$('#fileBanner').click();break;
+    case 'banner-confirm':state.event.bannerConfirm=el.checked;persist();$('#preview')&&($('#preview').innerHTML=previewHtml());break;
     case 'ev-plus':state.event.allowPlusOne=el.checked;persist();$('#preview')&&($('#preview').innerHTML=previewHtml());break;
     case 'import':if(e.target.closest('a')&&e.target.closest('a').dataset.action==='load-sample')break;$('#fileImport').click();break;
     case 'load-sample':e.stopPropagation();importRows(SAMPLE.map(r=>r.slice()),'Sample guest list (26 rows)');break;
