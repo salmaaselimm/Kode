@@ -288,6 +288,166 @@ textarea.input{min-height:120px;resize:vertical;line-height:1.55}
 .ch{font-size:12px;color:var(--soft);display:inline-flex;align-items:center;gap:6px}
 .ok-t{color:var(--ok)}.bad-t{color:var(--bad)}
 
+
+/* ===== Guest experience ===== */
+.plus{font-size:10.5px;background:#e9e9e9;color:#0a0a0a;border-radius:5px;padding:1px 6px;font-weight:800;margin-left:6px;vertical-align:1px}
+.gv-bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.stepper{display:flex;gap:6px;flex:1;min-width:320px}
+.stepper div{flex:1;padding:10px 12px;border-radius:12px;border:1px solid #222;background:#0f0f0f;font-size:12.5px;color:#6f6f6f;display:flex;gap:9px;align-items:center;font-weight:600;white-space:nowrap}
+.stepper b{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#1c1c1c;font-size:11px;flex:none;color:#999}
+.stepper .done{color:#d9d9d9}.stepper .done b{background:#e9e9e9;color:#0a0a0a}
+.stepper .act{border-color:#555;color:#fff;background:#171717}.stepper .act b{background:var(--metal);color:#0a0a0a}
+.gv-ctrl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.gv-ctrl .tabs{margin:0}
+.gv-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
+.gv-stage.phone{display:flex;justify-content:center}
+.door{display:flex;gap:10px;align-items:flex-start;margin-top:12px;padding:12px;border-radius:12px;border:1px solid;font-size:13px}
+.door svg{margin-top:2px}
+.door span{color:var(--soft)}
+.door.ok{border-color:#2b5a3d;background:#0f1912;color:var(--ok)}
+.door.dup,.door.warn{border-color:#5a4a22;background:#19150d;color:var(--warn)}
+.door.bad{border-color:#5a2626;background:#1a0f0f;color:var(--bad)}
+.exit-present{position:fixed;top:14px;right:14px;z-index:60;display:none}
+body.present .side,body.present .top{display:none}
+body.present .app{grid-template-columns:1fr}
+body.present .exit-present{display:inline-flex}
+
+/* Mail client mock */
+.mc{background:#fff;color:#1a1a1a;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;height:800px;box-shadow:0 30px 80px rgba(0,0,0,.55);border:1px solid #2a2a2a}
+.mc-top,.br-bar{height:48px;background:#f2f2f2;border-bottom:1px solid #e3e3e3;display:flex;align-items:center;gap:8px;padding:0 14px;flex:none;color:#333}
+.mc-top>i,.br-bar>i{width:11px;height:11px;border-radius:50%;background:#d4d4d4;display:block;flex:none}
+.mc-search{margin:0 auto;background:#fff;border:1px solid #e1e1e1;border-radius:8px;padding:5px 12px;color:#999;font-size:12.5px;width:min(360px,50%);display:flex;align-items:center;gap:8px}
+.mc-me{width:28px;height:28px;border-radius:50%;background:#0a0a0a;color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;flex:none}
+.mc-main{flex:1;display:grid;grid-template-columns:300px 1fr;min-height:0}
+.mc-list{border-right:1px solid #ececec;overflow:auto;background:#fafafa}
+.mc-lh{padding:14px 16px 10px;font-weight:700;font-size:13px;display:flex;gap:8px;align-items:center;font-family:Montserrat,Inter,sans-serif}
+.mc-lh span{background:#0a0a0a;color:#fff;border-radius:99px;font-size:11px;padding:0 7px}
+.mc-item{display:flex;gap:10px;padding:12px 14px 12px 16px;border-bottom:1px solid #efefef;cursor:pointer;position:relative;animation:pop .3s ease}
+.mc-item:hover{background:#f2f2f2}.mc-item.on{background:#e8e8e8}
+.mc-item.unread::before{content:"";position:absolute;left:6px;top:22px;width:6px;height:6px;border-radius:50%;background:#0a0a0a}
+.mc-av,.mr-av{width:34px;height:34px;border-radius:50%;background:#0a0a0a;display:grid;place-items:center;flex:none}
+.mc-av svg,.mr-av svg{width:22px;height:22px;color:#fff}
+.mc-it{min-width:0;flex:1}
+.mc-r1{display:flex;justify-content:space-between;gap:8px;font-size:13px}
+.mc-r1 b{font-weight:600}
+.mc-r1 span{color:#999;font-size:11.5px;white-space:nowrap}
+.mc-sub{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#333}
+.mc-item.unread .mc-sub,.mc-item.unread .mc-r1 b{font-weight:800;color:#000}
+.mc-pre{font-size:12px;color:#8a8a8a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mc-read{overflow:auto;background:#fff;min-width:0}
+.mc-none{display:grid;place-items:center;align-content:center;gap:10px;color:#aaa}
+.mc-none svg{width:64px;height:64px;color:#e2e2e2}
+.mc-empty{padding:40px 16px;text-align:center;color:#999;display:flex;flex-direction:column;align-items:center;gap:12px}
+.mc-empty svg{width:34px;height:34px;color:#ccc}
+.mr-head{padding:20px 24px 14px;border-bottom:1px solid #f0f0f0}
+.mr-head h2{font-family:Montserrat,Inter,sans-serif;font-size:20px;margin:0 0 14px;color:#111;font-weight:700}
+.mr-from{display:flex;gap:10px;align-items:center;font-size:13px;color:#333}
+.mr-from span{color:#8a8a8a}
+.mr-t{margin-left:auto;font-size:12px;white-space:nowrap}
+.mc-back{border:0;background:none;padding:12px 16px 0;font-weight:700;color:#0a0a0a;cursor:pointer;font-size:14px}
+.gv-stage.phone>.mc,.gv-stage.phone>.br{width:392px;height:820px;border-radius:48px;border:11px solid #1b1b1b;box-shadow:0 0 0 2px #343434,0 40px 90px rgba(0,0,0,.65)}
+.gv-stage.phone .mc-top>i,.gv-stage.phone .br-bar>i,.gv-stage.phone .mc-search{display:none}
+.gv-stage.phone .mc-top,.gv-stage.phone .br-bar{padding-top:6px}
+.mc.phone .mc-main{grid-template-columns:1fr}
+.mc.phone.has-sel .mc-list{display:none}
+.mc.phone:not(.has-sel) .mc-read{display:none}
+.mc.phone .em-wrap{padding:0}
+.mc.phone .em{border-radius:0;box-shadow:none}
+.mc.phone .em-body,.mc.phone .em-head,.mc.phone .em-hero,.mc.phone .em-foot{padding-left:18px;padding-right:18px}
+.mc.phone .em-hero h1{font-size:25px}
+.mc.phone .em-pass{flex-direction:column;text-align:center}
+.mc.phone .em-btns a{min-width:0;width:100%}
+.mc.phone .em-det td:first-child{width:92px}
+.mc.phone .mr-head{padding:12px 16px}
+.mc.phone .mr-head h2{font-size:17px}
+.chat{background:#efeae2;padding:22px;border-radius:12px}
+.chat .bub{background:#fff;border-radius:10px;padding:12px 14px;max-width:440px;white-space:pre-wrap;font-size:14px;color:#111;box-shadow:0 1px 1px rgba(0,0,0,.08)}
+
+/* Email template */
+.em-wrap{background:#efefef;padding:24px 16px}
+.em{max-width:600px;margin:0 auto;background:#fff;color:#1d1d1d;border-radius:4px;overflow:hidden;font:15px/1.65 Inter,Arial,sans-serif;box-shadow:0 1px 4px rgba(0,0,0,.08);text-align:left}
+.em a{cursor:pointer}
+.em-head{background:#0a0a0a;color:#fff;display:flex;align-items:center;justify-content:space-between;padding:20px 32px 6px}
+.em-head svg{width:42px;height:42px;color:#fff}
+.em-head span{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:#9a9a9a;font-weight:600}
+.em-hero{background:#0a0a0a;color:#fff;padding:22px 32px 40px;text-align:center;position:relative}
+.em-hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,#5e5e5e,#f4f4f4,#8a8a8a,#e8e8e8,#5e5e5e)}
+.em-eyebrow{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#bdbdbd;font-weight:600}
+.em-hero h1{font-family:Montserrat,Arial,sans-serif;font-weight:800;font-size:31px;line-height:1.15;margin:10px 0 10px;letter-spacing:-.01em;color:#fff}
+.em-hero p{margin:0;color:#b5b5b5;font-size:14px}
+.em-badge{width:48px;height:48px;border-radius:50%;margin:0 auto 14px;display:grid;place-items:center;background:linear-gradient(135deg,#fff,#a3a3a3);color:#0a0a0a;font-weight:900;font-size:22px}
+.em-body{padding:32px 32px 12px}
+.em-body p{margin:0 0 14px}
+.em-det{width:100%;border-collapse:collapse;margin:22px 0;border-top:1px solid #e7e7e7}
+.em-det td{padding:12px 0;border-bottom:1px solid #e7e7e7;font-size:14.5px;vertical-align:top}
+.em-det td:first-child{width:128px;color:#8a8a8a;font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;padding-top:15px}
+.em-det td b{font-weight:600}
+.em-rsvp{background:#f5f5f5;border-radius:6px;padding:24px 22px;text-align:center;margin:24px 0}
+.em-q{font-family:Montserrat,Arial,sans-serif;font-weight:800;font-size:18px;color:#0a0a0a}
+.em-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:16px 0}
+.em-btns a{display:inline-block;padding:13px 22px;border-radius:4px;font-weight:700;font-size:14px;text-decoration:none;min-width:200px;text-align:center;transition:.15s}
+.em-yes{background:#0a0a0a;color:#fff!important;border:1.5px solid #0a0a0a}
+.em-yes:hover{background:#2a2a2a}
+.em-no{background:#fff;color:#0a0a0a!important;border:1.5px solid #0a0a0a}
+.em-no:hover{background:#f0f0f0}
+.em-small{font-size:12.5px;color:#7a7a7a;line-height:1.55}
+.em-status{padding:15px 16px;border-radius:6px;background:#edf7f0;color:#17653b;font-weight:600;font-size:14px;margin:22px 0;text-align:center}
+.em-status.declined{background:#fbf4e4;color:#7a5a12}
+.em-status a{color:inherit;text-decoration:underline}
+.em-pass{display:flex;gap:22px;align-items:center;border:1px solid #e3e3e3;border-radius:8px;padding:18px;margin:24px 0;background:linear-gradient(180deg,#fff,#f8f8f8)}
+.em-passes .em-pass{margin:14px 0}
+.em-qr{width:140px;height:140px;flex:none;margin:0 auto}
+.em-qr svg{width:100%;height:100%;display:block}
+.em-lbl{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:#8a8a8a;font-weight:800}
+.em-pn{font-family:Montserrat,Arial,sans-serif;font-weight:800;font-size:19px;margin:4px 0 8px;color:#0a0a0a}
+.em-code{font-family:'JetBrains Mono',monospace;font-size:13px;background:#0a0a0a;color:#fff;display:inline-block;padding:4px 10px;border-radius:4px;letter-spacing:.06em;margin-bottom:8px}
+.em-cal{font-size:13px;color:#7a7a7a;text-align:center;margin:6px 0 22px}
+.em-cal a{color:#0a0a0a;font-weight:700}
+.em-expect{background:#f5f5f5;border-radius:6px;padding:16px 20px;font-size:14px;margin:20px 0}
+.em-expect ul{margin:8px 0 0;padding-left:18px}
+.em-expect li{margin:3px 0}
+.em-sign{margin-top:24px!important}
+.em-foot{background:#0a0a0a;color:#8a8a8a;font-size:11.5px;line-height:1.65;padding:24px 32px;display:flex;gap:16px;align-items:center}
+.em-foot svg{width:32px;height:32px;color:#fff;flex:none}
+.em-foot a{color:#bdbdbd;text-decoration:underline}
+
+/* RSVP landing page */
+.br{background:#0a0a0a;border-radius:14px;overflow:hidden;height:800px;display:flex;flex-direction:column;border:1px solid #2a2a2a;box-shadow:0 30px 80px rgba(0,0,0,.55)}
+.br-url{margin:0 auto;background:#fff;border:1px solid #e1e1e1;border-radius:8px;padding:5px 14px;font-size:12.5px;color:#444;display:flex;align-items:center;gap:6px;min-width:0;white-space:nowrap;overflow:hidden}
+.br-url svg{width:13px;height:13px;color:#2a8a4a;flex:none}
+.br-x{border:0;background:none;cursor:pointer;color:#666;display:grid;place-items:center;padding:4px}
+.rp{flex:1;overflow:auto;padding:42px 24px;display:flex;flex-direction:column;align-items:center;background:radial-gradient(600px 320px at 50% 0,rgba(255,255,255,.09),transparent),#0a0a0a;color:#fff}
+.rp-logo{width:66px;height:66px;color:#fff;margin-bottom:18px;flex:none}
+.rp-ev{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#9a9a9a;text-align:center;font-weight:600}
+.rp h2{font-family:Montserrat,Inter,sans-serif;font-weight:800;font-size:30px;margin:12px 0 6px;text-align:center;letter-spacing:-.01em}
+.rp-sub{color:#bdbdbd;margin:0 0 24px;text-align:center}
+.rp-card{width:100%;max-width:470px;background:#131313;border:1px solid #2a2a2a;border-radius:18px;padding:24px}
+.rp-l{display:block;font-size:12px;font-weight:600;color:#bdbdbd;margin:18px 0 8px}
+.rp-card>.rp-l:first-child{margin-top:0}
+.rp-l span{color:#6a6a6a;font-weight:500}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#0b0b0b;border:1px solid #262626;border-radius:12px;padding:4px}
+.seg button{border:0;background:transparent;color:#a5a5a5;padding:11px 8px;border-radius:9px;font-weight:700;cursor:pointer;font-size:13.5px}
+.seg button.on{background:var(--metal);color:#0a0a0a}
+.rp-in{width:100%;background:#0b0b0b;border:1px solid #2e2e2e;border-radius:10px;padding:11px 12px;color:#fff;outline:none;font:inherit;font-size:14px}
+.rp-in:focus{border-color:#7a7a7a}
+.rp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rp-grid .rp-l{margin-top:14px}
+.rp-submit{width:100%;margin-top:22px;padding:14px;border:0;border-radius:12px;background:var(--metal);color:#0a0a0a;font-weight:800;font-size:15px;cursor:pointer;font-family:Montserrat,Inter,sans-serif}
+.rp-fine{font-size:12px;color:#6a6a6a;text-align:center;margin-top:12px}
+.rp-note{font-size:13px;color:#8a8a8a;margin-top:14px}
+.rp-done{text-align:center;max-width:420px;margin-top:16px}
+.rp-done p{color:#c9c9c9}
+.rp-check{width:76px;height:76px;border-radius:50%;background:var(--metal);display:grid;place-items:center;margin:0 auto 18px;animation:pop .4s ease}
+.rp-check svg{width:36px;height:36px;color:#0a0a0a;stroke-width:3}
+.rp-spin{width:22px;height:22px;border:2px solid #333;border-top-color:#fff;border-radius:50%;margin:22px auto 8px;animation:spin .8s linear infinite}
+.rp-done small{color:#7a7a7a}
+@keyframes spin{to{transform:rotate(360deg)}}
+.br.phone .rp-grid{grid-template-columns:1fr}
+.br.phone .rp h2{font-size:24px}
+.br.phone .rp{padding:30px 16px}
+@media (max-width:1180px){.gv-grid{grid-template-columns:1fr}}
+@media (max-width:700px){.mc-main{grid-template-columns:1fr}.mc:not(.has-sel) .mc-read{display:none}.mc.has-sel .mc-list{display:none}.rp-grid{grid-template-columns:1fr}.em-pass{flex-direction:column;text-align:center}}
+
 .hide{display:none!important}
 svg[viewBox="0 0 24 24"]{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none;vertical-align:-4px}
 .viewfinder .cta svg{width:42px;height:42px;stroke-width:1.5;margin-bottom:8px;display:block;margin-inline:auto}
@@ -346,6 +506,7 @@ svg[viewBox="0 0 24 24"]{width:18px;height:18px;stroke:currentColor;fill:none;st
 <input type="file" id="fileScan" accept="image/*" capture="environment" class="hide">
 <div class="modal-bg" id="modalBg"><div class="modal" id="modal"></div></div>
 <div class="toasts" id="toasts"></div>
+<button class="btn exit-present" data-action="present">Exit presentation</button>
 
 <script>
 /* ============ Icons ============ */
@@ -376,7 +537,11 @@ const I={
   reset:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>',
   wa:'<path d="M21 11.5a8.4 8.4 0 0 1-12.3 7.4L3 21l2.1-5.6A8.4 8.4 0 1 1 21 11.5z"/>',
   sms:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
-  file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8"/>'
+  file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8"/>',
+  lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  present:'<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>',
+  phone:'<rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/>',
+  monitor:'<rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8"/>'
 };
 const ic=(n,cls='')=>`<svg class="${cls}" viewBox="0 0 24 24">${I[n]||''}</svg>`;
 const logo=(cls='')=>`<svg class="${cls}" viewBox="0 0 100 100"><use href="#kode-logo"/></svg>`;
@@ -393,6 +558,9 @@ const EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const ALPH='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 function fmtDate(d){if(!d)return'';const x=new Date(d+'T00:00:00');return isNaN(x)?d:x.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'})}
 function fmtTime(t){return t?new Date(t).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}):''}
+function fmtDateLong(d){if(!d)return'';const x=new Date(d+'T00:00:00');return isNaN(x)?d:x.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}
+const firstName=g=>(g.name||'').trim().split(/\s+/)[0]||'there';
+const initials=n=>(n||'?').split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
 function fmtDT(t){return t?new Date(t).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):''}
 function ago(t){const s=Math.max(0,(now()-t)/1000);if(s<45)return'just now';if(s<3600)return Math.round(s/60)+'m ago';if(s<86400)return Math.round(s/3600)+'h ago';return Math.round(s/86400)+'d ago'}
 function toast(msg){const d=document.createElement('div');d.className='toast';d.textContent=msg;$('#toasts').appendChild(d);setTimeout(()=>{d.style.transition='.3s';d.style.opacity='0';setTimeout(()=>d.remove(),300)},3200)}
@@ -401,30 +569,34 @@ function toast(msg){const d=document.createElement('div');d.className='toast';d.
 const LS='kode-qr-system-v1';
 const DEFAULT_TPL={
   subject:"You're invited: {{event}}",
-  body:"Hi {{first_name}},\n\nYou're invited to {{event}} on {{date}} at {{time}} — {{venue}}.\n\nBelow is your personal QR pass. Show it at the entrance for instant check-in. Please confirm whether you can make it using the buttons below.\n\nSee you there,\n{{sender}}",
-  accept:"Thanks {{first_name}} — you're confirmed for {{event}}! 🎉\n\nKeep this QR pass handy; it's your entry ticket. Doors open at {{time}} on {{date}}.\n\nPass ID: {{code}}\n{{venue}}",
-  decline:"Hi {{first_name}}, sorry you can't make it to {{event}}. Thanks for letting us know — we hope to see you at the next one.\n\n— {{sender}}",
-  reminder:"Hi {{first_name}}, a quick reminder that {{event}} is on {{date}} at {{time}}. We haven't received your RSVP yet — tap below to confirm your spot."
+  body:"We'd be delighted to have you join us for {{event}} — an evening of first looks, good conversation and great company.\n\nYour personal QR pass is included below. Simply show it at the entrance on the night for instant, contact-free check-in.",
+  accept:"Thank you for confirming — your place at {{event}} is reserved. Your QR pass is below; just show it at the entrance and you'll be checked in within seconds.",
+  decline:"Thank you for letting us know. We're sorry you can't make it to {{event}}, and we'll be sure to keep you in the loop for the next one.",
+  reminder:"Just a gentle reminder that {{event}} is coming up on {{date}}. We haven't received your RSVP yet — please let us know below whether you can make it."
 };
+const EVENT_EXTRAS={tagline:'An exclusive evening unveiling what\u2019s next',dress:'Smart casual',rsvpBy:'2026-12-03',allowPlusOne:true};
 function freshState(){
   return{
-    event:{name:'KODE Launch Night',date:'2026-12-10',time:'19:00',venue:'Dubai Design District, Building 7',sender:'The KODE Team',eventId:'EVT'+Math.random().toString(36).slice(2,6).toUpperCase()},
+    event:{...EVENT_EXTRAS,name:'KODE Launch Night',date:'2026-12-10',time:'19:00',venue:'Dubai Design District, Building 7',sender:'The KODE Team',eventId:'EVT'+Math.random().toString(36).slice(2,6).toUpperCase()},
     tpl:{...DEFAULT_TPL},
-    channels:{email:true,whatsapp:true,sms:false},
-    guests:[],outbox:[],log:[],scans:[]
+    channels:{email:true,whatsapp:false,sms:false},
+    guests:[],outbox:[],log:[],scans:[],tplV:2
   };
 }
 let state=null;
 try{state=JSON.parse(localStorage.getItem(LS))}catch(e){}
 if(!state||!state.event||!Array.isArray(state.guests))state=freshState();
+state.event={...EVENT_EXTRAS,...state.event};
+if(state.tplV!==2){state.tpl={...DEFAULT_TPL};state.tplV=2}
 state.tpl={...DEFAULT_TPL,...state.tpl};
 function persist(){try{localStorage.setItem(LS,JSON.stringify(state))}catch(e){}}
 function commit(){persist();render()}
 function log(type,text,gid,t=now()){state.log.unshift({t,type,text,gid});if(state.log.length>3000)state.log.length=3000}
 
-let ui={guestQ:'',guestF:'all',msgF:'all',tplTab:'body',previewId:null,lastScan:null,sendProg:null,lastField:null};
+const GV0={mode:'mail',msgId:null,rsvpV:'accepted',p1:false,p1name:'',p1email:'',diet:'',note:'',done:false,door:null};
+let ui={gv:{...GV0,gid:null,device:'desktop'},guestQ:'',guestF:'all',msgF:'all',tplTab:'body',previewId:null,lastScan:null,sendProg:null,lastField:null};
 
-function genCode(){let c;do{let s='';for(let i=0;i<8;i++)s+=ALPH[Math.floor(Math.random()*ALPH.length)];c='KD-'+s.slice(0,4)+'-'+s.slice(4)}while(state.guests.some(g=>g.code===c));return c}
+function genCode(){let c;do{let s='';for(let i=0;i<8;i++)s+=ALPH[Math.floor(Math.random()*ALPH.length)];c='KD-'+s.slice(0,4)+'-'+s.slice(4)}while(state.guests.some(g=>g.code===c||(g.plusOne&&g.plusOne.code===c)));return c}
 const payload=g=>`KODE|${state.event.eventId}|${g.code}`;
 function status(g){if(g.checkedInAt)return'checked';if(g.rsvp==='accepted')return'confirmed';if(g.rsvp==='declined')return'declined';if(g.bounced)return'bounced';if(g.openedAt)return'opened';if(g.sentAt)return'invited';return'pending'}
 const ST={pending:'Not invited',invited:'Invited',bounced:'Bounced',opened:'Opened',confirmed:'Confirmed',declined:'Declined',checked:'Checked in'};
@@ -441,11 +613,15 @@ function stats(){
   c.noRsvp=G.filter(g=>g.sentAt&&!g.bounced&&!g.rsvp).length;
   c.autoreplies=state.outbox.filter(m=>m.kind.startsWith('auto')).length;
   c.invalid=G.filter(g=>!g.emailValid).length;
+  c.plusOnes=G.filter(g=>g.rsvp==='accepted'&&g.plusOne).length;
+  c.plusArrived=G.filter(g=>g.plusOne&&g.plusOne.checkedInAt).length;
+  c.headcount=c.accepted+c.plusOnes;
+  c.arrivedTotal=c.checkedAll+c.plusArrived;
   return c;
 }
 function fill(str,g){
   const e=state.event,first=(g.name||'').trim().split(/\s+/)[0]||'there';
-  const map={name:g.name,first_name:first,event:e.name,date:fmtDate(e.date),time:e.time,venue:e.venue,sender:e.sender,code:g.code,email:g.email,phone:g.phone,company:g.company||''};
+  const map={plus_one:g.plusOne?g.plusOne.name:'',rsvp_by:fmtDateLong(e.rsvpBy),name:g.name,first_name:first,event:e.name,date:fmtDate(e.date),time:e.time,venue:e.venue,sender:e.sender,code:g.code,email:g.email,phone:g.phone,company:g.company||''};
   return String(str||'').replace(/\{\{\s*(\w+)\s*\}\}/g,(m,k)=>k in map?map[k]:m);
 }
 
@@ -481,7 +657,8 @@ function detectCols(headers){
     first:f(/first/),last:f(/last|surname|family/),
     email:f(/e-?mail|بريد/),
     phone:f(/phone|mobile|number|whats|tel|cell|رقم|هاتف|جوال/),
-    company:f(/company|organi[sz]ation|^org|employer|شركة|business/)
+    company:f(/company|organi[sz]ation|^org|employer|شركة|business/),
+    plus:f(/plus|\+1|companion|guest allowed/)
   };
 }
 function importRows(rows,source){
@@ -489,7 +666,7 @@ function importRows(rows,source){
   if(!rows.length){toast('That file looks empty');return}
   let hi=-1,cols=null;
   for(let i=0;i<Math.min(rows.length,10);i++){const c=detectCols(rows[i]);if(c.email>=0&&(c.name>=0||c.first>=0)){hi=i;cols=c;break}}
-  if(hi<0){cols={name:0,first:-1,last:-1,email:1,phone:2,company:3};
+  if(hi<0){cols={name:0,first:-1,last:-1,email:1,phone:2,company:3,plus:-1};
     const r0=rows[0].map(x=>String(x??''));if(!r0.some(x=>x.includes('@')))hi=0;}
   const data=rows.slice(hi+1);
   const seen=new Set(state.guests.map(g=>(g.email||'').toLowerCase()).filter(Boolean));
@@ -505,7 +682,8 @@ function importRows(rows,source){
     if(email)seen.add(email);if(pk)seenP.add(pk);
     const emailValid=EMAIL_RE.test(email);
     if(!emailValid)invalid.push(`${name||'(no name)'} — ${email||'no email'}`);
-    state.guests.push({id:uid(),name:name||email.split('@')[0]||'Guest',email,phone,company,code:genCode(),emailValid,addedAt:t});
+    const pv=get(cols.plus),plusOneAllowed=/^(y|yes|true|1|allow)/i.test(pv)?true:/^(n|no|false|0)/i.test(pv)?false:undefined;
+    state.guests.push({id:uid(),name:name||email.split('@')[0]||'Guest',email,phone,company,code:genCode(),emailValid,plusOneAllowed,addedAt:t});
     added++;
   });
   log('import',`Imported ${added} guests from ${source}`,null,t);
@@ -563,8 +741,8 @@ const SAMPLE=[
 ];
 function templateBlob(){
   const wb=XLSX.utils.book_new();
-  const ws=XLSX.utils.aoa_to_sheet([['Full Name','Email Address','Mobile Number','Company'],['Jane Doe','jane@company.com','+971 50 000 0000','Company LLC'],['John Smith','john@company.com','+20 100 000 0000','']]);
-  ws['!cols']=[{wch:24},{wch:30},{wch:20},{wch:22}];
+  const ws=XLSX.utils.aoa_to_sheet([['Full Name','Email Address','Mobile Number','Company','Plus One (Yes/No)'],['Jane Doe','jane@company.com','+971 50 000 0000','Company LLC','Yes'],['John Smith','john@company.com','+20 100 000 0000','','No']]);
+  ws['!cols']=[{wch:24},{wch:30},{wch:20},{wch:22},{wch:18}];
   XLSX.utils.book_append_sheet(wb,ws,'Guests');
   return new Blob([XLSX.write(wb,{bookType:'xlsx',type:'array'})]);
 }
@@ -588,9 +766,15 @@ function deliver(g,kind,t=now()){
   log(kind.startsWith('auto')?'auto':kind,ok?`${lbl} sent to ${g.name}`:`${lbl} to ${g.name} bounced`,g.id,t);
   return ok;
 }
-function setRsvp(g,v,t=now()){
+const PLUS_NAMES=['Nadine Fawzy','Ali Hamed','Reem Saleh','Tarek Nour','Maya Zaki','Hassan Adel','Leila Aziz','Sami Fares','Dalia Mourad','Kareem Fouad','Nada Ezz','Rami Khoury'];
+function setRsvp(g,v,t=now(),x={}){
   g.rsvp=v;g.rsvpAt=t;if(!g.openedAt)g.openedAt=t;
-  log('rsvp',`${g.name} ${v==='accepted'?'confirmed attendance':'declined the invitation'}`,g.id,t);
+  if(v==='accepted'){
+    if('plusOne' in x)g.plusOne=x.plusOne?{name:x.plusOne.name,email:x.plusOne.email||'',code:(g.plusOne&&g.plusOne.code)||genCode(),checkedInAt:g.plusOne&&g.plusOne.checkedInAt,gate:g.plusOne&&g.plusOne.gate}:null;
+  }else g.plusOne=null;
+  if('dietary' in x)g.dietary=x.dietary;
+  if('note' in x)g.note=x.note;
+  log('rsvp',`${g.name} ${v==='accepted'?'confirmed attendance'+(g.plusOne?` with +1 (${g.plusOne.name})`:''):'declined the invitation'}`,g.id,t);
   deliver(g,v==='accepted'?'auto-accept':'auto-decline',t+1500);
 }
 async function sendBatch(list,kind){
@@ -616,7 +800,7 @@ function simulateResponses(){
     if(g.openedAt||Math.random()<.82){
       if(!g.openedAt){g.openedAt=Math.min(T,g.sentAt+rand(20,900)*1000);log('open',`${g.name} opened the invitation`,g.id,g.openedAt);o++}
       const r=Math.random(),rt=Math.min(T,g.openedAt+rand(10,300)*1000);
-      if(r<.72){setRsvp(g,'accepted',rt);a++}else if(r<.86){setRsvp(g,'declined',rt);d++}
+      if(r<.72){const bring=state.event.allowPlusOne&&g.plusOneAllowed!==false&&Math.random()<.4;setRsvp(g,'accepted',rt,{plusOne:bring?{name:PLUS_NAMES[Math.floor(Math.random()*PLUS_NAMES.length)]}:null});a++}else if(r<.86){setRsvp(g,'declined',rt);d++}
     }
   });
   state.log.sort((x,y)=>y.t-x.t);state.outbox.sort((x,y)=>y.t-x.t);commit();
@@ -624,7 +808,8 @@ function simulateResponses(){
 }
 
 /* ============ Check-in ============ */
-function checkIn(g,gate,t=now()){g.checkedInAt=t;g.gate=gate;log('checkin',`${g.name} checked in at ${gate}`,g.id,t)}
+function checkIn(g,gate,t=now(),p=null){const o=p||g;o.checkedInAt=t;o.gate=gate;log('checkin',`${p?`${p.name} (+1 of ${g.name})`:g.name} checked in at ${gate}`,g.id,t)}
+function findPass(code){for(const g of state.guests){if(g.code===code)return{g,p:null};if(g.plusOne&&g.plusOne.code===code)return{g,p:g.plusOne}}return null}
 function processScan(raw){
   raw=String(raw||'').trim();
   let code=null,evOk=true;
@@ -636,14 +821,17 @@ function processScan(raw){
   if(!code)res={type:'bad',title:'Invalid QR code',sub:'This code wasn’t issued by KODE.'};
   else if(!evOk)res={type:'bad',title:'Wrong event',sub:'This pass belongs to a different event.'};
   else{
-    const g=state.guests.find(x=>x.code===code);
-    if(!g)res={type:'bad',title:'Pass not found',sub:`${code} isn’t on the guest list.`};
-    else if(g.checkedInAt)res={type:'dup',title:'Already checked in',sub:`${g.name} entered at ${fmtTime(g.checkedInAt)} via ${g.gate}.`,gid:g.id};
-    else if(g.rsvp==='declined')res={type:'warn',title:'Guest declined RSVP',sub:`${g.name} declined the invitation. Allow entry anyway?`,gid:g.id,override:true};
-    else{checkIn(g,gate);res={type:'ok',title:'Access granted',sub:`Welcome, ${g.name}!${g.rsvp?'':' · no RSVP on file'}`,gid:g.id}}
+    const f=findPass(code);
+    if(!f)res={type:'bad',title:'Pass not found',sub:`${code} isn\u2019t on the guest list.`};
+    else{
+      const {g,p}=f,o=p||g,who=p?`${p.name} (+1 of ${g.name})`:g.name;res={gid:g.id,name:who};
+      if(o.checkedInAt)Object.assign(res,{type:'dup',title:'Already checked in',sub:`${who} entered at ${fmtTime(o.checkedInAt)} via ${o.gate}.`});
+      else if(!p&&g.rsvp==='declined')Object.assign(res,{type:'warn',title:'Guest declined RSVP',sub:`${g.name} declined the invitation. Allow entry anyway?`,override:true});
+      else{checkIn(g,gate,now(),p);Object.assign(res,{type:'ok',title:'Access granted',sub:`Welcome, ${who}!${p||g.rsvp?'':' · no RSVP on file'}`})}
+    }
   }
   res.t=now();res.gate=gate;
-  state.scans.unshift({t:res.t,type:res.type,gid:res.gid||null,code:code||raw.slice(0,30)||'—',gate});
+  state.scans.unshift({t:res.t,type:res.type,gid:res.gid||null,name:res.name||null,code:code||raw.slice(0,30)||'—',gate});
   if(state.scans.length>1000)state.scans.length=1000;
   ui.lastScan=res;commit();
   const r=$('#scanResult');if(r){r.classList.remove('flash');void r.offsetWidth;r.classList.add('flash')}
@@ -675,7 +863,7 @@ function simulateArrivals(){
   const gates=['Main Gate','Main Gate','Main Gate','VIP Entrance','Gate B'];const T=now();let n=0;
   // Fast-forward to event night so the arrivals curve looks real
   const ev=new Date(state.event.date+'T'+(state.event.time||'19:00')).getTime(),base=isNaN(ev)?T-120*60000:ev;
-  pool.forEach(g=>{if(Math.random()<.85){const t=base+rand(-15,120)*60000;checkIn(g,gates[Math.floor(Math.random()*gates.length)],t);state.scans.unshift({t,type:'ok',gid:g.id,code:g.code,gate:g.gate});n++}});
+  pool.forEach(g=>{if(Math.random()<.85){const t=base+rand(-15,120)*60000;const gt=gates[Math.floor(Math.random()*gates.length)];checkIn(g,gt,t);state.scans.unshift({t,type:'ok',gid:g.id,name:g.name,code:g.code,gate:gt});n++;if(g.plusOne&&!g.plusOne.checkedInAt&&Math.random()<.9){const t2=t+rand(0,4)*60000;checkIn(g,gt,t2,g.plusOne);state.scans.unshift({t:t2,type:'ok',gid:g.id,name:`${g.plusOne.name} (+1)`,code:g.plusOne.code,gate:gt});n++}}});
   state.log.sort((a,b)=>b.t-a.t);state.scans.sort((a,b)=>b.t-a.t);commit();toast(`Fast-forwarded to event night: ${n} guests checked in`);
 }
 
@@ -716,22 +904,52 @@ function closeModal(){$('#modalBg').classList.remove('on');ui.modalGuest=null}
 $('#modalBg').addEventListener('click',e=>{if(e.target.id==='modalBg')closeModal()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 
-function guestEmailHtml(g,interactive){
-  const st=status(g);
-  let actions='';
-  if(g.rsvp==='accepted')actions=`<div class="rsvp-done"><span>✓ You're confirmed — see you there!</span>${interactive?`<button data-action="rsvp" data-id="${g.id}" data-v="declined">Can't make it anymore?</button>`:''}</div>`;
-  else if(g.rsvp==='declined')actions=`<div class="rsvp-done dec"><span>You declined this invitation.</span>${interactive?`<button data-action="rsvp" data-id="${g.id}" data-v="accepted">Changed your mind?</button>`:''}</div>`;
-  else actions=`<div class="rsvp"><button class="yes" ${interactive?`data-action="rsvp" data-id="${g.id}" data-v="accepted"`:''}>✓ I'll attend</button><button class="no" ${interactive?`data-action="rsvp" data-id="${g.id}" data-v="declined"`:''}>Can't make it</button></div>`;
-  return`<div class="mail">
-    <div class="mail-meta"><b>From:</b> ${esc(state.event.sender)} &lt;events@kode.app&gt;<br><b>To:</b> ${esc(g.name)} &lt;${esc(g.email||'—')}&gt;<br><b>Subject:</b> ${esc(fill(state.tpl.subject,g))}</div>
-    <div class="mail-top">${logo()}<div class="ev">${esc(state.event.name)}<small>${esc(fmtDate(state.event.date))} · ${esc(state.event.time)}</small></div></div>
-    <div class="mail-body">${esc(fill(state.tpl.body,g))}
-      <div class="ticket"><div class="q">${qrSvg(payload(g))}</div><div><div class="tn">${esc(g.name)}</div><div class="tm">${esc(state.event.name)}<br>${esc(fmtDate(state.event.date))} · ${esc(state.event.time)}<br>${esc(state.event.venue)}</div><div class="tc">${g.code}</div></div></div>
-      ${actions}
-    </div>
-    <div class="mail-foot">This pass is unique to ${esc(g.name)} and can be scanned once. Powered by KODE.</div>
-  </div>`;
+function calLinks(code){
+  const e=state.event,st=new Date(`${e.date}T${e.time||'19:00'}`);if(isNaN(st))return{g:'#',o:'#'};
+  const en=new Date(st.getTime()+3*3600e3),P=n=>String(n).padStart(2,'0');
+  const f=d=>`${d.getFullYear()}${P(d.getMonth()+1)}${P(d.getDate())}T${P(d.getHours())}${P(d.getMinutes())}00`;
+  const iso=d=>`${d.getFullYear()}-${P(d.getMonth()+1)}-${P(d.getDate())}T${P(d.getHours())}:${P(d.getMinutes())}:00`;
+  const E=encodeURIComponent,det=E(`Your KODE pass: ${code||''}`);
+  return{g:`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${E(e.name)}&dates=${f(st)}/${f(en)}&location=${E(e.venue)}&details=${det}`,
+         o:`https://outlook.live.com/calendar/0/deeplink/compose?subject=${E(e.name)}&startdt=${iso(st)}&enddt=${iso(en)}&location=${E(e.venue)}&body=${det}`};
 }
+const EMAIL_KIND={invite:'invite',reminder:'reminder','auto-accept':'confirm','auto-decline':'decline'};
+const paras=t=>esc(t).split(/\n{2,}/).map(x=>`<p>${x.replace(/\n/g,'<br>')}</p>`).join('');
+function emDetails(){const e=state.event;return`<table class="em-det">
+  <tr><td>Date</td><td><b>${esc(fmtDateLong(e.date))}</b></td></tr>
+  <tr><td>Time</td><td>${esc(e.time)} — doors open</td></tr>
+  <tr><td>Venue</td><td>${esc(e.venue)}</td></tr>
+  ${e.dress?`<tr><td>Dress code</td><td>${esc(e.dress)}</td></tr>`:''}</table>`}
+function emPass(name,code,label){return`<div class="em-pass"><div class="em-qr">${qrSvg(`KODE|${state.event.eventId}|${code}`)}</div><div><div class="em-lbl">${esc(label)}</div><div class="em-pn">${esc(name)}</div><div class="em-code">${code}</div><div class="em-small">Show this code at the entrance for instant check-in. Valid for one entry.</div></div></div>`}
+const rsvpAttr=(g,v,I)=>I?`data-action="rsvp-start" data-id="${g.id}" data-v="${v}"`:'';
+function emCal(g){const c=calLinks(g.code);return`<div class="em-cal">Add to calendar: <a href="${c.g}" target="_blank" rel="noopener">Google</a> · <a href="${c.o}" target="_blank" rel="noopener">Outlook</a></div>`}
+function emFoot(g){return`<div class="em-foot">${logo()}<div>${esc(state.event.sender)} · ${esc(state.event.venue)}<br>This invitation is personal to ${esc(g.name)} and is non-transferable.<br><a>Unsubscribe</a> · <a>Privacy policy</a></div></div>`}
+function renderEmail(kind,g,opt={}){
+  const e=state.event,first=firstName(g),I=!!opt.interactive,allow=e.allowPlusOne&&g.plusOneAllowed!==false;
+  let hero,body;
+  if(kind==='invite'||kind==='reminder'){
+    hero=`<div class="em-hero"><div class="em-eyebrow">${kind==='invite'?'You’re invited':'Friendly reminder'}</div><h1>${esc(e.name)}</h1>${e.tagline?`<p>${esc(e.tagline)}</p>`:''}</div>`;
+    const rs=g.rsvp?`<div class="em-status ${g.rsvp}">${g.rsvp==='accepted'?`✓ You’re attending${g.plusOne?` with ${esc(g.plusOne.name)}`:''}`:'You’ve let us know you can’t make it'}${I?` · <a ${rsvpAttr(g,g.rsvp,I)}>Change response</a>`:''}</div>`
+      :`<div class="em-rsvp"><div class="em-q">Will you be joining us?</div><div class="em-btns"><a class="em-yes" ${rsvpAttr(g,'accepted',I)}>Yes, I’ll be there</a><a class="em-no" ${rsvpAttr(g,'declined',I)}>Sorry, I can’t make it</a></div><div class="em-small">${e.rsvpBy?`Kindly respond by ${esc(fmtDateLong(e.rsvpBy))}.`:''}${allow?' You’re welcome to bring a +1 — you can add them when you respond.':''}</div></div>`;
+    body=`<p>Dear ${esc(first)},</p>${paras(fill(kind==='invite'?state.tpl.body:state.tpl.reminder,g))}${emDetails()}${rs}${emPass(g.name,g.code,'Your personal pass')}${emCal(g)}<p class="em-sign">Warm regards,<br><b>${esc(e.sender)}</b></p>`;
+  }else if(kind==='confirm'){
+    hero=`<div class="em-hero"><div class="em-badge">✓</div><div class="em-eyebrow">RSVP confirmed</div><h1>See you there, ${esc(first)}</h1><p>${esc(e.name)} · ${esc(fmtDateLong(e.date))}</p></div>`;
+    body=`<p>Dear ${esc(first)},</p>${paras(fill(state.tpl.accept,g))}${g.plusOne?`<p>Your +1, <b>${esc(g.plusOne.name)}</b>, has their own pass below — feel free to forward it to them${g.plusOne.email?` (we’ve also sent it to ${esc(g.plusOne.email)})`:''}.</p>`:''}
+      <div class="em-passes">${emPass(g.name,g.code,g.plusOne?'Guest':'Your pass')}${g.plusOne?emPass(g.plusOne.name,g.plusOne.code,'Plus one'):''}</div>
+      ${emDetails()}
+      <div class="em-expect"><b>Good to know</b><ul><li>Doors open at ${esc(e.time)}.</li><li>Have your QR ready on your phone — no need to print.</li><li>Each pass is valid for one entry.</li>${g.dietary?`<li>We’ve noted your dietary requirement: ${esc(g.dietary)}.</li>`:''}</ul></div>
+      <div class="em-btns"><a class="em-yes" href="${calLinks(g.code).g}" target="_blank" rel="noopener">Add to calendar</a><a class="em-no" ${rsvpAttr(g,'accepted',I)}>Update RSVP</a></div>
+      <p class="em-sign">See you soon,<br><b>${esc(e.sender)}</b></p>`;
+  }else{
+    hero=`<div class="em-hero"><div class="em-eyebrow">RSVP received</div><h1>We’ll miss you, ${esc(first)}</h1><p>${esc(e.name)} · ${esc(fmtDateLong(e.date))}</p></div>`;
+    body=`<p>Dear ${esc(first)},</p>${paras(fill(state.tpl.decline,g))}<div class="em-btns"><a class="em-no" ${rsvpAttr(g,'accepted',I)}>Changed your mind? Update RSVP</a></div><p class="em-sign">Warm regards,<br><b>${esc(e.sender)}</b></p>`;
+  }
+  const label={invite:'Private invitation',reminder:'Reminder',confirm:'Confirmation',decline:'RSVP received'}[kind];
+  return`<div class="em"><div class="em-head">${logo()}<span>${label}</span></div>${hero}<div class="em-body">${body}</div>${emFoot(g)}</div>`;
+}
+function guestEmailHtml(g,interactive){return`<div class="em-wrap" style="border-radius:14px">${renderEmail('invite',g,{interactive})}</div>`}
+function mailMeta(m,g){return`<div class="mr-head"><h2>${esc(m.subject)}</h2><div class="mr-from"><div class="mr-av">${logo()}</div><div><b>${esc(state.event.sender)}</b> <span>&lt;events@kode.events&gt;</span><br><span>to ${esc(g.name)} &lt;${esc(m.to)}&gt;</span></div><span class="mr-t">${fmtDT(m.t)}</span></div></div>`}
+const snippet=m=>String(m.body||'').replace(/\s+/g,' ').slice(0,110);
 function openGuest(id){
   const g=state.guests.find(x=>x.id===id);if(!g)return;ui.modalGuest=id;
   const st=status(g);
@@ -740,7 +958,7 @@ function openGuest(id){
     <div class="eyebrow">Guest pass & invitation</div>
     <h2>${esc(g.name)} ${pill(st)}</h2>
     <div class="pass-grid">
-      <div>${guestEmailHtml(g,true)}<div class="note">${ic('info')}<span>This is exactly what the guest receives. The RSVP buttons are live — click one to trigger the auto-reply.</span></div></div>
+      <div>${guestEmailHtml(g,true)}<div class="note">${ic('info')}<span>This is exactly what the guest receives. The RSVP buttons are live — they open the RSVP page (with +1) and trigger the auto-reply.</span></div></div>
       <div>
         <div class="card">
           <h3>Details</h3>
@@ -748,6 +966,8 @@ function openGuest(id){
             <span>Email</span><b>${esc(g.email||'—')}${g.emailValid?'':' <span class="warn-txt">Invalid email — will bounce</span>'}</b>
             <span>Phone</span><b>${esc(g.phone||'—')}</b>
             <span>Company</span><b>${esc(g.company||'—')}</b>
+            <span>Plus one</span><b>${g.plusOne?`${esc(g.plusOne.name)} <span class="code">${g.plusOne.code}</span>${g.plusOne.checkedInAt?' · checked in':''}`:'—'}</b>
+            ${g.dietary?`<span>Dietary</span><b>${esc(g.dietary)}</b>`:''}
             <span>Pass code</span><b><span class="code">${g.code}</span></b>
             <span>QR payload</span><b class="mono" style="font-size:12px;color:#aaa">${esc(payload(g))}</b>
             <span>Invited</span><b>${g.sentAt?fmtDT(g.sentAt):'—'}</b>
@@ -755,7 +975,8 @@ function openGuest(id){
             <span>Check-in</span><b>${g.checkedInAt?`${fmtDT(g.checkedInAt)} · ${esc(g.gate)}`:'—'}</b>
           </div>
           <div class="row">
-            <button class="btn sm pri" data-action="download-pass" data-id="${g.id}">${ic('download')} Pass (PNG)</button>
+            <button class="btn sm pri" data-action="gv-goto" data-id="${g.id}">${ic('mail')} Guest experience</button>
+            <button class="btn sm" data-action="download-pass" data-id="${g.id}">${ic('download')} Pass (PNG)</button>
             <button class="btn sm" data-action="send-one" data-id="${g.id}">${ic('send')} ${g.sentAt?'Resend':'Send'} invite</button>
             ${g.checkedInAt?'':`<button class="btn sm" data-action="checkin" data-id="${g.id}">${ic('door')} Check in</button>`}
             <button class="btn sm ghost" data-action="copy-code" data-id="${g.id}">${ic('copy')} Copy code</button>
@@ -767,12 +988,9 @@ function openGuest(id){
 }
 function openMessage(id){
   const m=state.outbox.find(x=>x.id===id);if(!m)return;const g=state.guests.find(x=>x.id===m.gid);
-  const showQR=g&&(m.kind==='invite'||m.kind==='auto-accept'||m.kind==='reminder');
-  openModal(`<div class="eyebrow">${esc(KIND[m.kind])} · ${esc(m.channel)}</div><h2>${esc(m.subject)}</h2>
-    <p class="muted" style="margin:4px 0 14px">To ${esc(m.to)} · ${fmtDT(m.t)} · <span class="${m.status==='delivered'?'ok-t':'bad-t'}">${m.status}</span></p>
-    <div class="mail"><div class="mail-top">${logo()}<div class="ev">${esc(state.event.name)}<small>${esc(fmtDate(state.event.date))} · ${esc(state.event.time)}</small></div></div>
-    <div class="mail-body">${esc(m.body)}${showQR?`<div class="ticket"><div class="q">${qrSvg(payload(g))}</div><div><div class="tn">${esc(g.name)}</div><div class="tc">${g.code}</div></div></div>`:''}</div></div>
-    ${g?`<div class="row mt" style="justify-content:flex-end"><button class="btn" data-action="view" data-id="${g.id}">${ic('eye')} Open guest</button></div>`:''}`);
+  const bodyHtml=!g?`<div class="chat"><div class="bub">${esc(m.body)}</div></div>`:m.channel==='email'?`<div class="mail">${mailMeta(m,g)}<div class="em-wrap">${renderEmail(EMAIL_KIND[m.kind],g,{})}</div></div>`:`<div class="chat"><div class="bub">${esc(m.body)}\n\n🎟 Your pass: ${g.code}</div></div>`;
+  openModal(`<div class="eyebrow">${esc(KIND[m.kind])} · ${esc(m.channel)} · <span class="${m.status==='delivered'?'ok-t':'bad-t'}">${m.status}</span></div><h2 style="margin-bottom:14px">${esc(m.subject)}</h2>${bodyHtml}
+    ${g?`<div class="row mt" style="justify-content:flex-end"><button class="btn" data-action="view" data-id="${g.id}">${ic('eye')} Open guest</button><button class="btn pri" data-action="gv-goto" data-id="${g.id}">${ic('mail')} Guest experience</button></div>`:''}`,m.channel==='email');
 }
 function openAddGuest(){
   openModal(`<h2>Add guest</h2><p class="muted">They'll get a unique QR pass immediately.</p>
@@ -794,6 +1012,7 @@ const VIEWS={
   dashboard:{t:'Dashboard',s:()=>`${state.event.name} · ${fmtDate(state.event.date)}`,ic:'dash',r:vDashboard},
   guests:{t:'Guests',s:()=>`${state.guests.length} on the list · import from Excel or CSV`,ic:'users',r:vGuests},
   invitations:{t:'Invitations',s:()=>'Event details, message templates, auto-replies and sending',ic:'send',r:vInvites},
+  'guest-view':{t:'Guest experience',s:()=>'Exactly what your guest sees — invitation, RSVP with +1, auto-reply, check-in',ic:'mail',r:vGuestView},
   messages:{t:'Messages',s:()=>'Every invitation, reminder and auto-reply sent',ic:'inbox',r:vMessages},
   scanner:{t:'Scanner',s:()=>'Check guests in at the door',ic:'scan',r:vScanner},
   reports:{t:'Reports',s:()=>`Live report · generated ${fmtDT(now())}`,ic:'chart',r:vReports}
@@ -829,7 +1048,7 @@ function vDashboard(s){
     <div class="hero-art">${logo('logo-big')}<div class="mini-qr">${qrSvg('KODE|DEMO|KD-HELO-2026')}</div></div>
   </div>
   <div class="grid g4 steps mt">
-    ${[['01','Import','Drop an Excel or CSV. Columns are detected automatically; duplicates and bad emails are flagged.'],['02','Invite','Personalised email + WhatsApp invitations, each carrying the guest’s own QR pass.'],['03','Auto-reply','Guests RSVP in one tap and instantly get a confirmation (or a kind decline note).'],['04','Scan & report','Scan passes at the door, block duplicates, and export a full Excel report.']].map(x=>`<div class="card"><div class="n">${x[0]}</div><b>${x[1]}</b><p>${x[2]}</p></div>`).join('')}
+    ${[['01','Import','Drop an Excel or CSV. Columns are detected automatically; duplicates and bad emails are flagged.'],['02','Invite','Personalised email + WhatsApp invitations, each carrying the guest’s own QR pass.'],['03','Auto-reply','Guests RSVP in one tap, add a +1, and instantly get a confirmation with their QR passes.'],['04','Scan & report','Scan passes at the door, block duplicates, and export a full Excel report.']].map(x=>`<div class="card"><div class="n">${x[0]}</div><b>${x[1]}</b><p>${x[2]}</p></div>`).join('')}
   </div>`;
   const funnel=[['Imported',s.total],['Delivered',s.delivered],['Opened',s.openedAll],['Confirmed',s.accepted],['Checked in',s.checkedAll]];
   const tiles=[];
@@ -838,16 +1057,17 @@ function vDashboard(s){
   if(s.noRsvp)tiles.push(`<div class="tile">${ic('bolt')}<div class="tx"><b>Demo: simulate guest replies</b><span class="muted">Opens + RSVPs trigger auto-replies</span></div><button class="btn sm" data-action="simulate-responses">Simulate</button></div>`);
   if(s.invalid)tiles.push(`<div class="tile">${ic('alert')}<div class="tx"><b>${s.invalid} invalid emails</b><span class="muted">They’ll only get WhatsApp/SMS</span></div><a class="btn sm" href="#guests">Review</a></div>`);
   if(s.accepted>s.checkedAll)tiles.push(`<div class="tile">${ic('scan')}<div class="tx"><b>${s.accepted-s.checkedAll} confirmed, not arrived</b><span class="muted">Open the door scanner</span></div><a class="btn sm" href="#scanner">Scanner</a></div>`);
+  tiles.unshift(`<div class="tile">${ic('mail')}<div class="tx"><b>See what guests receive</b><span class="muted">Invitation, RSVP with +1, auto-reply</span></div><a class="btn sm pri" href="#guest-view">Open</a></div>`);
   if(!tiles.length)tiles.push(`<div class="tile">${ic('chart')}<div class="tx"><b>All caught up</b><span class="muted">Export the full report</span></div><a class="btn sm" href="#reports">Reports</a></div>`);
-  const att=pct(s.checkedAll,s.accepted),C=2*Math.PI*52;
+  const att=pct(s.arrivedTotal,s.headcount),C=2*Math.PI*52;
   return`
   <div class="grid g6">
     ${kpi('Guests',s.total,`${s.invalid} need attention`,100)}
     ${kpi('Delivered',s.delivered,`of ${s.sent} sent · ${s.bounced} bounced`,pct(s.delivered,s.total))}
     ${kpi('Opened',s.openedAll,`${pct(s.openedAll,s.delivered)}% open rate`,pct(s.openedAll,s.total))}
-    ${kpi('Confirmed',s.accepted,`${s.autoreplies} auto-replies sent`,pct(s.accepted,s.total))}
+    ${kpi('Confirmed',s.accepted,`+${s.plusOnes} plus-ones · ${s.autoreplies} auto-replies`,pct(s.accepted,s.total))}
     ${kpi('Declined',s.declinedAll,`${s.noRsvp} still pending`,pct(s.declinedAll,s.total))}
-    ${kpi('Checked in',s.checkedAll,`${att}% of confirmed`,pct(s.checkedAll,s.total))}
+    ${kpi('Checked in',s.arrivedTotal,`of ${s.headcount} expected (incl. +1s)`,pct(s.arrivedTotal,s.headcount))}
   </div>
   <div class="grid g-main mt">
     <div class="card"><h3>Invitation funnel<span class="sub">from import to the door</span></h3><div class="bars">${funnel.map(([t,n])=>barRow(t,n,s.total)).join('')}</div></div>
@@ -857,7 +1077,7 @@ function vDashboard(s){
           <circle cx="66" cy="66" r="52" fill="none" stroke="#1e1e1e" stroke-width="12"/>
           <circle cx="66" cy="66" r="52" fill="none" stroke="url(#rg)" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C*att/100} ${C}" transform="rotate(-90 66 66)"/>
           <text x="66" y="68" text-anchor="middle" class="big">${att}%</text><text x="66" y="86" text-anchor="middle" class="sm">ARRIVED</text></svg>
-        <div class="legend" style="flex:1"><div><span class="muted">Confirmed</span><b>${s.accepted}</b></div><div><span class="muted">Checked in</span><b>${s.checkedAll}</b></div><div><span class="muted">Yet to arrive</span><b>${Math.max(0,s.accepted-s.checkedAll)}</b></div><div><span class="muted">Walk-ins (no RSVP)</span><b>${state.guests.filter(g=>g.checkedInAt&&g.rsvp!=='accepted').length}</b></div></div>
+        <div class="legend" style="flex:1"><div><span class="muted">Expected headcount</span><b>${s.headcount}</b></div><div><span class="muted">Plus-ones</span><b>${s.plusOnes}</b></div><div><span class="muted">Checked in</span><b>${s.arrivedTotal}</b></div><div><span class="muted">Yet to arrive</span><b>${Math.max(0,s.headcount-s.arrivedTotal)}</b></div><div><span class="muted">Walk-ins (no RSVP)</span><b>${state.guests.filter(g=>g.checkedInAt&&g.rsvp!=='accepted').length}</b></div></div>
       </div>
     </div>
   </div>
@@ -885,7 +1105,7 @@ function vGuests(s){
   <div class="tbl-wrap"><table>
     <thead><tr><th>Guest</th><th>Email</th><th>Phone</th><th>QR pass</th><th>Status</th><th>Last update</th><th></th></tr></thead>
     <tbody>${list.map(g=>{const st=status(g),lu=Math.max(g.checkedInAt||0,g.rsvpAt||0,g.openedAt||0,g.sentAt||0,g.addedAt||0);return`<tr>
-      <td class="gname"><b>${esc(g.name)}</b><small>${esc(g.company||'')}</small></td>
+      <td class="gname"><b>${esc(g.name)}${g.plusOne?`<span class="plus" title="+1: ${esc(g.plusOne.name)}">+1</span>`:''}</b><small>${esc(g.company||'')}${g.plusOne?` · +1 ${esc(g.plusOne.name)}`:''}</small></td>
       <td>${esc(g.email||'—')}${g.emailValid?'':'<span class="warn-txt">Invalid email</span>'}</td>
       <td style="white-space:nowrap">${esc(g.phone||'—')}</td>
       <td><span class="code">${g.code}</span></td>
@@ -932,7 +1152,7 @@ function vInvites(s){
         <div class="tabs">${tabs.map(([k,l])=>`<button data-action="tpl-tab" data-k="${k}" class="${ui.tplTab===k?'on':''}">${l}</button>`).join('')}</div>
         ${ui.tplTab==='body'?`<div class="field"><label>Email subject</label><input class="input tplf" data-k="subject" value="${esc(T.subject)}"></div>`:''}
         <div class="field"><label>${tabs.find(t=>t[0]===ui.tplTab)[1]} message</label><textarea class="input tplf" data-k="${ui.tplTab}" rows="9">${esc(T[ui.tplTab])}</textarea></div>
-        <div class="chips">${['first_name','name','event','date','time','venue','code','company','sender'].map(k=>`<span class="chip" data-action="ph" data-ph="{{${k}}}">{{${k}}}</span>`).join('')}</div>
+        <div class="chips">${['first_name','name','event','date','time','venue','code','plus_one','rsvp_by','company','sender'].map(k=>`<span class="chip" data-action="ph" data-ph="{{${k}}}">{{${k}}}</span>`).join('')}</div>
         <div class="row"><span class="muted" style="font-size:12px">${ui.tplTab==='accept'?'Sent automatically the moment a guest taps “I’ll attend”. Includes their QR pass.':ui.tplTab==='decline'?'Sent automatically when a guest taps “Can’t make it”.':ui.tplTab==='reminder'?'Sent to guests who haven’t RSVP’d when you click Remind.':'Every invitation includes the guest’s personal QR pass and RSVP buttons.'}</span><button class="btn sm ghost" data-action="tpl-reset" style="margin-left:auto">${ic('reset')} Reset</button></div>
       </div>
 
@@ -942,7 +1162,10 @@ function vInvites(s){
           <div class="field"><label>Event name</label><input class="input evf" data-k="name" value="${esc(e.name)}"></div>
           <div class="grid g2"><div class="field"><label>Date</label><input class="input evf" type="date" data-k="date" value="${esc(e.date)}"></div><div class="field"><label>Time</label><input class="input evf" type="time" data-k="time" value="${esc(e.time)}"></div></div>
           <div class="field"><label>Venue</label><input class="input evf" data-k="venue" value="${esc(e.venue)}"></div>
-          <div class="field" style="margin:0"><label>Sender name</label><input class="input evf" data-k="sender" value="${esc(e.sender)}"></div>
+          <div class="field"><label>Tagline</label><input class="input evf" data-k="tagline" value="${esc(e.tagline||'')}"></div>
+          <div class="grid g2"><div class="field"><label>Dress code</label><input class="input evf" data-k="dress" value="${esc(e.dress||'')}"></div><div class="field"><label>RSVP by</label><input class="input evf" type="date" data-k="rsvpBy" value="${esc(e.rsvpBy||'')}"></div></div>
+          <div class="field"><label>Sender name</label><input class="input evf" data-k="sender" value="${esc(e.sender)}"></div>
+          <div class="toggle" style="padding-bottom:0"><div><b>Allow +1</b><small>Guests can add a plus-one when they RSVP</small></div><label class="sw"><input type="checkbox" data-action="ev-plus" ${e.allowPlusOne?'checked':''}><span></span></label></div>
         </div>
         <div class="card">
           <h3>Channels</h3>
@@ -961,13 +1184,14 @@ function vInvites(s){
   </div>`;
 }
 function previewHtml(){
-  const g=state.guests.find(x=>x.id===ui.previewId)||{id:'x',name:'Jana Rizk',email:'jana@company.com',phone:'+20 100 000 0000',company:'Company',code:'KD-DEMO-0001',emailValid:true};
-  if(ui.tplTab==='body')return guestEmailHtml(g,false);
-  const body=fill(state.tpl[ui.tplTab],g);
-  const subj=ui.tplTab==='reminder'?`Reminder: ${state.event.name}`:ui.tplTab==='accept'?`You're confirmed — ${state.event.name}`:`RSVP received — ${state.event.name}`;
-  return`<div class="mail"><div class="mail-meta"><b>To:</b> ${esc(g.name)} &lt;${esc(g.email)}&gt;<br><b>Subject:</b> ${esc(subj)}</div><div class="mail-top">${logo()}<div class="ev">${esc(state.event.name)}<small>${esc(fmtDate(state.event.date))} · ${esc(state.event.time)}</small></div></div><div class="mail-body">${esc(body)}${ui.tplTab!=='decline'?`<div class="ticket"><div class="q">${qrSvg(payload(g))}</div><div><div class="tn">${esc(g.name)}</div><div class="tc">${g.code}</div></div></div>`:''}${ui.tplTab==='reminder'?`<div class="rsvp"><button class="yes">✓ I'll attend</button><button class="no">Can't make it</button></div>`:''}</div></div>`;
+  const g=state.guests.find(x=>x.id===ui.previewId)||{id:'x',name:'Jana Rizk',email:'jana@company.com',phone:'',company:'Company',code:'KD-DEMO-0001',emailValid:true};
+  const k={body:'invite',accept:'confirm',decline:'decline',reminder:'reminder'}[ui.tplTab];
+  let gg={...g};
+  if(k==='invite'||k==='reminder')gg.rsvp=null;
+  if(k==='confirm'){gg.rsvp='accepted';if(!gg.plusOne&&state.event.allowPlusOne)gg.plusOne={name:'Nadine Fawzy',code:'KD-PLUS-0001'}}
+  if(k==='decline'){gg.rsvp='declined';gg.plusOne=null}
+  return`<div class="em-wrap" style="border-radius:14px;padding:14px 10px">${renderEmail(k,gg,{})}</div>`;
 }
-
 function vMessages(){
   const f=ui.msgF;
   const list=state.outbox.filter(m=>f==='all'||(f==='auto'?m.kind.startsWith('auto'):f==='bounced'?m.status==='bounced':m.kind===f));
@@ -1010,18 +1234,18 @@ function vScanner(s){
       ${resHtml}
       <div class="card mt">
         <div class="row" style="justify-content:space-between;align-items:flex-end">
-          <div><div class="eyebrow">Inside now</div><div class="counter"><span class="v">${s.checkedAll}</span><span class="of">/ ${s.accepted} confirmed</span></div></div>
+          <div><div class="eyebrow">Inside now</div><div class="counter"><span class="v">${s.arrivedTotal}</span><span class="of">/ ${s.headcount} expected</span></div></div>
           <div style="text-align:right"><div class="eyebrow">Rejected scans</div><div class="counter" style="justify-content:flex-end"><span class="v" style="font-size:28px">${state.scans.filter(x=>x.type!=='ok').length}</span></div></div>
         </div>
-        <div class="progress"><div style="width:${pct(s.checkedAll,s.accepted)}%"></div></div>
+        <div class="progress"><div style="width:${pct(s.arrivedTotal,s.headcount)}%"></div></div>
       </div>
-      <div class="card mt"><h3>Recent scans</h3>${recent.length?`<div class="feed">${recent.map(x=>{const g=state.guests.find(y=>y.id===x.gid);return`<div class="it"><div class="dot" style="${x.type==='ok'?'':'border-color:#4a3a2a'}">${ic(x.type==='ok'?'check':x.type==='bad'?'x':'alert')}</div><div><b style="font-weight:600">${esc(g?g.name:'Unknown pass')}</b><br><span class="muted" style="font-size:12px">${x.type==='ok'?'Granted':x.type==='dup'?'Duplicate':x.type==='warn'?'Declined RSVP':'Rejected'} · ${esc(x.gate)} · <span class="mono">${esc(x.code)}</span></span></div><span class="tm">${fmtTime(x.t)}</span></div>`}).join('')}</div>`:'<div class="muted">No scans yet.</div>'}</div>
+      <div class="card mt"><h3>Recent scans</h3>${recent.length?`<div class="feed">${recent.map(x=>{const g=state.guests.find(y=>y.id===x.gid);return`<div class="it"><div class="dot" style="${x.type==='ok'?'':'border-color:#4a3a2a'}">${ic(x.type==='ok'?'check':x.type==='bad'?'x':'alert')}</div><div><b style="font-weight:600">${esc(x.name||(g?g.name:'Unknown pass'))}</b><br><span class="muted" style="font-size:12px">${x.type==='ok'?'Granted':x.type==='dup'?'Duplicate':x.type==='warn'?'Declined RSVP':'Rejected'} · ${esc(x.gate)} · <span class="mono">${esc(x.code)}</span></span></div><span class="tm">${fmtTime(x.t)}</span></div>`}).join('')}</div>`:'<div class="muted">No scans yet.</div>'}</div>
     </div>
   </div>`;
 }
 
 function arrivals(){
-  const ts=state.guests.filter(g=>g.checkedInAt).map(g=>g.checkedInAt).sort((a,b)=>a-b);
+  const ts=[];state.guests.forEach(g=>{if(g.checkedInAt)ts.push(g.checkedInAt);if(g.plusOne&&g.plusOne.checkedInAt)ts.push(g.plusOne.checkedInAt)});ts.sort((a,b)=>a-b);
   if(!ts.length)return null;
   const step=10*60000,start=Math.floor(ts[0]/step)*step,end=Math.floor(ts[ts.length-1]/step)*step;
   const n=Math.min(24,Math.round((end-start)/step)+1),b=Array.from({length:n},(_,i)=>({t:start+i*step,c:0}));
@@ -1030,7 +1254,7 @@ function arrivals(){
 function vReports(s){
   if(!s.total)return`<div class="card empty">${ic('chart')}<p>Reports fill in as soon as you import guests. <a href="#guests">Import now</a></p></div>`;
   const arr=arrivals(),mx=arr?Math.max(...arr.map(x=>x.c)):0;
-  const gates={};state.guests.forEach(g=>{if(g.checkedInAt)gates[g.gate]=(gates[g.gate]||0)+1});
+  const gates={};state.guests.forEach(g=>{if(g.checkedInAt)gates[g.gate]=(gates[g.gate]||0)+1;if(g.plusOne&&g.plusOne.checkedInAt)gates[g.plusOne.gate]=(gates[g.plusOne.gate]||0)+1});
   const comp={};state.guests.forEach(g=>{const k=g.company||'—';comp[k]=comp[k]||{t:0,a:0,c:0};comp[k].t++;if(g.rsvp==='accepted')comp[k].a++;if(g.checkedInAt)comp[k].c++});
   const noShows=state.guests.filter(g=>g.rsvp==='accepted'&&!g.checkedInAt).length;
   return`
@@ -1039,7 +1263,7 @@ function vReports(s){
     ${kpi('Open rate',pct(s.openedAll,s.delivered)+'%',`${s.openedAll} opened`,pct(s.openedAll,s.delivered))}
     ${kpi('Response rate',pct(s.accepted+s.declinedAll,s.delivered)+'%',`${s.accepted+s.declinedAll} replied`,pct(s.accepted+s.declinedAll,s.delivered))}
     ${kpi('Acceptance',pct(s.accepted,s.accepted+s.declinedAll)+'%',`${s.accepted} yes · ${s.declinedAll} no`,pct(s.accepted,s.accepted+s.declinedAll))}
-    ${kpi('Attendance',pct(s.checkedAll,s.accepted)+'%',`${s.checkedAll} checked in`,pct(s.checkedAll,s.accepted))}
+    ${kpi('Attendance',pct(s.arrivedTotal,s.headcount)+'%',`${s.arrivedTotal} of ${s.headcount} incl. +1s`,pct(s.arrivedTotal,s.headcount))}
     ${kpi('No-shows',noShows,'confirmed but not arrived',pct(noShows,s.accepted))}
   </div>
   <div class="grid g2 mt">
@@ -1052,22 +1276,130 @@ function vReports(s){
   <div class="card mt"><h3>By company</h3><div class="tbl-wrap"><table><thead><tr><th>Company</th><th>Invited</th><th>Confirmed</th><th>Checked in</th><th>Attendance</th></tr></thead><tbody>
     ${Object.entries(comp).sort((a,b)=>b[1].t-a[1].t).map(([k,v])=>`<tr><td><b style="font-weight:600">${esc(k)}</b></td><td>${v.t}</td><td>${v.a}</td><td>${v.c}</td><td style="width:30%"><div class="bar-row" style="grid-template-columns:1fr 44px"><div class="track"><div class="fill" style="width:${pct(v.c,v.t)}%"></div></div><span class="n">${pct(v.c,v.t)}%</span></div></td></tr>`).join('')}
   </tbody></table></div></div>
-  <div class="card mt"><h3>Full guest report<span class="sub">${s.total} guests</span></h3><div class="tbl-wrap" style="max-height:520px"><table><thead><tr><th>Guest</th><th>Contact</th><th>Code</th><th>Status</th><th>Invited</th><th>Opened</th><th>RSVP</th><th>Checked in</th><th>Gate</th></tr></thead><tbody>
-    ${state.guests.map(g=>`<tr><td class="gname"><b>${esc(g.name)}</b><small>${esc(g.company||'')}</small></td><td class="gname"><b style="font-weight:400">${esc(g.email||'—')}</b><small>${esc(g.phone||'')}</small></td><td><span class="code">${g.code}</span></td><td>${pill(status(g))}</td><td class="muted">${fmtDT(g.sentAt)||'—'}</td><td class="muted">${fmtDT(g.openedAt)||'—'}</td><td class="muted">${g.rsvp?fmtDT(g.rsvpAt):'—'}</td><td class="muted">${fmtDT(g.checkedInAt)||'—'}</td><td class="muted">${esc(g.gate||'—')}</td></tr>`).join('')}
+  <div class="card mt"><h3>Full guest report<span class="sub">${s.total} guests</span></h3><div class="tbl-wrap" style="max-height:520px"><table><thead><tr><th>Guest</th><th>Contact</th><th>Code</th><th>Status</th><th>+1</th><th>Invited</th><th>Opened</th><th>RSVP</th><th>Checked in</th><th>Gate</th></tr></thead><tbody>
+    ${state.guests.map(g=>`<tr><td class="gname"><b>${esc(g.name)}</b><small>${esc(g.company||'')}</small></td><td class="gname"><b style="font-weight:400">${esc(g.email||'—')}</b><small>${esc(g.phone||'')}</small></td><td><span class="code">${g.code}</span></td><td>${pill(status(g))}</td><td>${g.plusOne?`${esc(g.plusOne.name)}${g.plusOne.checkedInAt?' ✓':''}`:'<span class="muted">—</span>'}</td><td class="muted">${fmtDT(g.sentAt)||'—'}</td><td class="muted">${fmtDT(g.openedAt)||'—'}</td><td class="muted">${g.rsvp?fmtDT(g.rsvpAt):'—'}</td><td class="muted">${fmtDT(g.checkedInAt)||'—'}</td><td class="muted">${esc(g.gate||'—')}</td></tr>`).join('')}
   </tbody></table></div></div>`;
 }
 
+/* ============ Guest experience ============ */
+function gvGuest(){
+  let g=state.guests.find(x=>x.id===ui.gv.gid);
+  if(!g){g=state.guests.find(x=>x.emailValid&&!x.rsvp)||state.guests.find(x=>x.emailValid)||state.guests[0];if(g)ui.gv.gid=g.id}
+  return g;
+}
+const gvInbox=g=>state.outbox.filter(m=>m.gid===g.id&&m.channel==='email'&&m.status==='delivered').sort((a,b)=>b.t-a.t);
+function vGuestView(s){
+  if(!s.total)return`<div class="card empty">${ic('mail')}<p>Add guests to see the guest experience.</p><div class="row" style="justify-content:center"><button class="btn pri" data-action="load-sample">${ic('bolt')} Load sample guests</button><button class="btn" data-action="import">${ic('upload')} Import Excel</button></div></div>`;
+  const g=gvGuest(),gv=ui.gv,inbox=gvInbox(g);
+  const stepN=(g.checkedInAt?4:g.rsvp?3:g.sentAt?1:0);
+  const steps=['Invitation email','RSVP + plus-one','Auto-reply','Check-in at the door'];
+  const stepper=`<div class="stepper">${steps.map((t,i)=>`<div class="${i<stepN?'done':i===stepN?'act':''}"><b>${i<stepN?'✓':i+1}</b>${t}</div>`).join('')}</div>`;
+  const stage=gv.mode==='rsvp'?rsvpPage(g):mailClient(g,inbox);
+  return`
+  <div class="gv-bar">${stepper}</div>
+  <div class="gv-bar" style="justify-content:space-between">
+    <div class="gv-ctrl"><span class="eyebrow">Viewing as</span><select class="input" id="gvSel" style="width:auto">${state.guests.map(x=>`<option value="${x.id}" ${x.id===g.id?'selected':''}>${esc(x.name)}${x.emailValid?'':' (invalid email)'}</option>`).join('')}</select></div>
+    <div class="gv-ctrl">
+      <div class="tabs"><button data-action="gv-device" data-v="desktop" class="${gv.device==='desktop'?'on':''}">${ic('monitor')} Desktop</button><button data-action="gv-device" data-v="phone" class="${gv.device==='phone'?'on':''}">${ic('phone')} Phone</button></div>
+      <button class="btn" data-action="gv-reset">${ic('reset')} Restart for this guest</button>
+      <button class="btn" data-action="present">${ic('present')} Present</button>
+    </div>
+  </div>
+  <div class="gv-grid">
+    <div class="gv-stage ${gv.device}">${stage}</div>
+    <div>${behind(g)}</div>
+  </div>`;
+}
+function mailClient(g,inbox){
+  const gv=ui.gv,sel=inbox.find(m=>m.id===gv.msgId);
+  const unread=inbox.filter(m=>!m.read).length;
+  const list=`<div class="mc-list"><div class="mc-lh">Inbox ${unread?`<span>${unread}</span>`:''}</div>${inbox.length?inbox.map(m=>`<div class="mc-item ${m.read?'':'unread'} ${sel&&sel.id===m.id?'on':''}" data-action="gv-open" data-id="${m.id}"><div class="mc-av">${logo()}</div><div class="mc-it"><div class="mc-r1"><b>${esc(state.event.sender)}</b><span>${fmtTime(m.t)}</span></div><div class="mc-sub">${esc(m.subject)}</div><div class="mc-pre">${esc(snippet(m))}</div></div></div>`).join('')
+    :`<div class="mc-empty">${ic('inbox')}<div>No emails yet</div>${g.emailValid?`<button class="btn sm pri" data-action="gv-send">${ic('send')} Send invitation to ${esc(firstName(g))}</button>`:`<div style="color:#b54">This guest's email is invalid — pick another guest.</div>`}</div>`}</div>`;
+  const read=sel?`<div class="mc-read">${gv.device==='phone'?`<button class="mc-back" data-action="gv-back">‹ Inbox</button>`:''}${mailMeta(sel,g)}<div class="em-wrap">${renderEmail(EMAIL_KIND[sel.kind],g,{interactive:true})}</div></div>`
+    :`<div class="mc-read mc-none">${logo()}<div>${inbox.length?'Select an email to read':'Waiting for the invitation…'}</div></div>`;
+  return`<div class="mc ${gv.device} ${sel?'has-sel':''}"><div class="mc-top"><i></i><i></i><i></i><div class="mc-search">${ic('search')} Search mail</div><div class="mc-me" title="${esc(g.email)}">${esc(initials(g.name))}</div></div><div class="mc-main">${list}${read}</div></div>`;
+}
+function rsvpPage(g){
+  const gv=ui.gv,v=gv.rsvpV,e=state.event,allow=e.allowPlusOne&&g.plusOneAllowed!==false;
+  let inner;
+  if(gv.done){
+    inner=`<div class="rp-done"><div class="rp-check">${ic('check')}</div><h2>${v==='accepted'?'You’re on the list!':'Response saved'}</h2><p>${v==='accepted'?`We’ve emailed your confirmation${g.plusOne?' and both QR passes':' and QR pass'} to <b>${esc(g.email)}</b>.`:`Thanks for letting us know — a confirmation is on its way to <b>${esc(g.email)}</b>.`}</p><div class="rp-spin"></div><small>Opening your inbox…</small></div>`;
+  }else{
+    inner=`<div class="rp-ev">${esc(e.name)} · ${esc(fmtDate(e.date))} · ${esc(e.time)}</div>
+    <h2>${v==='accepted'?`Wonderful, ${esc(firstName(g))}!`:`Sorry to hear that, ${esc(firstName(g))}`}</h2>
+    <p class="rp-sub">${v==='accepted'?'Confirm the details below and we’ll save your spot.':'Confirm below and we’ll let the hosts know.'}</p>
+    <form id="rsvpForm" class="rp-card" novalidate>
+      <label class="rp-l">Will you attend?</label>
+      <div class="seg"><button type="button" data-action="gv-v" data-v="accepted" class="${v==='accepted'?'on':''}">Yes, I’ll be there</button><button type="button" data-action="gv-v" data-v="declined" class="${v==='declined'?'on':''}">Can’t make it</button></div>
+      ${v==='accepted'?`
+        ${allow?`<label class="rp-l">Are you bringing a +1?</label>
+        <div class="seg"><button type="button" data-action="gv-p1" data-v="0" class="${gv.p1?'':'on'}">Just me</button><button type="button" data-action="gv-p1" data-v="1" class="${gv.p1?'on':''}">Me + 1 guest</button></div>
+        ${gv.p1?`<div class="rp-grid"><div><label class="rp-l">Guest’s full name</label><input class="rp-in gvf" data-k="p1name" value="${esc(gv.p1name)}" placeholder="e.g. Nadine Fawzy"></div><div><label class="rp-l">Guest’s email <span>(optional)</span></label><input class="rp-in gvf" data-k="p1email" type="email" value="${esc(gv.p1email)}" placeholder="We’ll send their pass"></div></div>`:''}`
+        :`<div class="rp-note">This invitation is for you only.</div>`}
+        <label class="rp-l">Dietary requirements <span>(optional)</span></label><input class="rp-in gvf" data-k="diet" value="${esc(gv.diet)}" placeholder="e.g. vegetarian, nut allergy">`
+      :`<label class="rp-l">Message to the hosts <span>(optional)</span></label><textarea class="rp-in gvf" data-k="note" rows="3" placeholder="Wishing you a great event!">${esc(gv.note)}</textarea>`}
+      <button class="rp-submit" type="submit">${v==='accepted'?'Confirm RSVP':'Send response'}</button>
+      <div class="rp-fine">You can change your response any time from your invitation email.</div>
+    </form>`;
+  }
+  return`<div class="br ${gv.device}"><div class="br-bar"><i></i><i></i><i></i><div class="br-url">${ic('lock')} kode.events/rsvp/${g.code}</div><button class="br-x" data-action="gv-back" title="Back to inbox">${ic('x')}</button></div><div class="rp">${logo('rp-logo')}${inner}</div></div>`;
+}
+function behind(g){
+  const tl=state.log.filter(l=>l.gid===g.id).slice(0,9),d=ui.gv.door;
+  return`<div class="card"><h3>${ic('bolt')} Behind the scenes<span class="sub">tracked live</span></h3>
+    <div class="row" style="justify-content:space-between;flex-wrap:nowrap"><div class="gname" style="min-width:0"><b>${esc(g.name)}</b><small>${esc(g.email||'—')}</small></div>${pill(status(g))}</div>
+    <div class="kv">
+      <span>Pass</span><b><span class="code">${g.code}</span></b>
+      <span>Invitation</span><b>${g.sentAt?(g.bounced?'Bounced':`Delivered ${fmtTime(g.sentAt)}`):'Not sent yet'}</b>
+      <span>Opened</span><b>${g.openedAt?fmtTime(g.openedAt):'—'}</b>
+      <span>RSVP</span><b>${g.rsvp?`${g.rsvp==='accepted'?'Attending':'Not attending'} · ${fmtTime(g.rsvpAt)}`:'Awaiting'}</b>
+      <span>Plus one</span><b>${g.plusOne?`${esc(g.plusOne.name)}<br><span class="code">${g.plusOne.code}</span>`:'—'}</b>
+      ${g.dietary?`<span>Dietary</span><b>${esc(g.dietary)}</b>`:''}
+      ${g.note?`<span>Note</span><b>“${esc(g.note)}”</b>`:''}
+      <span>Auto-reply</span><b>${(()=>{const m=state.outbox.find(x=>x.gid===g.id&&x.kind.startsWith('auto'));return m?`Sent ${fmtTime(m.t)}`:'—'})()}</b>
+      <span>Check-in</span><b>${g.checkedInAt?`${fmtTime(g.checkedInAt)} · ${esc(g.gate)}`:'—'}${g.plusOne&&g.plusOne.checkedInAt?`<br>+1 at ${fmtTime(g.plusOne.checkedInAt)}`:''}</b>
+    </div>
+    <div class="eyebrow" style="margin:4px 0 8px">At the door</div>
+    <div class="row"><button class="btn sm" data-action="gv-scan" data-k="g" ${g.sentAt?'':'disabled'}>${ic('scan')} Scan ${esc(firstName(g))}’s pass</button>${g.plusOne?`<button class="btn sm" data-action="gv-scan" data-k="p">${ic('scan')} Scan +1 pass</button>`:''}</div>
+    ${d?`<div class="door ${d.type}">${ic(d.type==='ok'?'check':d.type==='bad'?'x':'alert')}<div><b>${esc(d.title)}</b><br><span>${esc(d.sub)}</span></div></div>`:''}
+  </div>
+  <div class="card mt"><h3>Live log</h3>${tl.length?`<div class="timeline">${tl.map(l=>`<div>${esc(l.text)}<small>${fmtDT(l.t)}</small></div>`).join('')}</div>`:'<div class="muted">Nothing yet — send the invitation to start.</div>'}</div>`;
+}
+function gvSubmit(){
+  const g=gvGuest(),gv=ui.gv,v=gv.rsvpV;if(!g)return;
+  if(v==='accepted'&&gv.p1&&!gv.p1name.trim()){toast('Please add your guest’s name');const i=document.querySelector('[data-k="p1name"]');if(i)i.focus();return}
+  setRsvp(g,v,now(),v==='accepted'?{plusOne:gv.p1?{name:gv.p1name.trim(),email:gv.p1email.trim()}:null,dietary:gv.diet.trim()}:{note:gv.note.trim()});
+  gv.done=true;commit();
+  setTimeout(()=>{
+    if(cur()!=='guest-view'||!ui.gv.done)return;
+    const m=state.outbox.find(x=>x.gid===g.id&&x.channel==='email'&&x.kind.startsWith('auto'));
+    Object.assign(ui.gv,{mode:'mail',done:false,msgId:null});
+    render();
+    toast(`Auto-reply delivered to ${g.email}`);
+    setTimeout(()=>{if(cur()==='guest-view'&&m){m.read=true;ui.gv.msgId=m.id;persist();render()}},900);
+  },1900);
+}
+function gvStartRsvp(g,v){
+  Object.assign(ui.gv,{...GV0,gid:g.id,mode:'rsvp',rsvpV:v,p1:!!g.plusOne,p1name:g.plusOne?g.plusOne.name:'',p1email:g.plusOne&&g.plusOne.email||'',diet:g.dietary||'',note:g.note||''});
+  if(!g.openedAt){g.openedAt=now();log('open',`${g.name} opened the invitation`,g.id);persist()}
+}
+function gvReset(g){
+  state.outbox=state.outbox.filter(m=>m.gid!==g.id);state.log=state.log.filter(l=>l.gid!==g.id);state.scans=state.scans.filter(x=>x.gid!==g.id);
+  ['sentAt','openedAt','bounced','rsvp','rsvpAt','plusOne','checkedInAt','gate','dietary','note','reminders'].forEach(k=>delete g[k]);
+  Object.assign(ui.gv,{...GV0,gid:g.id});
+}
+
 /* ============ Exports ============ */
-function guestRows(){return state.guests.map(g=>({'Name':g.name,'Email':g.email,'Phone':g.phone,'Company':g.company,'Pass code':g.code,'Status':ST[status(g)],'Email valid':g.emailValid?'Yes':'No','Invited at':fmtDT(g.sentAt),'Opened at':fmtDT(g.openedAt),'RSVP':g.rsvp?(g.rsvp==='accepted'?'Confirmed':'Declined'):'','RSVP at':fmtDT(g.rsvpAt),'Checked in at':fmtDT(g.checkedInAt),'Gate':g.gate||'','Reminders':g.reminders||0}))}
+function guestRows(){return state.guests.map(g=>({'Name':g.name,'Email':g.email,'Phone':g.phone,'Company':g.company,'Pass code':g.code,'Status':ST[status(g)],'Email valid':g.emailValid?'Yes':'No','Invited at':fmtDT(g.sentAt),'Opened at':fmtDT(g.openedAt),'RSVP':g.rsvp?(g.rsvp==='accepted'?'Confirmed':'Declined'):'','RSVP at':fmtDT(g.rsvpAt),'Checked in at':fmtDT(g.checkedInAt),'Gate':g.gate||'','Plus one':g.plusOne?g.plusOne.name:'','Plus one code':g.plusOne?g.plusOne.code:'','Plus one checked in':g.plusOne?fmtDT(g.plusOne.checkedInAt):'','Dietary':g.dietary||'','Note':g.note||'','Reminders':g.reminders||0}))}
 function summaryLines(){const s=stats(),e=state.event;return[
  ['Event',e.name],['Date',`${fmtDate(e.date)} ${e.time}`],['Venue',e.venue],['Generated',new Date().toLocaleString('en-GB')],[],
- ['Total guests',s.total],['Invitations sent',s.sent],['Delivered',s.delivered],['Bounced',s.bounced],['Opened',s.openedAll],['Confirmed',s.accepted],['Declined',s.declinedAll],['Awaiting RSVP',s.noRsvp],['Checked in',s.checkedAll],['No-shows',state.guests.filter(g=>g.rsvp==='accepted'&&!g.checkedInAt).length],
+ ['Total guests',s.total],['Invitations sent',s.sent],['Delivered',s.delivered],['Bounced',s.bounced],['Opened',s.openedAll],['Confirmed',s.accepted],['Declined',s.declinedAll],['Awaiting RSVP',s.noRsvp],['Plus-ones confirmed',s.plusOnes],['Expected headcount',s.headcount],['Checked in (guests)',s.checkedAll],['Checked in (incl. +1s)',s.arrivedTotal],['No-shows',state.guests.filter(g=>g.rsvp==='accepted'&&!g.checkedInAt).length],
  [],['Delivery rate',pct(s.delivered,s.sent)+'%'],['Open rate',pct(s.openedAll,s.delivered)+'%'],['Acceptance rate',pct(s.accepted,s.accepted+s.declinedAll)+'%'],['Attendance rate',pct(s.checkedAll,s.accepted)+'%'],['Auto-replies sent',s.autoreplies]]}
 function exportXlsx(){
   if(typeof XLSX==='undefined'){toast('Excel library failed to load');return}
   const wb=XLSX.utils.book_new();
   const ws1=XLSX.utils.aoa_to_sheet([['KODE — Event Report'],[],...summaryLines()]);ws1['!cols']=[{wch:22},{wch:44}];XLSX.utils.book_append_sheet(wb,ws1,'Summary');
-  const ws2=XLSX.utils.json_to_sheet(guestRows());ws2['!cols']=[22,30,18,18,14,12,10,18,18,10,18,18,14,10].map(w=>({wch:w}));XLSX.utils.book_append_sheet(wb,ws2,'Guests');
+  const ws2=XLSX.utils.json_to_sheet(guestRows());ws2['!cols']=[22,30,18,18,14,12,10,18,18,10,18,18,14,20,14,18,20,24,10].map(w=>({wch:w}));XLSX.utils.book_append_sheet(wb,ws2,'Guests');
   const ws3=XLSX.utils.json_to_sheet(state.outbox.map(m=>{const g=state.guests.find(x=>x.id===m.gid);return{'Time':fmtDT(m.t),'Type':KIND[m.kind],'Guest':g?g.name:'','Channel':m.channel,'To':m.to,'Subject':m.subject,'Status':m.status}}));XLSX.utils.book_append_sheet(wb,ws3,'Messages');
   const ws4=XLSX.utils.json_to_sheet(state.scans.map(x=>{const g=state.guests.find(y=>y.id===x.gid);return{'Time':fmtDT(x.t),'Result':x.type==='ok'?'Granted':x.type==='dup'?'Duplicate':x.type==='warn'?'Declined RSVP':'Rejected','Guest':g?g.name:'','Code':x.code,'Gate':x.gate}}));XLSX.utils.book_append_sheet(wb,ws4,'Scans');
   const ws5=XLSX.utils.json_to_sheet(state.log.map(l=>({'Time':fmtDT(l.t),'Event':l.text})));XLSX.utils.book_append_sheet(wb,ws5,'Activity');
@@ -1083,6 +1415,9 @@ function afterRender(v){
   document.querySelectorAll('.evf').forEach(el=>el.addEventListener('input',()=>{state.event[el.dataset.k]=el.value;persist();$('#preview').innerHTML=previewHtml()}));
   document.querySelectorAll('.evf').forEach(el=>el.addEventListener('change',()=>render()));
   const pv=$('#pvSel');if(pv)pv.addEventListener('change',e=>{ui.previewId=e.target.value;$('#preview').innerHTML=previewHtml()});
+  const gvs=$('#gvSel');if(gvs)gvs.addEventListener('change',e=>{Object.assign(ui.gv,{...GV0,gid:e.target.value});render()});
+  document.querySelectorAll('.gvf').forEach(el=>el.addEventListener('input',()=>{ui.gv[el.dataset.k]=el.value}));
+  const rf=$('#rsvpForm');if(rf)rf.addEventListener('submit',e=>{e.preventDefault();gvSubmit()});
   const gs=$('#gateSel');if(gs)gs.addEventListener('change',e=>ui.gate=e.target.value);
   const mf=$('#manualForm');if(mf)mf.addEventListener('submit',e=>{e.preventDefault();const v=$('#manualCode').value;if(v.trim())processScan(v)});
   ['dropImport','vf'].forEach(id=>{const d=$('#'+id);if(!d)return;
@@ -1100,6 +1435,18 @@ document.addEventListener('click',async e=>{
   if(el.tagName==='A'&&el.getAttribute('href')==='#')e.preventDefault();
   switch(a){
     case 'close-modal':closeModal();break;
+    case 'rsvp-start':if(!g)break;gvStartRsvp(g,el.dataset.v);if(cur()==='guest-view'){closeModal();render();$('#view').scrollIntoView({behavior:'smooth'})}else location.hash='guest-view';break;
+    case 'gv-goto':if(!g)break;{const m=gvInbox(g)[0];Object.assign(ui.gv,{...GV0,gid:g.id,msgId:m?m.id:null});if(m)m.read=true;if(cur()==='guest-view'){closeModal();render()}else location.hash='guest-view'}break;
+    case 'gv-open':{const m=state.outbox.find(x=>x.id===id);if(!m)break;m.read=true;ui.gv.msgId=id;const gg=state.guests.find(x=>x.id===m.gid);if(gg&&!gg.openedAt&&(m.kind==='invite'||m.kind==='reminder')){gg.openedAt=now();log('open',`${gg.name} opened the invitation`,gg.id)}commit()}break;
+    case 'gv-back':if(ui.gv.mode==='rsvp'){ui.gv.mode='mail';ui.gv.done=false}else ui.gv.msgId=null;render();break;
+    case 'gv-v':ui.gv.rsvpV=el.dataset.v;render();break;
+    case 'gv-p1':ui.gv.p1=el.dataset.v==='1';render();if(ui.gv.p1){const i=document.querySelector('[data-k="p1name"]');if(i)i.focus()}break;
+    case 'gv-device':ui.gv.device=el.dataset.v;render();break;
+    case 'gv-send':{const gg=gvGuest();if(!gg)break;if(!state.channels.email){state.channels.email=true;toast('Email channel turned on')}deliver(gg,'invite');const m=gvInbox(gg)[0];ui.gv.msgId=null;commit();toast(`Invitation delivered to ${gg.email}`);setTimeout(()=>{if(cur()==='guest-view'&&m&&!ui.gv.msgId){m.read=true;ui.gv.msgId=m.id;const g3=gvGuest();if(g3&&!g3.openedAt){g3.openedAt=now();log('open',`${g3.name} opened the invitation`,g3.id)}commit()}},1100)}break;
+    case 'gv-reset':{const gg=gvGuest();if(!gg)break;gvReset(gg);commit();toast(`Restarted the demo for ${gg.name}`)}break;
+    case 'gv-scan':{const gg=gvGuest();if(!gg)break;const code=el.dataset.k==='p'&&gg.plusOne?gg.plusOne.code:gg.code;processScan(`KODE|${state.event.eventId}|${code}`);ui.gv.door=ui.lastScan;render()}break;
+    case 'present':document.body.classList.toggle('present');window.scrollTo(0,0);break;
+    case 'ev-plus':state.event.allowPlusOne=el.checked;persist();$('#preview')&&($('#preview').innerHTML=previewHtml());break;
     case 'import':if(e.target.closest('a')&&e.target.closest('a').dataset.action==='load-sample')break;$('#fileImport').click();break;
     case 'load-sample':e.stopPropagation();importRows(SAMPLE.map(r=>r.slice()),'Sample guest list (26 rows)');break;
     case 'template':if(typeof XLSX==='undefined'){toast('Excel library failed to load');break}saveFile('KODE-guest-template.xlsx',templateBlob());break;

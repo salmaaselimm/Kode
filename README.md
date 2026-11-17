@@ -8,6 +8,7 @@ A working front-end prototype of KODE's QR invitation system.
 - **Import** an Excel/CSV guest list (name, email, phone, company) — columns auto-detected, duplicates skipped, invalid emails flagged
 - **Issue** every guest a unique QR pass (`KODE|<eventId>|KD-XXXX-XXXX`)
 - **Invite** via email / WhatsApp / SMS with editable templates and live preview
+- **Guest experience** demo: professional invitation email → RSVP page (attending / not, +1 with name, dietary) → instant auto-reply with QR passes for the guest and their +1
 - **Auto-reply** instantly when a guest confirms or declines
 - **Scan** passes at the door (photo/camera upload, manual code entry) — duplicates and fake codes rejected
 - **Report** live KPIs, funnel, arrivals over time, per-company stats, and export to Excel / CSV
