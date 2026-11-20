@@ -467,6 +467,48 @@ body.present .exit-present{display:inline-flex}
   .gv-ctrl{width:100%}
   .bn-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+.dots{display:inline-flex;gap:4px;vertical-align:middle}
+.dots i{width:11px;height:11px;border-radius:3px;background:#242424;border:1px solid #333;display:block}
+.dots i.on{background:var(--metal);border-color:transparent}
+.sess-bar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.sess{border:1px solid #262626;background:#0f0f0f;border-radius:14px;padding:12px 14px;cursor:pointer;text-align:left;color:#bbb;font:inherit}
+.sess b{display:block;color:#fff;font-family:Montserrat,Inter,sans-serif;font-size:14px}
+.sess small{display:block;color:#7a7a7a;font-size:12px;margin-top:2px}
+.sess .cnt{font-size:12px;margin-top:8px;color:#aaa}
+.sess.on{border-color:#d9d9d9;background:#171717;box-shadow:0 0 0 3px rgba(255,255,255,.08)}
+.sess.on b::before{content:"● ";color:var(--ok)}
+.netbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px;font-size:12.5px;color:var(--soft)}
+.net{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:99px;border:1px solid #2a4a35;background:#0f1912;color:var(--ok);font-weight:600}
+.net.off{border-color:#5a4a22;background:#19150d;color:var(--warn)}
+.net::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.prog{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+.prog span{font-size:11px;font-weight:700;padding:4px 9px;border-radius:7px;background:#1a1a1a;border:1px solid #2c2c2c;color:#777}
+.prog span.on{background:#e9e9e9;color:#0a0a0a;border-color:transparent}
+.prog span.cur{outline:2px solid var(--ok);outline-offset:1px}
+.att-cell{font-size:12.5px;color:#e5e5e5;white-space:nowrap;font-weight:600}
+.att-cell.no{color:#4a4a4a}
+.att-cell small{display:block;color:var(--dim);font-size:11px;font-weight:500}
+.att-cell .m{font-size:10px;background:#2a2a2a;border-radius:4px;padding:0 4px;margin-left:4px;color:#ccc}
+.st-elig{color:#0a0a0a;background:var(--metal);border-color:transparent}.st-elig::before{background:#0a0a0a}
+.st-miss{color:var(--warn);border-color:#4a3d1f;background:#1c1810}
+.st-none{color:#8a8a8a;border-color:#2e2e2e;background:#141414}
+.st-sent{color:var(--ok);border-color:#24442f;background:#111b15}
+.cert-img{width:100%;border-radius:8px;display:block;box-shadow:0 30px 70px rgba(0,0,0,.6);background:#fff}
+.find-res{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.find-res .fr{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid #222;border-radius:10px;background:#111}
+.find-res .fr .gname{flex:1;min-width:0}
+.em-prog{border:1px solid #e3e3e3;border-radius:8px;padding:16px 18px;margin:20px 0}
+.em-ps{display:flex;justify-content:space-between;gap:4px 12px;padding:8px 0;border-bottom:1px dashed #e5e5e5;font-size:14px;flex-wrap:wrap}
+.em-ps:last-of-type{border-bottom:0}
+.em-ps span{color:#777;font-size:13px}
+.em-certnote{margin-top:12px;background:#0a0a0a;color:#fff;border-radius:6px;padding:12px 14px;font-size:13.5px;font-weight:600}
+.em-cert{margin:20px 0;border:1px solid #e3e3e3;border-radius:6px;overflow:hidden}
+.em-cert img{width:100%;display:block}
+.em-attach{display:inline-flex;align-items:center;gap:8px;border:1px solid #ddd;border-radius:6px;padding:9px 12px;font-size:13px;font-weight:600;background:#fafafa;margin-bottom:14px}
+.em-done{list-style:none;padding:0;margin:10px 0 18px}
+.em-done li{padding:6px 0;border-bottom:1px solid #f0f0f0;font-size:14px}
+.em-done li::before{content:"✓  ";font-weight:900}
+@media (max-width:860px){.sess-bar{grid-template-columns:1fr 1fr}.nav{overflow-x:auto;justify-content:flex-start}.nav a{min-width:60px}}
 .hide{display:none!important}
 svg[viewBox="0 0 24 24"]{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none;vertical-align:-4px}
 .viewfinder .cta svg{width:42px;height:42px;stroke-width:1.5;margin-bottom:8px;display:block;margin-inline:auto}
@@ -558,6 +600,8 @@ const I={
   wa:'<path d="M21 11.5a8.4 8.4 0 0 1-12.3 7.4L3 21l2.1-5.6A8.4 8.4 0 1 1 21 11.5z"/>',
   sms:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
   file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8"/>',
+  award:'<circle cx="12" cy="8" r="6"/><path d="M8.2 13.2 7 22l5-3 5 3-1.2-8.8"/>',
+  wifi:'<path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/>',
   lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
   present:'<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>',
   phone:'<rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/>',
@@ -579,48 +623,86 @@ const ALPH='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 function fmtDate(d){if(!d)return'';const x=new Date(d+'T00:00:00');return isNaN(x)?d:x.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'})}
 function fmtTime(t){return t?new Date(t).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}):''}
 function fmtDateLong(d){if(!d)return'';const x=new Date(d+'T00:00:00');return isNaN(x)?d:x.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}
-const firstName=g=>(g.name||'').trim().split(/\s+/)[0]||'there';
-const initials=n=>(n||'?').split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+const TITLE_RE=/^(dr|prof|professor|mr|mrs|ms|miss|eng|sir|dame)\.?$/i;
+const firstName=g=>{const w=(g.name||'').trim().split(/\s+/);return TITLE_RE.test(w[0]||'')&&w[1]?`${w[0].replace(/\.?$/,'.')} ${w[1]}`:(w[0]||'there')};
+const initials=n=>(n||'?').split(/\s+/).filter(w=>!TITLE_RE.test(w)).map(w=>w[0]).slice(0,2).join('').toUpperCase();
 function fmtDT(t){return t?new Date(t).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):''}
 function ago(t){const s=Math.max(0,(now()-t)/1000);if(s<45)return'just now';if(s<3600)return Math.round(s/60)+'m ago';if(s<86400)return Math.round(s/3600)+'h ago';return Math.round(s/86400)+'d ago'}
 function toast(msg){const d=document.createElement('div');d.className='toast';d.textContent=msg;$('#toasts').appendChild(d);setTimeout(()=>{d.style.transition='.3s';d.style.opacity='0';setTimeout(()=>d.remove(),300)},3200)}
 
 /* ============ State ============ */
-const LS='kode-qr-system-v1';
+const LS='kode-qr-system-v2';
 const DEFAULT_TPL={
-  subject:"You're invited: {{event}}",
-  body:"We'd be delighted to have you join us for {{event}} — an evening of first looks, good conversation and great company.\n\nYour personal QR pass is included below. Simply show it at the entrance on the night for instant, contact-free check-in.",
-  accept:"Thank you for confirming — your place at {{event}} is reserved. Your QR pass is below; just show it at the entrance and you'll be checked in within seconds.",
-  decline:"Thank you for letting us know. We're sorry you can't make it to {{event}}, and we'll be sure to keep you in the loop for the next one.",
-  reminder:"Just a gentle reminder that {{event}} is coming up on {{date}}. We haven't received your RSVP yet — please let us know below whether you can make it."
+  subject:"Invitation: {{event}}",
+  body:"On behalf of the organising committee, we are pleased to invite you to {{event}}, taking place over two days at {{venue}}.\n\nThe programme includes two conference sessions and two hands-on workshops. Attendance at all four sessions is required to receive your certificate of attendance.\n\nYour personal QR pass is below. The same code is scanned at the entrance of every session.",
+  accept:"Thank you for confirming — your place at {{event}} is reserved.\n\nPlease bring this QR pass to every session. It is scanned at the entrance of each of the four sessions, and your certificate is issued once all four are recorded.",
+  decline:"Thank you for letting us know. We're sorry you can't join us for {{event}}, and we'll be sure to keep you informed about future programmes.",
+  reminder:"A gentle reminder that {{event}} begins on {{date}}. We haven't received your RSVP yet — please confirm below so we can reserve your seat.",
+  cert:"Thank you for attending {{event}}. Our records show you attended all four sessions, and your certificate of attendance is attached to this email.\n\nWe hope to welcome you again at our next programme."
 };
-const EVENT_EXTRAS={banner:'preset:spotlight',bannerConfirm:true,tagline:'An exclusive evening unveiling what\u2019s next',dress:'Smart casual',rsvpBy:'2026-12-03',allowPlusOne:true};
+const DEFAULT_SESSIONS=[
+  {id:'d1c',day:1,type:'Conference',date:'2026-11-25',time:'09:00',room:'Main Hall'},
+  {id:'d1w',day:1,type:'Workshop',date:'2026-11-25',time:'14:00',room:'Workshop Hall'},
+  {id:'d2c',day:2,type:'Conference',date:'2026-11-26',time:'09:00',room:'Main Hall'},
+  {id:'d2w',day:2,type:'Workshop',date:'2026-11-26',time:'14:00',room:'Workshop Hall'}];
+const DEFAULT_CERT={enabled:true,title:'Certificate of Attendance',hours:12,signer1:'Conference Chair',signer2:'Head of Scientific Committee'};
+const EVENT_EXTRAS={banner:'preset:spotlight',bannerConfirm:true,tagline:'Two days of clinical insight and hands-on workshops',dress:'Business attire',rsvpBy:'2026-11-23',allowPlusOne:false};
 function freshState(){
   return{
-    event:{...EVENT_EXTRAS,name:'KODE Launch Night',date:'2026-12-10',time:'19:00',venue:'Dubai Design District, Building 7',sender:'The KODE Team',eventId:'EVT'+Math.random().toString(36).slice(2,6).toUpperCase()},
+    sessions:DEFAULT_SESSIONS.map(x=>({...x})),
+    event:{...EVENT_EXTRAS,cert:{...DEFAULT_CERT},name:'Annual Medical Conference 2026',date:'2026-11-25',time:'09:00',venue:'Conference Centre, Cairo',sender:'The Organising Committee',eventId:'EVT'+Math.random().toString(36).slice(2,6).toUpperCase()},
     tpl:{...DEFAULT_TPL},
     channels:{email:true,whatsapp:false,sms:false},
-    guests:[],outbox:[],log:[],scans:[],tplV:2
+    guests:[],outbox:[],log:[],scans:[],tplV:3
   };
 }
 let state=null;
 try{state=JSON.parse(localStorage.getItem(LS))}catch(e){}
 if(!state||!state.event||!Array.isArray(state.guests))state=freshState();
 state.event={...EVENT_EXTRAS,...state.event};
-if(state.tplV!==2){state.tpl={...DEFAULT_TPL};state.tplV=2}
+if(state.tplV!==3){state.tpl={...DEFAULT_TPL};state.tplV=3}
+if(!Array.isArray(state.sessions))state.sessions=DEFAULT_SESSIONS.map(x=>({...x}));
+state.event.cert={...DEFAULT_CERT,...(state.event.cert||{})};
 state.tpl={...DEFAULT_TPL,...state.tpl};
 function persist(){try{localStorage.setItem(LS,JSON.stringify(state));return true}catch(e){return false}}
 function commit(){persist();render()}
 function log(type,text,gid,t=now()){state.log.unshift({t,type,text,gid});if(state.log.length>3000)state.log.length=3000}
 
 const GV0={mode:'mail',msgId:null,rsvpV:'accepted',p1:false,p1name:'',p1email:'',diet:'',note:'',done:false,door:null};
-let ui={gv:{...GV0,gid:null,device:'desktop'},guestQ:'',guestF:'all',msgF:'all',tplTab:'body',previewId:null,lastScan:null,sendProg:null,lastField:null};
+let ui={sid:null,offline:false,findQ:'',attQ:'',attF:'all',certGid:null,gv:{...GV0,gid:null,device:'desktop'},guestQ:'',guestF:'all',msgF:'all',tplTab:'body',previewId:null,lastScan:null,sendProg:null,lastField:null};
 
 function genCode(){let c;do{let s='';for(let i=0;i<8;i++)s+=ALPH[Math.floor(Math.random()*ALPH.length)];c='KD-'+s.slice(0,4)+'-'+s.slice(4)}while(state.guests.some(g=>g.code===c||(g.plusOne&&g.plusOne.code===c)));return c}
 const payload=g=>`KODE|${state.event.eventId}|${g.code}`;
 function status(g){if(g.checkedInAt)return'checked';if(g.rsvp==='accepted')return'confirmed';if(g.rsvp==='declined')return'declined';if(g.bounced)return'bounced';if(g.openedAt)return'opened';if(g.sentAt)return'invited';return'pending'}
 const ST={pending:'Not invited',invited:'Invited',bounced:'Bounced',opened:'Opened',confirmed:'Confirmed',declined:'Declined',checked:'Checked in'};
 const pill=s=>`<span class="pill st-${s}">${ST[s]}</span>`;
+const sName=x=>`Day ${x.day} · ${x.type}`;
+const sShort=x=>`D${x.day} ${x.type==='Conference'?'Conf':'Workshop'}`;
+const sAt=x=>new Date(`${x.date}T${x.time||'09:00'}`).getTime();
+const attCount=o=>state.sessions.filter(x=>o&&o.att&&o.att[x.id]).length;
+const eligible=g=>state.sessions.length>0&&attCount(g)===state.sessions.length;
+const missingS=g=>state.sessions.filter(x=>!(g.att&&g.att[x.id]));
+const dots=o=>`<span class="dots" title="${attCount(o)} of ${state.sessions.length} sessions">${state.sessions.map(x=>`<i class="${o&&o.att&&o.att[x.id]?'on':''}"></i>`).join('')}</span>`;
+function certState(g){if(g.certSentAt)return['sent','Certificate sent'];if(eligible(g))return['elig','Eligible · 4/4'.replace('4/4',`${state.sessions.length}/${state.sessions.length}`)];const n=attCount(g);if(!n)return['none','Not started'];return['miss','Missing: '+missingS(g).map(sShort).join(', ')]}
+const certPill=g=>{const [k,l]=certState(g);return`<span class="pill st-${k}">${esc(l)}</span>`};
+function curSession(){
+  let x=state.sessions.find(y=>y.id===ui.sid);if(x)return x;
+  const T=now(),today=state.sessions.filter(y=>y.date===new Date().toISOString().slice(0,10));
+  x=today.filter(y=>sAt(y)<=T+45*60000).pop()||today[0]||state.sessions[0];
+  if(x)ui.sid=x.id;return x;
+}
+function eventDates(long=true){
+  const ds=[...new Set(state.sessions.map(x=>x.date))].sort();if(!ds.length)return fmtDateLong(state.event.date);if(ds.length===1)return fmtDateLong(ds[0]);
+  const a=new Date(ds[0]+'T00:00:00'),b=new Date(ds[ds.length-1]+'T00:00:00');
+  if(a.getMonth()===b.getMonth()&&a.getFullYear()===b.getFullYear()){const my=b.toLocaleDateString('en-GB',{month:'long',year:'numeric'});return long?`${a.toLocaleDateString('en-GB',{weekday:'short'})} ${a.getDate()} – ${b.toLocaleDateString('en-GB',{weekday:'short'})} ${b.getDate()} ${my}`:`${a.getDate()}–${b.getDate()} ${my}`}
+  return`${fmtDate(ds[0])} – ${fmtDate(ds[ds.length-1])}`;
+}
+function recordAttendance(g,x,t=now(),src='scan',p=null){
+  const o=p||g;o.att=o.att||{};o.att[x.id]={t,src,synced:!ui.offline};
+  if(!o.checkedInAt){o.checkedInAt=t;o.gate=x.room}
+  log('checkin',`${p?`${p.name} (+1 of ${g.name})`:g.name} attended ${sName(x)}${src==='manual'?' (marked manually)':src==='override'?' (override)':''}`,g.id,t);
+  if(!p&&eligible(g))log('cert',`${g.name} completed all ${state.sessions.length} sessions — certificate eligible`,g.id,t+1);
+}
 function stats(){
   const G=state.guests,c={total:G.length,pending:0,invited:0,bounced:0,opened:0,confirmed:0,declined:0,checked:0};
   G.forEach(g=>c[status(g)]++);
@@ -636,6 +718,11 @@ function stats(){
   c.plusOnes=G.filter(g=>g.rsvp==='accepted'&&g.plusOne).length;
   c.plusArrived=G.filter(g=>g.plusOne&&g.plusOne.checkedInAt).length;
   c.headcount=c.accepted+c.plusOnes;
+  c.sess=state.sessions.map(x=>G.filter(g=>g.att&&g.att[x.id]).length);
+  c.eligible=G.filter(eligible).length;
+  c.certSent=G.filter(g=>g.certSentAt).length;
+  c.incomplete=G.filter(g=>attCount(g)>0&&!eligible(g)).length;
+  c.complete=[0,1,2,3,4].map(n=>G.filter(g=>g.rsvp==='accepted'&&attCount(g)===n).length);
   c.arrivedTotal=c.checkedAll+c.plusArrived;
   return c;
 }
@@ -759,6 +846,8 @@ const SAMPLE=[
  ['Sara El-Masry','SARA.ELMASRY@mirage.studio','+20 100 455 2190','Mirage Studio'],
  ['Layla Mostafa','layla.mostafa@sandline.ae','','Sandline']
 ];
+const MED_ORG={'Nile Ventures':'Nile Valley Hospital','Mirage Studio':'Horizon Clinics','Desert Labs':'Crescent Medical Group','Falcon Capital':'Lotus Women\u2019s Health','Blue Dune Tech':'Delta Care Hospital','Cairo Works':'Pyramid Diagnostics','Gulf Arc':'Al Safa Medical Centre','Sandline':'Meridian Heart Institute','Freelance':'Private practice'};
+const SAMPLE_MED=SAMPLE.map((r,i)=>i?['Dr. '+r[0],r[1],r[2],MED_ORG[r[3]]||r[3]]:r);
 function templateBlob(){
   const wb=XLSX.utils.book_new();
   const ws=XLSX.utils.aoa_to_sheet([['Full Name','Email Address','Mobile Number','Company','Plus One (Yes/No)'],['Jane Doe','jane@company.com','+971 50 000 0000','Company LLC','Yes'],['John Smith','john@company.com','+20 100 000 0000','','No']]);
@@ -769,11 +858,11 @@ function templateBlob(){
 
 /* ============ Messaging engine ============ */
 function activeChannels(){return Object.keys(state.channels).filter(k=>state.channels[k])}
-const KIND={invite:'Invitation',reminder:'Reminder','auto-accept':'Auto-reply · Confirmed','auto-decline':'Auto-reply · Declined'};
+const KIND={certificate:'Certificate',invite:'Invitation',reminder:'Reminder','auto-accept':'Auto-reply · Confirmed','auto-decline':'Auto-reply · Declined'};
 function deliver(g,kind,t=now()){
   const ch=activeChannels();let ok=false;
-  const subject=kind==='invite'?fill(state.tpl.subject,g):kind==='reminder'?`Reminder: ${state.event.name}`:kind==='auto-accept'?`You're confirmed — ${state.event.name}`:`RSVP received — ${state.event.name}`;
-  const body=fill(kind==='invite'?state.tpl.body:kind==='reminder'?state.tpl.reminder:kind==='auto-accept'?state.tpl.accept:state.tpl.decline,g);
+  const subject=kind==='certificate'?`Your certificate of attendance — ${state.event.name}`:kind==='invite'?fill(state.tpl.subject,g):kind==='reminder'?`Reminder: ${state.event.name}`:kind==='auto-accept'?`You're confirmed — ${state.event.name}`:`RSVP received — ${state.event.name}`;
+  const body=fill(kind==='certificate'?state.tpl.cert:kind==='invite'?state.tpl.body:kind==='reminder'?state.tpl.reminder:kind==='auto-accept'?state.tpl.accept:state.tpl.decline,g);
   ch.forEach(c=>{
     if(c!=='email'&&!g.phone)return;
     const st=(c==='email'&&!g.emailValid)?'bounced':'delivered';
@@ -782,8 +871,9 @@ function deliver(g,kind,t=now()){
   });
   if(kind==='invite'){g.sentAt=t;g.bounced=!ok}
   if(kind==='reminder')g.reminders=(g.reminders||0)+1;
+  if(kind==='certificate'&&ok)g.certSentAt=t;
   const lbl=KIND[kind];
-  log(kind.startsWith('auto')?'auto':kind,ok?`${lbl} sent to ${g.name}`:`${lbl} to ${g.name} bounced`,g.id,t);
+  log(kind.startsWith('auto')?'auto':kind==='certificate'?'cert':kind,ok?`${lbl} sent to ${g.name}`:`${lbl} to ${g.name} bounced`,g.id,t);
   return ok;
 }
 const PLUS_NAMES=['Nadine Fawzy','Ali Hamed','Reem Saleh','Tarek Nour','Maya Zaki','Hassan Adel','Leila Aziz','Sami Fares','Dalia Mourad','Kareem Fouad','Nada Ezz','Rami Khoury'];
@@ -799,7 +889,7 @@ function setRsvp(g,v,t=now(),x={}){
 }
 async function sendBatch(list,kind){
   if(ui.sendProg){toast('A send is already in progress');return}
-  if(!list.length){toast(kind==='invite'?'Everyone has already been invited':'No one to remind');return}
+  if(!list.length){toast(kind==='invite'?'Everyone has already been invited':kind==='certificate'?'No eligible guests waiting for a certificate':'No one to remind');return}
   if(!activeChannels().length){toast('Turn on at least one channel');return}
   ui.sendProg={done:0,total:list.length,kind};render();
   let ok=0,bad=0;
@@ -809,9 +899,9 @@ async function sendBatch(list,kind){
     if(i%2===0||i===list.length-1){updateProg();await sleep(55)}
   }
   ui.sendProg=null;commit();
-  toast(`${kind==='invite'?'Invitations':'Reminders'}: ${ok} delivered${bad?` · ${bad} bounced`:''}`);
+  toast(`${{invite:'Invitations',reminder:'Reminders',certificate:'Certificates'}[kind]}: ${ok} delivered${bad?` · ${bad} bounced`:''}`);
 }
-function updateProg(){const p=ui.sendProg,el=$('#sendProg');if(!p||!el)return;el.querySelector('div').style.width=pct(p.done,p.total)+'%';const t=$('#sendProgT');if(t)t.textContent=`Sending ${p.kind==='invite'?'invitations':'reminders'}… ${p.done}/${p.total}`}
+function updateProg(){const p=ui.sendProg,el=$('#sendProg');if(!p||!el)return;el.querySelector('div').style.width=pct(p.done,p.total)+'%';const t=$('#sendProgT');if(t)t.textContent=`Sending ${{invite:'invitations',reminder:'reminders',certificate:'certificates'}[p.kind]}… ${p.done}/${p.total}`}
 function simulateResponses(){
   const pool=state.guests.filter(g=>g.sentAt&&!g.bounced&&!g.rsvp);
   if(!pool.length){toast(state.guests.some(g=>g.sentAt)?'Everyone reachable has already responded':'Send invitations first');return}
@@ -830,13 +920,13 @@ function simulateResponses(){
 /* ============ Check-in ============ */
 function checkIn(g,gate,t=now(),p=null){const o=p||g;o.checkedInAt=t;o.gate=gate;log('checkin',`${p?`${p.name} (+1 of ${g.name})`:g.name} checked in at ${gate}`,g.id,t)}
 function findPass(code){for(const g of state.guests){if(g.code===code)return{g,p:null};if(g.plusOne&&g.plusOne.code===code)return{g,p:g.plusOne}}return null}
-function processScan(raw){
+function processScan(raw,sidOverride){
   raw=String(raw||'').trim();
   let code=null,evOk=true;
   const m=raw.match(/^KODE\|([^|]+)\|(KD-[A-Z0-9]{4}-[A-Z0-9]{4})$/i);
   if(m){code=m[2].toUpperCase();evOk=m[1]===state.event.eventId}
   else{const m2=raw.toUpperCase().replace(/\s/g,'').match(/^KD-?([A-Z0-9]{4})-?([A-Z0-9]{4})$/);if(m2)code=`KD-${m2[1]}-${m2[2]}`}
-  const gate=($('#gateSel')||{}).value||'Main Gate';
+  const ses=(sidOverride&&state.sessions.find(y=>y.id===sidOverride))||curSession(),gate=ses?sName(ses):'Entrance';
   let res;
   if(!code)res={type:'bad',title:'Invalid QR code',sub:'This code wasn’t issued by KODE.'};
   else if(!evOk)res={type:'bad',title:'Wrong event',sub:'This pass belongs to a different event.'};
@@ -845,13 +935,15 @@ function processScan(raw){
     if(!f)res={type:'bad',title:'Pass not found',sub:`${code} isn\u2019t on the guest list.`};
     else{
       const {g,p}=f,o=p||g,who=p?`${p.name} (+1 of ${g.name})`:g.name;res={gid:g.id,name:who};
-      if(o.checkedInAt)Object.assign(res,{type:'dup',title:'Already checked in',sub:`${who} entered at ${fmtTime(o.checkedInAt)} via ${o.gate}.`});
+      res.sid=ses.id;
+      if(o.att&&o.att[ses.id])Object.assign(res,{type:'dup',title:'Already scanned for this session',sub:`${who} was checked in to ${sName(ses)} at ${fmtTime(o.att[ses.id].t)} — not counted twice.`});
       else if(!p&&g.rsvp==='declined')Object.assign(res,{type:'warn',title:'Guest declined RSVP',sub:`${g.name} declined the invitation. Allow entry anyway?`,override:true});
-      else{checkIn(g,gate,now(),p);Object.assign(res,{type:'ok',title:'Access granted',sub:`Welcome, ${who}!${p||g.rsvp?'':' · no RSVP on file'}`})}
+      else{recordAttendance(g,ses,now(),'scan',p);const n=attCount(o),N=state.sessions.length;Object.assign(res,{type:'ok',title:`Checked in · ${sName(ses)}`,sub:`${who} — ${n} of ${N} sessions${n===N?' · certificate eligible 🎓':''}${p||g.rsvp?'':' · no RSVP on file'}`})}
+      res.prog=state.sessions.map(y=>!!(o.att&&o.att[y.id]));
     }
   }
   res.t=now();res.gate=gate;
-  state.scans.unshift({t:res.t,type:res.type,gid:res.gid||null,name:res.name||null,code:code||raw.slice(0,30)||'—',gate});
+  state.scans.unshift({t:res.t,type:res.type,gid:res.gid||null,name:res.name||null,code:code||raw.slice(0,30)||'—',gate,sid:ses&&ses.id,synced:!ui.offline});
   if(state.scans.length>1000)state.scans.length=1000;
   ui.lastScan=res;commit();
   const r=$('#scanResult');if(r){r.classList.remove('flash');void r.offsetWidth;r.classList.add('flash')}
@@ -877,15 +969,72 @@ async function scanImage(file){
     else{ui.lastScan={type:'bad',title:'No QR found',sub:'Couldn’t find a QR code in that image — try a closer, sharper photo.',t:now()};render()}
   }catch(e){toast('Couldn’t read that image')}
 }
-function simulateArrivals(){
-  const pool=state.guests.filter(g=>g.rsvp==='accepted'&&!g.checkedInAt);
-  if(!pool.length){toast('No confirmed guests waiting — simulate RSVPs first');return}
-  const gates=['Main Gate','Main Gate','Main Gate','VIP Entrance','Gate B'];const T=now();let n=0;
-  // Fast-forward to event night so the arrivals curve looks real
-  const ev=new Date(state.event.date+'T'+(state.event.time||'19:00')).getTime(),base=isNaN(ev)?T-120*60000:ev;
-  pool.forEach(g=>{if(Math.random()<.85){const t=base+rand(-15,120)*60000;const gt=gates[Math.floor(Math.random()*gates.length)];checkIn(g,gt,t);state.scans.unshift({t,type:'ok',gid:g.id,name:g.name,code:g.code,gate:gt});n++;if(g.plusOne&&!g.plusOne.checkedInAt&&Math.random()<.9){const t2=t+rand(0,4)*60000;checkIn(g,gt,t2,g.plusOne);state.scans.unshift({t:t2,type:'ok',gid:g.id,name:`${g.plusOne.name} (+1)`,code:g.plusOne.code,gate:gt});n++}}});
-  state.log.sort((a,b)=>b.t-a.t);state.scans.sort((a,b)=>b.t-a.t);commit();toast(`Fast-forwarded to event night: ${n} guests checked in`);
+function simulateSession(x,silent){
+  const idx=state.sessions.indexOf(x);if(idx<0)return 0;
+  const pool=state.guests.filter(g=>g.rsvp==='accepted'&&!(g.att&&g.att[x.id]));
+  let n=0;
+  pool.forEach(g=>{
+    const prev=state.sessions.slice(0,idx).filter(y=>g.att&&g.att[y.id]).length;
+    const pr=idx===0?.94:prev===idx?.93:.4;
+    if(Math.random()<pr){const t=sAt(x)+rand(-25,18)*60000;recordAttendance(g,x,t,'scan');state.scans.unshift({t,type:'ok',gid:g.id,name:g.name,code:g.code,gate:sName(x),sid:x.id,synced:!ui.offline});n++}
+  });
+  if(!silent){state.log.sort((a,b)=>b.t-a.t);state.scans.sort((a,b)=>b.t-a.t);commit();toast(`${sName(x)}: ${n} guests checked in`)}
+  return n;
 }
+function simulateDay(d){
+  if(!state.guests.some(g=>g.rsvp==='accepted')){toast('No confirmed guests yet — send invitations and simulate replies first');return}
+  let n=0;state.sessions.filter(x=>x.day===d).forEach(x=>n+=simulateSession(x,true));
+  state.log.sort((a,b)=>b.t-a.t);state.scans.sort((a,b)=>b.t-a.t);commit();toast(`Day ${d} simulated: ${n} session check-ins`);
+}
+function setOffline(off){
+  ui.offline=off;
+  if(!off){let n=0;state.scans.forEach(x=>{if(x.synced===false){x.synced=true;n++}});state.guests.forEach(g=>{if(g.att)Object.values(g.att).forEach(a=>a.synced=true)});commit();toast(n?`Back online — ${n} scans synced to the server`:'Back online — everything is in sync')}
+  else{render();toast('Offline mode: scanning keeps working, scans are saved on this device')}
+}
+
+/* ============ Certificate ============ */
+const certCache=new Map();
+const certId=g=>'KC-'+g.code.slice(3);
+function drawCert(g,W=1600){
+  const H=Math.round(W/1.414),k=W/1600,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+  x.scale(k,k);const w=1600,h=1131,cx=w/2,E=state.event,C=E.cert;
+  x.fillStyle='#fff';x.fillRect(0,0,w,h);
+  const gr=x.createLinearGradient(0,0,w,h);gr.addColorStop(0,'#5a5a5a');gr.addColorStop(.35,'#e9e9e9');gr.addColorStop(.6,'#8a8a8a');gr.addColorStop(1,'#d0d0d0');
+  x.fillStyle='#0a0a0a';x.fillRect(0,0,w,26);x.fillRect(0,h-26,w,26);x.fillRect(0,0,26,h);x.fillRect(w-26,0,26,h);
+  x.strokeStyle=gr;x.lineWidth=3;x.strokeRect(52,52,w-104,h-104);
+  x.strokeStyle='#0a0a0a';x.lineWidth=1;x.strokeRect(64,64,w-128,h-128);
+  [[64,64],[w-64,64],[64,h-64],[w-64,h-64]].forEach(([a,b])=>{x.fillStyle='#0a0a0a';x.fillRect(a-9,b-9,18,18)});
+  drawLogo(x,cx-46,104,92,'#0a0a0a');
+  x.textAlign='center';x.textBaseline='alphabetic';
+  const sp=(t,y,font,col,ls)=>{x.font=font;x.fillStyle=col;if('letterSpacing' in x){x.letterSpacing=ls+'px';x.fillText(t,cx+ls/2,y);x.letterSpacing='0px'}else x.fillText(t.split('').join(' '),cx,y)};
+  sp((C.title||'Certificate of Attendance').toUpperCase(),290,'800 44px Montserrat, Arial, sans-serif','#0a0a0a',10);
+  x.fillStyle=gr;x.fillRect(cx-160,318,320,3);
+  x.fillStyle='#6b6b6b';x.font='400 25px Inter, Arial, sans-serif';x.fillText('This is to certify that',cx,384);
+  let fs=74;x.font=`800 ${fs}px Montserrat, Arial, sans-serif`;while(x.measureText(g.name).width>1180&&fs>40){fs-=2;x.font=`800 ${fs}px Montserrat, Arial, sans-serif`}
+  x.fillStyle='#0a0a0a';x.fillText(g.name,cx,478);
+  x.fillStyle=gr;x.fillRect(cx-440,505,880,2);
+  x.fillStyle='#6b6b6b';x.font='400 25px Inter, Arial, sans-serif';x.fillText(`has attended all ${state.sessions.length} sessions of`,cx,566);
+  x.fillStyle='#0a0a0a';x.font='700 40px Montserrat, Arial, sans-serif';x.fillText(E.name,cx,625);
+  x.fillStyle='#555';x.font='400 23px Inter, Arial, sans-serif';x.fillText(`${eventDates(false)} · ${E.venue}`,cx,668);
+  const n=state.sessions.length,bw=300,gap=24,tot=n*bw+(n-1)*gap;let bx=cx-tot/2;
+  state.sessions.forEach(ses=>{
+    const a=g.att&&g.att[ses.id];
+    x.strokeStyle='#d6d6d6';x.lineWidth=1.5;x.strokeRect(bx,712,bw,92);
+    x.fillStyle=a?'#0a0a0a':'#e5e5e5';x.beginPath();x.arc(bx+40,758,17,0,7);x.fill();
+    if(a){x.strokeStyle='#fff';x.lineWidth=4;x.beginPath();x.moveTo(bx+31,758);x.lineTo(bx+38,766);x.lineTo(bx+50,750);x.stroke()}
+    x.textAlign='left';x.fillStyle='#0a0a0a';x.font='700 21px Montserrat, Arial, sans-serif';x.fillText(sName(ses),bx+70,752);
+    x.fillStyle='#777';x.font='400 17px Inter, Arial, sans-serif';x.fillText(`${fmtDate(ses.date)} · ${ses.time}`,bx+70,780);x.textAlign='center';
+    bx+=bw+gap;
+  });
+  if(C.hours){x.fillStyle='#0a0a0a';x.font='600 23px Inter, Arial, sans-serif';x.fillText(`Awarded ${C.hours} CME credit hours`,cx,862)}
+  const sig=(lx,label)=>{x.strokeStyle='#0a0a0a';x.lineWidth=1.5;x.beginPath();x.moveTo(lx-170,975);x.lineTo(lx+170,975);x.stroke();x.fillStyle='#555';x.font='500 20px Inter, Arial, sans-serif';x.fillText(label||'',lx,1006)};
+  sig(400,C.signer1);sig(w-400,C.signer2);
+  const q=makeQR(`KODE-CERT|${E.eventId}|${certId(g)}`);
+  if(q){const m=q.getModuleCount(),cs=Math.floor(118/m),qs=cs*m,qx=cx-qs/2,qy=900;x.fillStyle='#000';for(let r=0;r<m;r++)for(let cc=0;cc<m;cc++)if(q.isDark(r,cc))x.fillRect(qx+cc*cs,qy+r*cs,cs,cs)}
+  x.fillStyle='#8a8a8a';x.font='500 16px Inter, Arial, sans-serif';x.fillText(`Certificate ID ${certId(g)} · Scan to verify · Issued by ${E.sender} via KODE`,cx,1062);
+  return c;
+}
+function certSrc(g,W=1000){const key=[g.id,g.name,W,JSON.stringify(state.event.cert),state.event.name,state.event.venue,JSON.stringify(state.sessions),JSON.stringify(g.att||{})].join('|');if(!certCache.has(key)){if(certCache.size>60)certCache.clear();certCache.set(key,drawCert(g,W).toDataURL('image/jpeg',.9))}return certCache.get(key)}
 
 /* ============ Pass image ============ */
 function drawLogo(x,X,Y,S,color='#fff'){
@@ -925,8 +1074,8 @@ $('#modalBg').addEventListener('click',e=>{if(e.target.id==='modalBg')closeModal
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 
 function calLinks(code){
-  const e=state.event,st=new Date(`${e.date}T${e.time||'19:00'}`);if(isNaN(st))return{g:'#',o:'#'};
-  const en=new Date(st.getTime()+3*3600e3),P=n=>String(n).padStart(2,'0');
+  const e=state.event,ss=[...state.sessions].sort((a,b)=>sAt(a)-sAt(b)),st=new Date(ss.length?sAt(ss[0]):`${e.date}T${e.time||'19:00'}`);if(isNaN(st))return{g:'#',o:'#'};
+  const en=new Date((ss.length?sAt(ss[ss.length-1]):st.getTime())+3*3600e3),P=n=>String(n).padStart(2,'0');
   const f=d=>`${d.getFullYear()}${P(d.getMonth()+1)}${P(d.getDate())}T${P(d.getHours())}${P(d.getMinutes())}00`;
   const iso=d=>`${d.getFullYear()}-${P(d.getMonth()+1)}-${P(d.getDate())}T${P(d.getHours())}:${P(d.getMinutes())}:00`;
   const E=encodeURIComponent,det=E(`Your KODE pass: ${code||''}`);
@@ -957,14 +1106,15 @@ function setBannerFromFile(file){
   img.onerror=()=>{URL.revokeObjectURL(u);toast('Couldn’t read that image')};
   img.src=u;
 }
-const EMAIL_KIND={invite:'invite',reminder:'reminder','auto-accept':'confirm','auto-decline':'decline'};
+const EMAIL_KIND={certificate:'certificate',invite:'invite',reminder:'reminder','auto-accept':'confirm','auto-decline':'decline'};
 const paras=t=>esc(t).split(/\n{2,}/).map(x=>`<p>${x.replace(/\n/g,'<br>')}</p>`).join('');
 function emDetails(){const e=state.event;return`<table class="em-det">
-  <tr><td>Date</td><td><b>${esc(fmtDateLong(e.date))}</b></td></tr>
-  <tr><td>Time</td><td>${esc(e.time)} — doors open</td></tr>
+  <tr><td>Dates</td><td><b>${esc(eventDates())}</b></td></tr>
+  <tr><td>Registration</td><td>Opens 30 minutes before each session</td></tr>
   <tr><td>Venue</td><td>${esc(e.venue)}</td></tr>
   ${e.dress?`<tr><td>Dress code</td><td>${esc(e.dress)}</td></tr>`:''}</table>`}
-function emPass(name,code,label){return`<div class="em-pass"><div class="em-qr">${qrSvg(`KODE|${state.event.eventId}|${code}`)}</div><div><div class="em-lbl">${esc(label)}</div><div class="em-pn">${esc(name)}</div><div class="em-code">${code}</div><div class="em-small">Show this code at the entrance for instant check-in. Valid for one entry.</div></div></div>`}
+function emPass(name,code,label){return`<div class="em-pass"><div class="em-qr">${qrSvg(`KODE|${state.event.eventId}|${code}`)}</div><div><div class="em-lbl">${esc(label)}</div><div class="em-pn">${esc(name)}</div><div class="em-code">${code}</div><div class="em-small">One code for every session — it\u2019s scanned at the entrance of each conference and workshop.</div></div></div>`}
+function emProgramme(){if(!state.sessions.length)return'';const C=state.event.cert;return`<div class="em-prog"><div class="em-lbl" style="margin-bottom:6px">Programme</div>${state.sessions.map(x=>`<div class="em-ps"><b>${esc(sName(x))}</b><span>${esc(fmtDate(x.date))} · ${esc(x.time)} · ${esc(x.room)}</span></div>`).join('')}${C&&C.enabled?`<div class="em-certnote">🎓 Attend all ${state.sessions.length} sessions to receive your certificate of attendance${C.hours?` (${C.hours} CME hours)`:''}.</div>`:''}</div>`}
 const rsvpAttr=(g,v,I)=>I?`data-action="rsvp-start" data-id="${g.id}" data-v="${v}"`:'';
 function emCal(g){const c=calLinks(g.code);return`<div class="em-cal">Add to calendar: <a href="${c.g}" target="_blank" rel="noopener">Google</a> · <a href="${c.o}" target="_blank" rel="noopener">Outlook</a></div>`}
 function emFoot(g){return`<div class="em-foot">${logo()}<div>${esc(state.event.sender)} · ${esc(state.event.venue)}<br>This invitation is personal to ${esc(g.name)} and is non-transferable.<br><a>Unsubscribe</a> · <a>Privacy policy</a></div></div>`}
@@ -975,20 +1125,23 @@ function renderEmail(kind,g,opt={}){
     hero=`<div class="em-hero"><div class="em-eyebrow">${kind==='invite'?'You’re invited':'Friendly reminder'}</div><h1>${esc(e.name)}</h1>${e.tagline?`<p>${esc(e.tagline)}</p>`:''}</div>`;
     const rs=g.rsvp?`<div class="em-status ${g.rsvp}">${g.rsvp==='accepted'?`✓ You’re attending${g.plusOne?` with ${esc(g.plusOne.name)}`:''}`:'You’ve let us know you can’t make it'}${I?` · <a ${rsvpAttr(g,g.rsvp,I)}>Change response</a>`:''}</div>`
       :`<div class="em-rsvp"><div class="em-q">Will you be joining us?</div><div class="em-btns"><a class="em-yes" ${rsvpAttr(g,'accepted',I)}>Yes, I’ll be there</a><a class="em-no" ${rsvpAttr(g,'declined',I)}>Sorry, I can’t make it</a></div><div class="em-small">${e.rsvpBy?`Kindly respond by ${esc(fmtDateLong(e.rsvpBy))}.`:''}${allow?' You’re welcome to bring a +1 — you can add them when you respond.':''}</div></div>`;
-    body=`<p>Dear ${esc(first)},</p>${paras(fill(kind==='invite'?state.tpl.body:state.tpl.reminder,g))}${emDetails()}${rs}${emPass(g.name,g.code,'Your personal pass')}${emCal(g)}<p class="em-sign">Warm regards,<br><b>${esc(e.sender)}</b></p>`;
+    body=`<p>Dear ${esc(first)},</p>${paras(fill(kind==='invite'?state.tpl.body:state.tpl.reminder,g))}${emDetails()}${emProgramme()}${rs}${emPass(g.name,g.code,'Your personal pass')}${emCal(g)}<p class="em-sign">Warm regards,<br><b>${esc(e.sender)}</b></p>`;
   }else if(kind==='confirm'){
     hero=`<div class="em-hero"><div class="em-badge">✓</div><div class="em-eyebrow">RSVP confirmed</div><h1>See you there, ${esc(first)}</h1><p>${esc(e.name)} · ${esc(fmtDateLong(e.date))}</p></div>`;
     body=`<p>Dear ${esc(first)},</p>${paras(fill(state.tpl.accept,g))}${g.plusOne?`<p>Your +1, <b>${esc(g.plusOne.name)}</b>, has their own pass below — feel free to forward it to them${g.plusOne.email?` (we’ve also sent it to ${esc(g.plusOne.email)})`:''}.</p>`:''}
       <div class="em-passes">${emPass(g.name,g.code,g.plusOne?'Guest':'Your pass')}${g.plusOne?emPass(g.plusOne.name,g.plusOne.code,'Plus one'):''}</div>
-      ${emDetails()}
-      <div class="em-expect"><b>Good to know</b><ul><li>Doors open at ${esc(e.time)}.</li><li>Have your QR ready on your phone — no need to print.</li><li>Each pass is valid for one entry.</li>${g.dietary?`<li>We’ve noted your dietary requirement: ${esc(g.dietary)}.</li>`:''}</ul></div>
+      ${emDetails()}${emProgramme()}
+      <div class="em-expect"><b>Good to know</b><ul><li>Registration opens 30 minutes before each session.</li><li>Have your QR ready on your phone, or use the printed badge you\u2019ll receive on Day 1.</li><li>The same QR is scanned at the entrance of every session.</li><li>Your certificate is emailed after Day 2 once all ${state.sessions.length} sessions are recorded.</li>${g.dietary?`<li>We’ve noted your dietary requirement: ${esc(g.dietary)}.</li>`:''}</ul></div>
       <div class="em-btns"><a class="em-yes" href="${calLinks(g.code).g}" target="_blank" rel="noopener">Add to calendar</a><a class="em-no" ${rsvpAttr(g,'accepted',I)}>Update RSVP</a></div>
       <p class="em-sign">See you soon,<br><b>${esc(e.sender)}</b></p>`;
+  }else if(kind==='certificate'){
+    hero=`<div class="em-hero"><div class="em-badge">🎓</div><div class="em-eyebrow">Certificate of attendance</div><h1>Congratulations, ${esc(first)}</h1><p>${esc(e.name)} · ${esc(eventDates(false))}</p></div>`;
+    body=`<p>Dear ${esc(first)},</p>${paras(fill(state.tpl.cert,g))}<div class="em-attach">📎 Certificate-${esc(g.name.replace(/[^\w]+/g,'-'))}.pdf</div><div class="em-cert"><img src="${certSrc(g,900)}" alt="Certificate"></div><b>Sessions attended</b><ul class="em-done">${state.sessions.filter(x=>g.att&&g.att[x.id]).map(x=>`<li>${esc(sName(x))} — ${esc(fmtDate(x.date))}, scanned ${fmtTime(g.att[x.id].t)}</li>`).join('')}</ul>${e.cert.hours?`<p><b>${e.cert.hours} CME credit hours</b> have been recorded for your attendance.</p>`:''}<p class="em-small">Certificate ID ${certId(g)} — scan the QR on the certificate to verify it.</p><p class="em-sign">With thanks,<br><b>${esc(e.sender)}</b></p>`;
   }else{
     hero=`<div class="em-hero"><div class="em-eyebrow">RSVP received</div><h1>We’ll miss you, ${esc(first)}</h1><p>${esc(e.name)} · ${esc(fmtDateLong(e.date))}</p></div>`;
     body=`<p>Dear ${esc(first)},</p>${paras(fill(state.tpl.decline,g))}<div class="em-btns"><a class="em-no" ${rsvpAttr(g,'accepted',I)}>Changed your mind? Update RSVP</a></div><p class="em-sign">Warm regards,<br><b>${esc(e.sender)}</b></p>`;
   }
-  const label={invite:'Private invitation',reminder:'Reminder',confirm:'Confirmation',decline:'RSVP received'}[kind];
+  const label={invite:'Invitation',reminder:'Reminder',confirm:'Confirmation',decline:'RSVP received',certificate:'Certificate'}[kind];
   const bsrc=bannerSrc(e.banner),showB=bsrc&&(kind==='invite'||kind==='reminder'||(kind==='confirm'&&e.bannerConfirm));
   return`<div class="em"><div class="em-head">${logo()}<span>${label}</span></div>${showB?`<img class="em-banner" src="${bsrc}" alt="${esc(e.name)}">`:''}${hero}<div class="em-body">${body}</div>${emFoot(g)}</div>`;
 }
@@ -1054,18 +1207,20 @@ function openAddGuest(){
 
 /* ============ Views ============ */
 const VIEWS={
-  dashboard:{t:'Dashboard',s:()=>`${state.event.name} · ${fmtDate(state.event.date)}`,ic:'dash',r:vDashboard},
+  dashboard:{t:'Dashboard',n:'Home',s:()=>`${state.event.name} · ${fmtDate(state.event.date)}`,ic:'dash',r:vDashboard},
   guests:{t:'Guests',s:()=>`${state.guests.length} on the list · import from Excel or CSV`,ic:'users',r:vGuests},
-  invitations:{t:'Invitations',s:()=>'Event details, message templates, auto-replies and sending',ic:'send',r:vInvites},
-  'guest-view':{t:'Guest experience',n:'Guest view',s:()=>'Exactly what your guest sees — invitation, RSVP with +1, auto-reply, check-in',ic:'mail',r:vGuestView},
-  messages:{t:'Messages',s:()=>'Every invitation, reminder and auto-reply sent',ic:'inbox',r:vMessages},
-  scanner:{t:'Scanner',s:()=>'Check guests in at the door',ic:'scan',r:vScanner},
+  invitations:{t:'Invitations',n:'Invite',s:()=>'Event details, message templates, auto-replies and sending',ic:'send',r:vInvites},
+  'guest-view':{t:'Guest experience',n:'Guest view',s:()=>'Exactly what your guest sees — invitation, RSVP, auto-reply, session check-ins, certificate',ic:'mail',r:vGuestView},
+  messages:{t:'Messages',n:'Inbox',s:()=>'Every invitation, reminder and auto-reply sent',ic:'inbox',r:vMessages},
+  scanner:{t:'Scanner',s:()=>'One QR per guest — pick the session, scan at the door',ic:'scan',r:vScanner},
+  attendance:{t:'Attendance',n:'Attend',s:()=>`Who attended which session · ${state.sessions.length} sessions, strict ${state.sessions.length}/${state.sessions.length} for the certificate`,ic:'check',r:vAttendance},
+  certificates:{t:'Certificates',n:'Certs',s:()=>'Issued automatically to guests who attended every session',ic:'award',r:vCertificates},
   reports:{t:'Reports',s:()=>`Live report · generated ${fmtDT(now())}`,ic:'chart',r:vReports}
 };
 function cur(){const h=location.hash.slice(1);return VIEWS[h]?h:'dashboard'}
 function render(){
   const v=cur(),s=stats();
-  const badges={guests:s.total||'',messages:state.outbox.length||'',scanner:s.checkedAll?`${s.checkedAll}`:''};
+  const badges={guests:s.total||'',messages:state.outbox.length||'',certificates:s.eligible||''};
   $('#nav').innerHTML=Object.entries(VIEWS).map(([k,o])=>`<a href="#${k}" class="${k===v?'on':''}">${ic(o.ic,'ico')}<span class="lbl">${o.n&&innerWidth<860?o.n:o.t}</span>${badges[k]?`<span class="badge">${badges[k]}</span>`:''}</a>`).join('');
   const days=Math.ceil((new Date(state.event.date+'T'+(state.event.time||'00:00'))-now())/864e5);
   $('#sideEvent').innerHTML=`<div class="lbl">Current event</div><div class="nm">${esc(state.event.name)}</div><div class="dt">${esc(fmtDate(state.event.date))} · ${esc(state.event.time)}</div><div class="dt muted" style="font-size:12px">${esc(state.event.venue)}</div><div class="cd">${isNaN(days)?'':days>0?`<b>${days}</b> days to go`:days===0?'<b>Today</b>':'Event passed'} · <b>${s.accepted}</b> confirmed</div>`;
@@ -1076,6 +1231,7 @@ function render(){
 }
 function topActs(v,s){
   if(v==='guests')return`<button class="btn" data-action="template">${ic('file')} Excel template</button><button class="btn" data-action="add-guest">${ic('plus')} Add guest</button><button class="btn pri" data-action="import">${ic('upload')} Import Excel</button>`;
+  if(v==='attendance')return`<button class="btn" data-action="sim-day" data-v="1">${ic('bolt')} Simulate Day 1</button><button class="btn" data-action="sim-day" data-v="2">${ic('bolt')} Simulate Day 2</button><button class="btn pri" data-action="export-xlsx">${ic('download')} Export attendance</button>`;
   if(v==='reports')return`<button class="btn" data-action="copy-summary">${ic('copy')} Copy summary</button><button class="btn" data-action="export-csv">${ic('download')} CSV</button><button class="btn pri" data-action="export-xlsx">${ic('download')} Export Excel report</button>`;
   if(v==='dashboard'&&s.total)return`<button class="btn ghost" data-action="reset">${ic('reset')} Reset demo</button><a class="btn" href="#scanner">${ic('scan')} Open scanner</a><a class="btn pri" href="#invitations">${ic('send')} Send invitations</a>`;
   return'';
@@ -1086,43 +1242,45 @@ function vDashboard(s){
   <div class="card hero">
     <div>
       <div class="eyebrow">QR Invitation & Access System</div>
-      <h2>Turn a spreadsheet into a guest list that <em>checks itself in.</em></h2>
-      <p>Upload an Excel sheet of names, emails and numbers. KODE issues every guest a unique QR pass, sends the invitation, auto-replies the moment they RSVP, and tracks them all the way through the door — with a live report at the end.</p>
+      <h2>From a spreadsheet to <em>certified attendance.</em></h2>
+      <p>Upload an Excel sheet of attendees. KODE issues each guest one QR pass, sends the invitation, auto-replies when they RSVP, scans them into every conference and workshop, and issues certificates automatically to everyone who attended all four sessions.</p>
       <div class="row"><button class="btn pri" data-action="import">${ic('upload')} Import Excel / CSV</button><button class="btn" data-action="load-sample">${ic('bolt')} Load sample guests</button><button class="btn ghost" data-action="template">${ic('file')} Get the Excel template</button></div>
     </div>
     <div class="hero-art">${logo('logo-big')}<div class="mini-qr">${qrSvg('KODE|DEMO|KD-HELO-2026')}</div></div>
   </div>
   <div class="grid g4 steps mt">
-    ${[['01','Import','Drop an Excel or CSV. Columns are detected automatically; duplicates and bad emails are flagged.'],['02','Invite','Personalised email + WhatsApp invitations, each carrying the guest’s own QR pass.'],['03','Auto-reply','Guests RSVP in one tap, add a +1, and instantly get a confirmation with their QR passes.'],['04','Scan & report','Scan passes at the door, block duplicates, and export a full Excel report.']].map(x=>`<div class="card"><div class="n">${x[0]}</div><b>${x[1]}</b><p>${x[2]}</p></div>`).join('')}
+    ${[['01','Import','Drop an Excel or CSV. Columns are detected automatically; duplicates and bad emails are flagged.'],['02','Invite','Personalised email + WhatsApp invitations, each carrying the guest’s own QR pass.'],['03','Auto-reply','Guests RSVP in one tap and instantly get a confirmation with their QR pass and the programme.'],['04','Scan & certify','The same pass is scanned at each session. Guests who attend all four get their certificate automatically.']].map(x=>`<div class="card"><div class="n">${x[0]}</div><b>${x[1]}</b><p>${x[2]}</p></div>`).join('')}
   </div>`;
-  const funnel=[['Imported',s.total],['Delivered',s.delivered],['Opened',s.openedAll],['Confirmed',s.accepted],['Checked in',s.checkedAll]];
+  const funnel=[['Imported',s.total],['Delivered',s.delivered],['Opened',s.openedAll],['Confirmed',s.accepted],['Attended 1+',s.checkedAll],['All sessions',s.eligible]];
   const tiles=[];
   if(s.pending)tiles.push(`<div class="tile">${ic('send')}<div class="tx"><b>${s.pending} guests not invited yet</b><span class="muted">Send them their QR invitation</span></div><button class="btn sm pri" data-action="send-all">Send</button></div>`);
   if(s.noRsvp)tiles.push(`<div class="tile">${ic('bell')}<div class="tx"><b>${s.noRsvp} awaiting RSVP</b><span class="muted">Nudge them with a reminder</span></div><button class="btn sm" data-action="remind">Remind</button></div>`);
   if(s.noRsvp)tiles.push(`<div class="tile">${ic('bolt')}<div class="tx"><b>Demo: simulate guest replies</b><span class="muted">Opens + RSVPs trigger auto-replies</span></div><button class="btn sm" data-action="simulate-responses">Simulate</button></div>`);
   if(s.invalid)tiles.push(`<div class="tile">${ic('alert')}<div class="tx"><b>${s.invalid} invalid emails</b><span class="muted">They’ll only get WhatsApp/SMS</span></div><a class="btn sm" href="#guests">Review</a></div>`);
-  if(s.accepted>s.checkedAll)tiles.push(`<div class="tile">${ic('scan')}<div class="tx"><b>${s.accepted-s.checkedAll} confirmed, not arrived</b><span class="muted">Open the door scanner</span></div><a class="btn sm" href="#scanner">Scanner</a></div>`);
-  tiles.unshift(`<div class="tile">${ic('mail')}<div class="tx"><b>See what guests receive</b><span class="muted">Invitation, RSVP with +1, auto-reply</span></div><a class="btn sm pri" href="#guest-view">Open</a></div>`);
+  
+  if(s.accepted&&!s.checkedAll)tiles.push(`<div class="tile">${ic('bolt')}<div class="tx"><b>Demo: run the conference</b><span class="muted">Simulate Day 1 and Day 2 check-ins</span></div><a class="btn sm" href="#attendance">Attendance</a></div>`);
+  if(s.eligible>s.certSent)tiles.unshift(`<div class="tile">${ic('award')}<div class="tx"><b>${s.eligible-s.certSent} certificates ready</b><span class="muted">Guests who attended all ${state.sessions.length} sessions</span></div><a class="btn sm pri" href="#certificates">Send</a></div>`);
+  tiles.unshift(`<div class="tile">${ic('mail')}<div class="tx"><b>See what guests receive</b><span class="muted">Invitation → RSVP → sessions → certificate</span></div><a class="btn sm pri" href="#guest-view">Open</a></div>`);
   if(!tiles.length)tiles.push(`<div class="tile">${ic('chart')}<div class="tx"><b>All caught up</b><span class="muted">Export the full report</span></div><a class="btn sm" href="#reports">Reports</a></div>`);
-  const att=pct(s.arrivedTotal,s.headcount),C=2*Math.PI*52;
+  const att=pct(s.eligible,s.accepted),C=2*Math.PI*52;
   return`
   <div class="grid g6">
     ${kpi('Guests',s.total,`${s.invalid} need attention`,100)}
     ${kpi('Delivered',s.delivered,`of ${s.sent} sent · ${s.bounced} bounced`,pct(s.delivered,s.total))}
     ${kpi('Opened',s.openedAll,`${pct(s.openedAll,s.delivered)}% open rate`,pct(s.openedAll,s.total))}
-    ${kpi('Confirmed',s.accepted,`+${s.plusOnes} plus-ones · ${s.autoreplies} auto-replies`,pct(s.accepted,s.total))}
+    ${kpi('Confirmed',s.accepted,`${s.autoreplies} auto-replies sent`,pct(s.accepted,s.total))}
     ${kpi('Declined',s.declinedAll,`${s.noRsvp} still pending`,pct(s.declinedAll,s.total))}
-    ${kpi('Checked in',s.arrivedTotal,`of ${s.headcount} expected (incl. +1s)`,pct(s.arrivedTotal,s.headcount))}
+    ${kpi('Certificate eligible',s.eligible,`${pct(s.eligible,s.accepted)}% of confirmed · ${s.certSent} sent`,pct(s.eligible,s.accepted))}
   </div>
   <div class="grid g-main mt">
     <div class="card"><h3>Invitation funnel<span class="sub">from import to the door</span></h3><div class="bars">${funnel.map(([t,n])=>barRow(t,n,s.total)).join('')}</div></div>
-    <div class="card"><h3>Attendance</h3>
+    <div class="card"><h3>Certificates<span class="sub">strict ${state.sessions.length}/${state.sessions.length}</span></h3>
       <div class="ring-wrap">
         <svg class="ring" viewBox="0 0 132 132"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".5" stop-color="#8e8e8e"/><stop offset="1" stop-color="#e8e8e8"/></linearGradient></defs>
           <circle cx="66" cy="66" r="52" fill="none" stroke="#1e1e1e" stroke-width="12"/>
           <circle cx="66" cy="66" r="52" fill="none" stroke="url(#rg)" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C*att/100} ${C}" transform="rotate(-90 66 66)"/>
-          <text x="66" y="68" text-anchor="middle" class="big">${att}%</text><text x="66" y="86" text-anchor="middle" class="sm">ARRIVED</text></svg>
-        <div class="legend" style="flex:1"><div><span class="muted">Expected headcount</span><b>${s.headcount}</b></div><div><span class="muted">Plus-ones</span><b>${s.plusOnes}</b></div><div><span class="muted">Checked in</span><b>${s.arrivedTotal}</b></div><div><span class="muted">Yet to arrive</span><b>${Math.max(0,s.headcount-s.arrivedTotal)}</b></div><div><span class="muted">Walk-ins (no RSVP)</span><b>${state.guests.filter(g=>g.checkedInAt&&g.rsvp!=='accepted').length}</b></div></div>
+          <text x="66" y="68" text-anchor="middle" class="big">${att}%</text><text x="66" y="86" text-anchor="middle" class="sm">ELIGIBLE</text></svg>
+        <div class="legend" style="flex:1">${state.sessions.map((x,i)=>`<div><span class="muted">${esc(sName(x))}</span><b>${s.sess[i]}</b></div>`).join('')}<div><span class="muted">All ${state.sessions.length} sessions</span><b>${s.eligible}</b></div></div>
       </div>
     </div>
   </div>
@@ -1133,7 +1291,7 @@ function vDashboard(s){
 }
 const kpi=(l,v,s,w)=>`<div class="card kpi"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s}</div><div class="bar" style="width:${w}%"></div></div>`;
 const barRow=(t,n,tot)=>`<div class="bar-row"><span class="t">${t}</span><div class="track"><div class="fill" style="width:${pct(n,tot)}%"></div></div><span class="n">${n}<span>${pct(n,tot)}%</span></span></div>`;
-const LOGIC={import:'upload',invite:'send',reminder:'bell',auto:'reply',rsvp:'check',open:'eye',checkin:'door'};
+const LOGIC={cert:'award',certificate:'award',import:'upload',invite:'send',reminder:'bell',auto:'reply',rsvp:'check',open:'eye',checkin:'door'};
 function feed(items){if(!items.length)return`<div class="empty">No activity yet.</div>`;return`<div class="feed">${items.map(l=>`<div class="it"><div class="dot">${ic(LOGIC[l.type]||'info')}</div><div>${l.gid?`<a href="#" data-action="view" data-id="${l.gid}" style="text-decoration:none">${esc(l.text)}</a>`:esc(l.text)}</div><span class="tm">${ago(l.t)}</span></div>`).join('')}</div>`}
 
 function vGuests(s){
@@ -1148,20 +1306,21 @@ function vGuests(s){
     <span class="muted" style="margin-left:auto;font-size:12.5px">${list.length} shown</span>
   </div>
   <div class="tbl-wrap"><table>
-    <thead><tr><th>Guest</th><th>Email</th><th>Phone</th><th>QR pass</th><th>Status</th><th>Last update</th><th></th></tr></thead>
+    <thead><tr><th>Guest</th><th>Email</th><th>Phone</th><th>QR pass</th><th>Status</th><th>Sessions</th><th>Last update</th><th></th></tr></thead>
     <tbody>${list.map(g=>{const st=status(g),lu=Math.max(g.checkedInAt||0,g.rsvpAt||0,g.openedAt||0,g.sentAt||0,g.addedAt||0);return`<tr>
       <td class="gname"><b>${esc(g.name)}${g.plusOne?`<span class="plus" title="+1: ${esc(g.plusOne.name)}">+1</span>`:''}</b><small>${esc(g.company||'')}${g.plusOne?` · +1 ${esc(g.plusOne.name)}`:''}</small></td>
       <td>${esc(g.email||'—')}${g.emailValid?'':'<span class="warn-txt">Invalid email</span>'}</td>
       <td style="white-space:nowrap">${esc(g.phone||'—')}</td>
       <td><span class="code">${g.code}</span></td>
       <td>${pill(st)}</td>
+      <td>${dots(g)}</td>
       <td class="muted" style="white-space:nowrap">${ago(lu)}</td>
       <td><div class="acts-cell">
         <button class="iconbtn" title="View pass & invitation" data-action="view" data-id="${g.id}">${ic('qr')}</button>
         <button class="iconbtn" title="${g.sentAt?'Resend':'Send'} invitation" data-action="send-one" data-id="${g.id}">${ic('send')}</button>
         ${g.checkedInAt?'':`<button class="iconbtn" title="Check in manually" data-action="checkin" data-id="${g.id}">${ic('door')}</button>`}
         <button class="iconbtn" title="Remove" data-action="delete" data-id="${g.id}">${ic('trash')}</button>
-      </div></td></tr>`}).join('')||`<tr><td colspan="7" class="empty">No guests match.</td></tr>`}</tbody>
+      </div></td></tr>`}).join('')||`<tr><td colspan="8" class="empty">No guests match.</td></tr>`}</tbody>
   </table></div>
   <div class="drop mt" id="dropImport" data-action="import" style="padding:18px"><p style="margin:0">${ic('upload','')} Drop another Excel / CSV here to add more guests — duplicates are skipped automatically.</p></div>`;
 }
@@ -1213,6 +1372,13 @@ function vInvites(s){
         <div class="row"><span class="muted" style="font-size:12px">${ui.tplTab==='accept'?'Sent automatically the moment a guest taps “I’ll attend”. Includes their QR pass.':ui.tplTab==='decline'?'Sent automatically when a guest taps “Can’t make it”.':ui.tplTab==='reminder'?'Sent to guests who haven’t RSVP’d when you click Remind.':'Every invitation includes the guest’s personal QR pass and RSVP buttons.'}</span><button class="btn sm ghost" data-action="tpl-reset" style="margin-left:auto">${ic('reset')} Reset</button></div>
       </div>
 
+      <div class="card mt">
+        <h3>${ic('dash')} Programme<span class="sub">each session is scanned separately</span></h3>
+        <div class="tbl-wrap"><table><thead><tr><th>Session</th><th>Date</th><th>Time</th><th>Room</th></tr></thead><tbody>
+        ${state.sessions.map(x=>`<tr><td><b>${esc(sName(x))}</b></td><td><input class="input sesf" type="date" data-id="${x.id}" data-k="date" value="${esc(x.date)}"></td><td><input class="input sesf" type="time" data-id="${x.id}" data-k="time" value="${esc(x.time)}"></td><td><input class="input sesf" data-id="${x.id}" data-k="room" value="${esc(x.room)}"></td></tr>`).join('')}
+        </tbody></table></div>
+      </div>
+
       <div class="grid g2 mt">
         <div class="card">
           <h3>Event</h3>
@@ -1255,35 +1421,44 @@ function vMessages(){
   const cnt=k=>state.outbox.filter(m=>k==='auto'?m.kind.startsWith('auto'):k==='bounced'?m.status==='bounced':m.kind===k).length;
   if(!state.outbox.length)return`<div class="card empty">${ic('inbox')}<p>No messages yet. <a href="#invitations">Send your invitations</a> to see them here.</p></div>`;
   const chI={email:'mail',whatsapp:'wa',sms:'sms'};
-  return`<div class="tabs" style="display:inline-flex">${[['all','All',state.outbox.length],['invite','Invitations',cnt('invite')],['auto','Auto-replies',cnt('auto')],['reminder','Reminders',cnt('reminder')],['bounced','Bounced',cnt('bounced')]].map(([k,l,n])=>`<button data-action="msg-f" data-k="${k}" class="${f===k?'on':''}">${l} · ${n}</button>`).join('')}</div>
+  return`<div class="tabs" style="display:inline-flex">${[['all','All',state.outbox.length],['invite','Invitations',cnt('invite')],['auto','Auto-replies',cnt('auto')],['reminder','Reminders',cnt('reminder')],['certificate','Certificates',cnt('certificate')],['bounced','Bounced',cnt('bounced')]].map(([k,l,n])=>`<button data-action="msg-f" data-k="${k}" class="${f===k?'on':''}">${l} · ${n}</button>`).join('')}</div>
   <div class="tbl-wrap"><table><thead><tr><th>Time</th><th>Type</th><th>Recipient</th><th>Channel</th><th>Subject</th><th>Status</th></tr></thead><tbody>
   ${list.slice(0,400).map(m=>{const g=state.guests.find(x=>x.id===m.gid);return`<tr class="msg-row" data-action="msg" data-id="${m.id}"><td class="muted" style="white-space:nowrap">${fmtDT(m.t)}</td><td><span class="type ${m.kind.startsWith('auto')?'auto':''}">${esc(KIND[m.kind])}</span></td><td class="gname"><b>${esc(g?g.name:'(removed)')}</b><small>${esc(m.to)}</small></td><td><span class="ch">${ic(chI[m.channel])}${m.channel}</span></td><td>${esc(m.subject)}</td><td class="${m.status==='delivered'?'ok-t':'bad-t'}">${m.status}</td></tr>`}).join('')}
   </tbody></table></div>`;
 }
 
 function vScanner(s){
-  const r=ui.lastScan;
-  const resHtml=r?`<div class="result ${r.type}" id="scanResult"><div class="big-ic">${ic(r.type==='ok'?'check':r.type==='bad'?'x':'alert')}</div><h2>${esc(r.title)}</h2><p>${esc(r.sub)}</p><p class="muted" style="font-size:12px">${fmtTime(r.t)} · ${esc(r.gate||'')}</p>
+  const r=ui.lastScan,ses=curSession();
+  if(!ses)return`<div class="card empty">No sessions configured.</div>`;
+  const si=state.sessions.indexOf(ses);
+  const progHtml=r&&r.prog?`<div class="prog">${r.prog.map((b,i)=>`<span class="${b?'on':''} ${state.sessions[i].id===r.sid?'cur':''}">${b?'✓ ':''}${sShort(state.sessions[i])}</span>`).join('')}</div>`:'';
+  const resHtml=r?`<div class="result ${r.type}" id="scanResult"><div class="big-ic">${ic(r.type==='ok'?'check':r.type==='bad'?'x':'alert')}</div><h2>${esc(r.title)}</h2><p>${esc(r.sub)}</p>${progHtml}<p class="muted" style="font-size:12px;margin-top:8px">${fmtTime(r.t)} · ${esc(r.gate||'')}${ui.offline?' · saved offline':''}</p>
     <div class="row" style="justify-content:center;margin-top:8px">${r.override?`<button class="btn sm pri" data-action="override" data-id="${r.gid}">Allow entry</button>`:''}${r.gid?`<button class="btn sm" data-action="view" data-id="${r.gid}">${ic('eye')} Guest</button>`:''}</div></div>`
-    :`<div class="result" id="scanResult"><div class="big-ic" style="background:#161616;color:#ccc">${ic('qr')}</div><h2>Ready to scan</h2><p class="muted">Results appear here instantly.</p></div>`;
-  const recent=state.scans.slice(0,12);
+    :`<div class="result" id="scanResult"><div class="big-ic" style="background:#161616;color:#ccc">${ic('qr')}</div><h2>Ready · ${esc(sName(ses))}</h2><p class="muted">Every scan is recorded for this session.</p></div>`;
+  const recent=state.scans.slice(0,12),pend=state.scans.filter(x=>x.synced===false).length;
   return`
-  <div class="scanner">
+  <div class="card">
+    <div class="eyebrow" style="margin-bottom:10px">Scanning for</div>
+    <div class="sess-bar">${state.sessions.map((x,i)=>`<button class="sess ${x.id===ses.id?'on':''}" data-action="pick-session" data-id="${x.id}"><b>${esc(sName(x))}</b><small>${esc(fmtDate(x.date))} · ${esc(x.time)} · ${esc(x.room)}</small><div class="cnt">${s.sess[i]} / ${s.accepted} checked in</div></button>`).join('')}</div>
+    <div class="netbar"><span class="net ${ui.offline?'off':''}">${ui.offline?'Offline — scanning continues':'Online · synced'}</span><span>${ic('check')} Guest list cached on this device (${s.total} guests)</span>${pend?`<span style="color:var(--warn)">${pend} scans waiting to sync</span>`:''}<button class="btn sm ghost" data-action="toggle-offline" style="margin-left:auto">${ic('wifi')} ${ui.offline?'Reconnect':'Simulate no internet'}</button></div>
+  </div>
+  <div class="scanner mt">
     <div>
       <div class="viewfinder" id="vf" data-action="scan-upload">
         <div class="frame"><i></i><i></i><i></i><i></i></div><div class="laser"></div>
-        <div class="cta">${ic('scan','')}<b>Tap to scan a QR pass</b><small>Opens your camera on mobile · or drop a photo / screenshot here</small></div>
+        <div class="cta">${ic('scan','')}<b>Tap to scan a QR pass</b><small>${esc(sName(ses))} · opens your camera on mobile · or drop a photo here</small></div>
       </div>
       <div class="card mt">
         <div class="grid g2">
-          <div class="field" style="margin:0"><label>Gate</label><select class="input" id="gateSel">${['Main Gate','VIP Entrance','Gate B'].map(g=>`<option ${ui.gate===g?'selected':''}>${g}</option>`).join('')}</select></div>
+          <div class="field" style="margin:0"><label>Find guest (lost pass)</label><input class="input" id="findGuest" placeholder="Name, phone or email" value="${esc(ui.findQ)}" autocomplete="off"></div>
           <div class="field" style="margin:0"><label>Manual entry (pass code)</label><form id="manualForm" class="row" style="flex-wrap:nowrap"><input class="input mono" id="manualCode" placeholder="KD-XXXX-XXXX" autocomplete="off"><button class="btn pri" type="submit">Check</button></form></div>
         </div>
+        <div class="find-res" id="findRes">${findResults()}</div>
         <div class="row mt"><span class="eyebrow" style="margin-right:4px">Demo</span>
           <button class="btn sm" data-action="scan-demo" data-k="valid">Scan a confirmed guest</button>
-          <button class="btn sm" data-action="scan-demo" data-k="dup">Scan a used pass</button>
+          <button class="btn sm" data-action="scan-demo" data-k="dup">Scan same pass again</button>
           <button class="btn sm" data-action="scan-demo" data-k="bad">Scan a fake QR</button>
-          <button class="btn sm ghost" data-action="simulate-arrivals">${ic('bolt')} Simulate arrivals</button>
+          <button class="btn sm ghost" data-action="sim-session">${ic('bolt')} Fill this session</button>
         </div>
       </div>
     </div>
@@ -1291,12 +1466,91 @@ function vScanner(s){
       ${resHtml}
       <div class="card mt">
         <div class="row" style="justify-content:space-between;align-items:flex-end">
-          <div><div class="eyebrow">Inside now</div><div class="counter"><span class="v">${s.arrivedTotal}</span><span class="of">/ ${s.headcount} expected</span></div></div>
-          <div style="text-align:right"><div class="eyebrow">Rejected scans</div><div class="counter" style="justify-content:flex-end"><span class="v" style="font-size:28px">${state.scans.filter(x=>x.type!=='ok').length}</span></div></div>
+          <div><div class="eyebrow">In ${esc(sName(ses))}</div><div class="counter"><span class="v">${s.sess[si]}</span><span class="of">/ ${s.accepted} confirmed</span></div></div>
+          <div style="text-align:right"><div class="eyebrow">Certificate eligible</div><div class="counter" style="justify-content:flex-end"><span class="v" style="font-size:28px">${s.eligible}</span></div></div>
         </div>
-        <div class="progress"><div style="width:${pct(s.arrivedTotal,s.headcount)}%"></div></div>
+        <div class="progress"><div style="width:${pct(s.sess[si],s.accepted)}%"></div></div>
       </div>
-      <div class="card mt"><h3>Recent scans</h3>${recent.length?`<div class="feed">${recent.map(x=>{const g=state.guests.find(y=>y.id===x.gid);return`<div class="it"><div class="dot" style="${x.type==='ok'?'':'border-color:#4a3a2a'}">${ic(x.type==='ok'?'check':x.type==='bad'?'x':'alert')}</div><div><b style="font-weight:600">${esc(x.name||(g?g.name:'Unknown pass'))}</b><br><span class="muted" style="font-size:12px">${x.type==='ok'?'Granted':x.type==='dup'?'Duplicate':x.type==='warn'?'Declined RSVP':'Rejected'} · ${esc(x.gate)} · <span class="mono">${esc(x.code)}</span></span></div><span class="tm">${fmtTime(x.t)}</span></div>`}).join('')}</div>`:'<div class="muted">No scans yet.</div>'}</div>
+      <div class="card mt"><h3>Recent scans</h3>${recent.length?`<div class="feed">${recent.map(x=>{const g=state.guests.find(y=>y.id===x.gid);return`<div class="it"><div class="dot" style="${x.type==='ok'?'':'border-color:#4a3a2a'}">${ic(x.type==='ok'?'check':x.type==='bad'?'x':'alert')}</div><div><b style="font-weight:600">${esc(x.name||(g?g.name:'Unknown pass'))}</b> ${g?dots(g):''}<br><span class="muted" style="font-size:12px">${x.type==='ok'?'Granted':x.type==='dup'?'Duplicate':x.type==='warn'?'Declined RSVP':'Rejected'} · ${esc(x.gate)}${x.synced===false?' · <span style="color:var(--warn)">pending sync</span>':''}</span></div><span class="tm">${fmtTime(x.t)}</span></div>`}).join('')}</div>`:'<div class="muted">No scans yet.</div>'}</div>
+    </div>
+  </div>`;
+}
+function findResults(){
+  const q=ui.findQ.trim().toLowerCase();if(q.length<2)return'';
+  const ses=curSession(),L=state.guests.filter(g=>[g.name,g.email,g.phone,g.code].join(' ').toLowerCase().includes(q)).slice(0,6);
+  if(!L.length)return`<div class="muted" style="font-size:13px">No guest matches “${esc(ui.findQ)}”.</div>`;
+  return L.map(g=>`<div class="fr"><div class="gname"><b>${esc(g.name)}</b><small>${esc(g.email||g.phone||'')}</small></div>${dots(g)}${g.att&&g.att[ses.id]?`<span class="muted" style="font-size:12px">Already in</span>`:`<button class="btn sm pri" data-action="mark-att" data-id="${g.id}">Mark present</button>`}</div>`).join('');
+}
+
+function vAttendance(s){
+  if(!s.total)return`<div class="card empty">${ic('users')}<p>Import guests first. <a href="#guests">Go to guests</a></p></div>`;
+  const N=state.sessions.length,q=ui.attQ.toLowerCase();
+  const F={all:g=>true,elig:g=>eligible(g),m1:g=>attCount(g)===N-1,m2:g=>attCount(g)>0&&attCount(g)<N-1,none:g=>g.rsvp==='accepted'&&!attCount(g)};
+  const list=state.guests.filter(g=>(F[ui.attF]||F.all)(g)&&(!q||[g.name,g.email,g.company,g.code].join(' ').toLowerCase().includes(q)));
+  const opts=[['all',`All guests (${s.total})`],['elig',`Eligible ${N}/${N} (${s.eligible})`],['m1',`Missing 1 session (${state.guests.filter(F.m1).length})`],['m2',`Missing 2+ (${state.guests.filter(F.m2).length})`],['none',`Confirmed, no check-ins (${state.guests.filter(F.none).length})`]];
+  return`
+  <div class="grid g6">
+    ${state.sessions.map((x,i)=>kpi(esc(sName(x)),s.sess[i],`${pct(s.sess[i],s.accepted)}% of ${s.accepted} confirmed`,pct(s.sess[i],s.accepted))).join('')}
+    ${kpi('Eligible '+N+'/'+N,s.eligible,`${pct(s.eligible,s.accepted)}% of confirmed`,pct(s.eligible,s.accepted))}
+    ${kpi('Incomplete',s.incomplete,'attended some, not all',pct(s.incomplete,s.accepted))}
+  </div>
+  <div class="grid g2 mt">
+    <div class="card"><h3>Session attendance<span class="sub">of ${s.accepted} confirmed</span></h3><div class="bars">${state.sessions.map((x,i)=>barRow(sName(x),s.sess[i],s.accepted)).join('')}</div></div>
+    <div class="card"><h3>Completion<span class="sub">sessions attended per guest</span></h3><div class="bars">${[4,3,2,1,0].map(n=>barRow(`${n} of ${N}`,s.complete[n]||0,s.accepted)).join('')}</div></div>
+  </div>
+  <div class="toolbar mt">
+    <div class="search">${ic('search')}<input class="input" id="aq" placeholder="Search guest…" value="${esc(ui.attQ)}"></div>
+    <select class="input" id="af" style="width:auto">${opts.map(([k,l])=>`<option value="${k}" ${ui.attF===k?'selected':''}>${l}</option>`).join('')}</select>
+    <span class="muted" style="margin-left:auto;font-size:12.5px">${list.length} shown</span>
+  </div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Guest</th>${state.sessions.map(x=>`<th>${esc(sShort(x))}</th>`).join('')}<th>Progress</th><th>Certificate</th><th></th></tr></thead>
+    <tbody>${list.map(g=>`<tr><td class="gname"><b>${esc(g.name)}</b><small>${esc(g.company||g.email||'')}</small></td>
+      ${state.sessions.map(x=>{const a=g.att&&g.att[x.id];return`<td class="att-cell ${a?'':'no'}">${a?`✓ ${fmtTime(a.t)}${a.src!=='scan'?'<span class="m">manual</span>':''}<small>${esc(fmtDate(x.date))}</small>`:'—'}</td>`}).join('')}
+      <td>${dots(g)} <b style="margin-left:6px">${attCount(g)}/${N}</b></td><td>${certPill(g)}</td>
+      <td><div class="acts-cell">${eligible(g)?`<button class="iconbtn" title="View certificate" data-action="cert-view" data-id="${g.id}">${ic('award')}</button>`:''}<button class="iconbtn" title="Guest details" data-action="view" data-id="${g.id}">${ic('eye')}</button></div></td></tr>`).join('')||`<tr><td colspan="${N+4}" class="empty">No guests match.</td></tr>`}</tbody>
+  </table></div>`;
+}
+
+function vCertificates(s){
+  if(!s.total)return`<div class="card empty">${ic('award')}<p>Import guests first. <a href="#guests">Go to guests</a></p></div>`;
+  const N=state.sessions.length,C=state.event.cert,elig=state.guests.filter(eligible);
+  let g=state.guests.find(x=>x.id===ui.certGid)||elig[0];
+  const sample=!g;if(!g)g={id:'sample',name:'Dr. Sample Guest',code:'KD-SAMP-L001',att:Object.fromEntries(state.sessions.map(x=>[x.id,{t:sAt(x)}]))};
+  ui.certGid=sample?null:g.id;
+  const waiting=elig.filter(x=>!x.certSentAt).length,p=ui.sendProg;
+  const inc=state.guests.filter(x=>x.rsvp==='accepted'&&attCount(x)>0&&!eligible(x));
+  return`
+  <div class="grid g6">
+    ${kpi('Eligible',s.eligible,`attended all ${N} sessions`,pct(s.eligible,s.accepted))}
+    ${kpi('Sent',s.certSent,`${waiting} waiting to send`,pct(s.certSent,s.eligible))}
+    ${kpi('Not eligible',s.incomplete,'missed at least one session',pct(s.incomplete,s.accepted))}
+    ${kpi('CME hours',C.hours||0,'per certificate',100)}
+    ${kpi('Rule',`${N}/${N}`,'strict — every session required',100)}
+    ${kpi('Format','PDF','emailed after Day 2',100)}
+  </div>
+  <div class="grid g-main mt">
+    <div class="card">
+      <h3>${ic('award')} Certificate preview${elig.length?`<select class="input" id="certSel" style="width:auto;margin-left:auto;padding:5px 10px;font-size:12.5px">${elig.map(x=>`<option value="${x.id}" ${x.id===g.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select>`:'<span class="sub">sample — no eligible guests yet</span>'}</h3>
+      <img class="cert-img" src="${certSrc(g,1400)}" alt="Certificate preview">
+      <div class="row mt">${sample?'':`<button class="btn" data-action="cert-download" data-id="${g.id}">${ic('download')} Download (PNG)</button><button class="btn" data-action="cert-send-one" data-id="${g.id}">${ic('send')} ${g.certSentAt?'Resend':'Send'} to ${esc(firstName(g))}</button><button class="btn ghost" data-action="gv-goto" data-id="${g.id}">${ic('mail')} See it in their inbox</button>`}</div>
+    </div>
+    <div>
+      <div class="card">
+        <h3>Send certificates</h3>
+        <div class="counter"><span class="v">${waiting}</span><span class="of">ready to send</span></div>
+        <div id="sendProg" class="progress ${p?'':'hide'}"><div style="width:${p?pct(p.done,p.total):0}%"></div></div>
+        <div id="sendProgT" class="muted ${p?'':'hide'}" style="font-size:12.5px">${p?`Sending… ${p.done}/${p.total}`:''}</div>
+        <div class="row mt"><button class="btn pri" data-action="cert-send-all" ${waiting&&!p?'':'disabled'}>${ic('send')} Send ${waiting} certificate${waiting===1?'':'s'}</button></div>
+        <div class="note">${ic('info')}<span>Only guests with all ${N} sessions recorded receive one. In production this runs automatically after Day 2 and attaches a PDF.</span></div>
+      </div>
+      <div class="card mt">
+        <h3>Certificate details</h3>
+        <div class="field"><label>Title</label><input class="input certf" data-k="title" value="${esc(C.title)}"></div>
+        <div class="field"><label>CME credit hours</label><input class="input certf" type="number" min="0" data-k="hours" value="${esc(C.hours)}"></div>
+        <div class="grid g2"><div class="field"><label>Signature 1</label><input class="input certf" data-k="signer1" value="${esc(C.signer1)}"></div><div class="field"><label>Signature 2</label><input class="input certf" data-k="signer2" value="${esc(C.signer2)}"></div></div>
+      </div>
+      <div class="card mt"><h3>Won’t receive one<span class="sub">${inc.length} guests</span></h3>${inc.length?`<div class="next">${inc.slice(0,8).map(x=>`<div class="tile" style="padding:9px 12px"><div class="tx"><b>${esc(x.name)}</b><span class="muted">Missing: ${esc(missingS(x).map(sName).join(', '))}</span></div>${dots(x)}</div>`).join('')}</div>`:'<div class="muted">Nobody yet.</div>'}</div>
     </div>
   </div>`;
 }
@@ -1321,12 +1575,13 @@ function vReports(s){
     ${kpi('Response rate',pct(s.accepted+s.declinedAll,s.delivered)+'%',`${s.accepted+s.declinedAll} replied`,pct(s.accepted+s.declinedAll,s.delivered))}
     ${kpi('Acceptance',pct(s.accepted,s.accepted+s.declinedAll)+'%',`${s.accepted} yes · ${s.declinedAll} no`,pct(s.accepted,s.accepted+s.declinedAll))}
     ${kpi('Attendance',pct(s.arrivedTotal,s.headcount)+'%',`${s.arrivedTotal} of ${s.headcount} incl. +1s`,pct(s.arrivedTotal,s.headcount))}
-    ${kpi('No-shows',noShows,'confirmed but not arrived',pct(noShows,s.accepted))}
+    ${kpi('Certificates',s.eligible,`eligible · ${s.certSent} sent`,pct(s.eligible,s.accepted))}
   </div>
   <div class="grid g2 mt">
     <div class="card"><h3>Guests by status</h3><div class="bars">${Object.keys(ST).map(k=>barRow(ST[k],s[k],s.total)).join('')}</div></div>
-    <div class="card"><h3>Arrivals over time<span class="sub">10-minute intervals</span></h3>
-      ${arr?`<div class="vchart">${arr.map(x=>`<div class="col"><span class="c">${x.c||''}</span><div class="b" style="height:${mx?x.c/mx*100:0}%"></div></div>`).join('')}</div><div class="vlabels">${arr.map((x,i)=>`<span>${i%Math.ceil(arr.length/8)===0?fmtTime(x.t):''}</span>`).join('')}</div>`:'<div class="empty">No check-ins yet.</div>'}
+    <div class="card"><h3>Check-ins per session<span class="sub">of ${s.accepted} confirmed</span></h3>
+      ${s.checkedAll?(()=>{const m=Math.max(1,...s.sess);return`<div class="vchart">${state.sessions.map((x,i)=>`<div class="col"><span class="c">${s.sess[i]}</span><div class="b" style="height:${s.sess[i]/m*100}%"></div></div>`).join('')}<div class="col"><span class="c">${s.eligible}</span><div class="b" style="height:${s.eligible/m*100}%;opacity:.55"></div></div></div><div class="vlabels">${state.sessions.map(x=>`<span>${esc(sShort(x))}</span>`).join('')}<span>All ${state.sessions.length}</span></div>`})():'<div class="empty">No check-ins yet.</div>'}
+      
       ${Object.keys(gates).length?`<div class="legend mt">${Object.entries(gates).sort((a,b)=>b[1]-a[1]).map(([g,n])=>`<div><span class="muted">${esc(g)}</span><b>${n}</b></div>`).join('')}</div>`:''}
     </div>
   </div>
@@ -1348,8 +1603,9 @@ const gvInbox=g=>state.outbox.filter(m=>m.gid===g.id&&m.channel==='email'&&m.sta
 function vGuestView(s){
   if(!s.total)return`<div class="card empty">${ic('mail')}<p>Add guests to see the guest experience.</p><div class="row" style="justify-content:center"><button class="btn pri" data-action="load-sample">${ic('bolt')} Load sample guests</button><button class="btn" data-action="import">${ic('upload')} Import Excel</button></div></div>`;
   const g=gvGuest(),gv=ui.gv,inbox=gvInbox(g);
-  const stepN=(g.checkedInAt?4:g.rsvp?3:g.sentAt?1:0);
-  const steps=['Invitation email','RSVP + plus-one','Auto-reply','Check-in at the door'];
+  const N=state.sessions.length,ac=attCount(g);
+  const stepN=!g.sentAt?0:!g.rsvp?1:ac<N?3:!g.certSentAt?4:5;
+  const steps=['Invitation email','RSVP','Auto-reply',`Sessions ${ac}/${N}`,'Certificate'];
   const stepper=`<div class="stepper">${steps.map((t,i)=>`<div class="${i<stepN?'done':i===stepN?'act':''}"><b>${i<stepN?'✓':i+1}</b>${t}</div>`).join('')}</div>`;
   const stage=gv.mode==='rsvp'?rsvpPage(g):mailClient(g,inbox);
   return`
@@ -1410,14 +1666,16 @@ function behind(g){
       <span>Invitation</span><b>${g.sentAt?(g.bounced?'Bounced':`Delivered ${fmtTime(g.sentAt)}`):'Not sent yet'}</b>
       <span>Opened</span><b>${g.openedAt?fmtTime(g.openedAt):'—'}</b>
       <span>RSVP</span><b>${g.rsvp?`${g.rsvp==='accepted'?'Attending':'Not attending'} · ${fmtTime(g.rsvpAt)}`:'Awaiting'}</b>
-      <span>Plus one</span><b>${g.plusOne?`${esc(g.plusOne.name)}<br><span class="code">${g.plusOne.code}</span>`:'—'}</b>
+      ${g.plusOne?`<span>Plus one</span><b>${esc(g.plusOne.name)}<br><span class="code">${g.plusOne.code}</span></b>`:''}
       ${g.dietary?`<span>Dietary</span><b>${esc(g.dietary)}</b>`:''}
       ${g.note?`<span>Note</span><b>“${esc(g.note)}”</b>`:''}
       <span>Auto-reply</span><b>${(()=>{const m=state.outbox.find(x=>x.gid===g.id&&x.kind.startsWith('auto'));return m?`Sent ${fmtTime(m.t)}`:'—'})()}</b>
-      <span>Check-in</span><b>${g.checkedInAt?`${fmtTime(g.checkedInAt)} · ${esc(g.gate)}`:'—'}${g.plusOne&&g.plusOne.checkedInAt?`<br>+1 at ${fmtTime(g.plusOne.checkedInAt)}`:''}</b>
+      <span>Sessions</span><b>${dots(g)} ${attCount(g)}/${state.sessions.length}</b>
+      <span>Certificate</span><b>${g.certSentAt?`Sent ${fmtTime(g.certSentAt)}`:eligible(g)?'Eligible':'—'}</b>
     </div>
-    <div class="eyebrow" style="margin:4px 0 8px">At the door</div>
-    <div class="row"><button class="btn sm" data-action="gv-scan" data-k="g" ${g.sentAt?'':'disabled'}>${ic('scan')} Scan ${esc(firstName(g))}’s pass</button>${g.plusOne?`<button class="btn sm" data-action="gv-scan" data-k="p">${ic('scan')} Scan +1 pass</button>`:''}</div>
+    <div class="eyebrow" style="margin:4px 0 8px">Session check-ins · ${attCount(g)}/${state.sessions.length}</div>
+    <div class="grid g2" style="gap:6px">${state.sessions.map(x=>`<button class="btn sm" data-action="gv-scan" data-sid="${x.id}" ${g.sentAt?'':'disabled'} style="justify-content:flex-start">${g.att&&g.att[x.id]?ic('check'):ic('scan')} ${esc(sShort(x))}</button>`).join('')}</div>
+    ${eligible(g)?`<div class="row mt"><button class="btn sm pri" data-action="cert-send-one" data-id="${g.id}">${ic('award')} ${g.certSentAt?'Resend':'Send'} certificate</button></div>`:''}
     ${d?`<div class="door ${d.type}">${ic(d.type==='ok'?'check':d.type==='bad'?'x':'alert')}<div><b>${esc(d.title)}</b><br><span>${esc(d.sub)}</span></div></div>`:''}
   </div>
   <div class="card mt"><h3>Live log</h3>${tl.length?`<div class="timeline">${tl.map(l=>`<div>${esc(l.text)}<small>${fmtDT(l.t)}</small></div>`).join('')}</div>`:'<div class="muted">Nothing yet — send the invitation to start.</div>'}</div>`;
@@ -1442,23 +1700,25 @@ function gvStartRsvp(g,v){
 }
 function gvReset(g){
   state.outbox=state.outbox.filter(m=>m.gid!==g.id);state.log=state.log.filter(l=>l.gid!==g.id);state.scans=state.scans.filter(x=>x.gid!==g.id);
-  ['sentAt','openedAt','bounced','rsvp','rsvpAt','plusOne','checkedInAt','gate','dietary','note','reminders'].forEach(k=>delete g[k]);
+  ['sentAt','openedAt','bounced','rsvp','rsvpAt','plusOne','checkedInAt','gate','dietary','note','reminders','att','certSentAt'].forEach(k=>delete g[k]);
   Object.assign(ui.gv,{...GV0,gid:g.id});
 }
 
 /* ============ Exports ============ */
-function guestRows(){return state.guests.map(g=>({'Name':g.name,'Email':g.email,'Phone':g.phone,'Company':g.company,'Pass code':g.code,'Status':ST[status(g)],'Email valid':g.emailValid?'Yes':'No','Invited at':fmtDT(g.sentAt),'Opened at':fmtDT(g.openedAt),'RSVP':g.rsvp?(g.rsvp==='accepted'?'Confirmed':'Declined'):'','RSVP at':fmtDT(g.rsvpAt),'Checked in at':fmtDT(g.checkedInAt),'Gate':g.gate||'','Plus one':g.plusOne?g.plusOne.name:'','Plus one code':g.plusOne?g.plusOne.code:'','Plus one checked in':g.plusOne?fmtDT(g.plusOne.checkedInAt):'','Dietary':g.dietary||'','Note':g.note||'','Reminders':g.reminders||0}))}
+function guestRows(){return state.guests.map(g=>({...attRow(g),'Name':g.name,'Email':g.email,'Phone':g.phone,'Company':g.company,'Pass code':g.code,'Status':ST[status(g)],'Email valid':g.emailValid?'Yes':'No','Invited at':fmtDT(g.sentAt),'Opened at':fmtDT(g.openedAt),'RSVP':g.rsvp?(g.rsvp==='accepted'?'Confirmed':'Declined'):'','RSVP at':fmtDT(g.rsvpAt),'Checked in at':fmtDT(g.checkedInAt),'Gate':g.gate||'','Plus one':g.plusOne?g.plusOne.name:'','Plus one code':g.plusOne?g.plusOne.code:'','Plus one checked in':g.plusOne?fmtDT(g.plusOne.checkedInAt):'','Dietary':g.dietary||'','Note':g.note||'','Reminders':g.reminders||0}))}
+function attRow(g){const o={'Name':g.name,'Email':g.email,'Organisation':g.company};state.sessions.forEach(x=>{const a=g.att&&g.att[x.id];o[sName(x)]=a?`${fmtDT(a.t)}${a.src!=='scan'?' (manual)':''}`:''});o['Sessions attended']=`${attCount(g)}/${state.sessions.length}`;o['Certificate']=g.certSentAt?'Sent':eligible(g)?'Eligible':'Not eligible';o['Missing']=eligible(g)?'':missingS(g).map(sName).join(', ');return o}
 function summaryLines(){const s=stats(),e=state.event;return[
  ['Event',e.name],['Date',`${fmtDate(e.date)} ${e.time}`],['Venue',e.venue],['Generated',new Date().toLocaleString('en-GB')],[],
  ['Total guests',s.total],['Invitations sent',s.sent],['Delivered',s.delivered],['Bounced',s.bounced],['Opened',s.openedAll],['Confirmed',s.accepted],['Declined',s.declinedAll],['Awaiting RSVP',s.noRsvp],['Plus-ones confirmed',s.plusOnes],['Expected headcount',s.headcount],['Checked in (guests)',s.checkedAll],['Checked in (incl. +1s)',s.arrivedTotal],['No-shows',state.guests.filter(g=>g.rsvp==='accepted'&&!g.checkedInAt).length],
- [],['Delivery rate',pct(s.delivered,s.sent)+'%'],['Open rate',pct(s.openedAll,s.delivered)+'%'],['Acceptance rate',pct(s.accepted,s.accepted+s.declinedAll)+'%'],['Attendance rate',pct(s.checkedAll,s.accepted)+'%'],['Auto-replies sent',s.autoreplies]]}
+ [],['Certificate eligible',s.eligible],['Certificates sent',s.certSent],...state.sessions.map((x,i)=>[`Attended ${sName(x)}`,s.sess[i]]),[],['Delivery rate',pct(s.delivered,s.sent)+'%'],['Open rate',pct(s.openedAll,s.delivered)+'%'],['Acceptance rate',pct(s.accepted,s.accepted+s.declinedAll)+'%'],['Attendance rate',pct(s.checkedAll,s.accepted)+'%'],['Auto-replies sent',s.autoreplies]]}
 function exportXlsx(){
   if(typeof XLSX==='undefined'){toast('Excel library failed to load');return}
   const wb=XLSX.utils.book_new();
   const ws1=XLSX.utils.aoa_to_sheet([['KODE — Event Report'],[],...summaryLines()]);ws1['!cols']=[{wch:22},{wch:44}];XLSX.utils.book_append_sheet(wb,ws1,'Summary');
+  const wsA=XLSX.utils.json_to_sheet(state.guests.map(attRow));wsA['!cols']=[26,30,26,...state.sessions.map(()=>20),16,14,40].map(w=>({wch:w}));XLSX.utils.book_append_sheet(wb,wsA,'Attendance');
   const ws2=XLSX.utils.json_to_sheet(guestRows());ws2['!cols']=[22,30,18,18,14,12,10,18,18,10,18,18,14,20,14,18,20,24,10].map(w=>({wch:w}));XLSX.utils.book_append_sheet(wb,ws2,'Guests');
   const ws3=XLSX.utils.json_to_sheet(state.outbox.map(m=>{const g=state.guests.find(x=>x.id===m.gid);return{'Time':fmtDT(m.t),'Type':KIND[m.kind],'Guest':g?g.name:'','Channel':m.channel,'To':m.to,'Subject':m.subject,'Status':m.status}}));XLSX.utils.book_append_sheet(wb,ws3,'Messages');
-  const ws4=XLSX.utils.json_to_sheet(state.scans.map(x=>{const g=state.guests.find(y=>y.id===x.gid);return{'Time':fmtDT(x.t),'Result':x.type==='ok'?'Granted':x.type==='dup'?'Duplicate':x.type==='warn'?'Declined RSVP':'Rejected','Guest':g?g.name:'','Code':x.code,'Gate':x.gate}}));XLSX.utils.book_append_sheet(wb,ws4,'Scans');
+  const ws4=XLSX.utils.json_to_sheet(state.scans.map(x=>{const g=state.guests.find(y=>y.id===x.gid);return{'Time':fmtDT(x.t),'Result':x.type==='ok'?'Granted':x.type==='dup'?'Duplicate':x.type==='warn'?'Declined RSVP':'Rejected','Guest':x.name||(g?g.name:''),'Code':x.code,'Session':x.gate}}));XLSX.utils.book_append_sheet(wb,ws4,'Scans');
   const ws5=XLSX.utils.json_to_sheet(state.log.map(l=>({'Time':fmtDT(l.t),'Event':l.text})));XLSX.utils.book_append_sheet(wb,ws5,'Activity');
   saveFile(`KODE-report-${state.event.name.replace(/[^\w]+/g,'-')}.xlsx`,new Blob([XLSX.write(wb,{bookType:'xlsx',type:'array'})]));
 }
@@ -1475,6 +1735,12 @@ function afterRender(v){
   const gvs=$('#gvSel');if(gvs)gvs.addEventListener('change',e=>{Object.assign(ui.gv,{...GV0,gid:e.target.value});render()});
   document.querySelectorAll('.gvf').forEach(el=>el.addEventListener('input',()=>{ui.gv[el.dataset.k]=el.value}));
   const rf=$('#rsvpForm');if(rf)rf.addEventListener('submit',e=>{e.preventDefault();gvSubmit()});
+  const fg=$('#findGuest');if(fg)fg.addEventListener('input',e=>{ui.findQ=e.target.value;$('#findRes').innerHTML=findResults()});
+  const aq=$('#aq');if(aq)aq.addEventListener('input',e=>{ui.attQ=e.target.value;const p=e.target.selectionStart;render();const n=$('#aq');n.focus();n.setSelectionRange(p,p)});
+  const af=$('#af');if(af)af.addEventListener('change',e=>{ui.attF=e.target.value;render()});
+  const cs=$('#certSel');if(cs)cs.addEventListener('change',e=>{ui.certGid=e.target.value;render()});
+  document.querySelectorAll('.certf').forEach(el=>el.addEventListener('change',()=>{state.event.cert[el.dataset.k]=el.type==='number'?+el.value:el.value;commit()}));
+  document.querySelectorAll('.sesf').forEach(el=>el.addEventListener('change',()=>{const x=state.sessions.find(y=>y.id===el.dataset.id);if(x){x[el.dataset.k]=el.value;if(x.id==='d1c'){state.event.date=x.date;state.event.time=x.time}persist();$('#preview')&&($('#preview').innerHTML=previewHtml())}}));
   const gs=$('#gateSel');if(gs)gs.addEventListener('change',e=>ui.gate=e.target.value);
   const mf=$('#manualForm');if(mf)mf.addEventListener('submit',e=>{e.preventDefault();const v=$('#manualCode').value;if(v.trim())processScan(v)});
   ['dropImport','vf'].forEach(id=>{const d=$('#'+id);if(!d)return;
@@ -1502,20 +1768,29 @@ document.addEventListener('click',async e=>{
     case 'gv-device':ui.gv.device=el.dataset.v;render();break;
     case 'gv-send':{const gg=gvGuest();if(!gg)break;if(!state.channels.email){state.channels.email=true;toast('Email channel turned on')}deliver(gg,'invite');const m=gvInbox(gg)[0];ui.gv.msgId=null;commit();toast(`Invitation delivered to ${gg.email}`);setTimeout(()=>{if(cur()==='guest-view'&&m&&!ui.gv.msgId){m.read=true;ui.gv.msgId=m.id;const g3=gvGuest();if(g3&&!g3.openedAt){g3.openedAt=now();log('open',`${g3.name} opened the invitation`,g3.id)}commit()}},1100)}break;
     case 'gv-reset':{const gg=gvGuest();if(!gg)break;gvReset(gg);commit();toast(`Restarted the demo for ${gg.name}`)}break;
-    case 'gv-scan':{const gg=gvGuest();if(!gg)break;const code=el.dataset.k==='p'&&gg.plusOne?gg.plusOne.code:gg.code;processScan(`KODE|${state.event.eventId}|${code}`);ui.gv.door=ui.lastScan;render()}break;
+    case 'gv-scan':{const gg=gvGuest();if(!gg)break;processScan(`KODE|${state.event.eventId}|${gg.code}`,el.dataset.sid);ui.gv.door=ui.lastScan;render()}break;
+    case 'pick-session':ui.sid=id;ui.lastScan=null;render();break;
+    case 'toggle-offline':setOffline(!ui.offline);break;
+    case 'mark-att':{if(!g)break;const x=curSession();recordAttendance(g,x,now(),'manual');state.scans.unshift({t:now(),type:'ok',gid:g.id,name:g.name,code:'manual',gate:sName(x),sid:x.id,synced:!ui.offline});ui.lastScan={type:'ok',title:`Marked present · ${sName(x)}`,sub:`${g.name} — ${attCount(g)} of ${state.sessions.length} sessions (manual, logged for audit)`,gid:g.id,t:now(),gate:sName(x),sid:x.id,prog:state.sessions.map(y=>!!(g.att&&g.att[y.id]))};ui.findQ='';commit()}break;
+    case 'sim-session':simulateSession(curSession());break;
+    case 'sim-day':simulateDay(+el.dataset.v);break;
+    case 'cert-view':ui.certGid=id;location.hash='certificates';break;
+    case 'cert-send-one':if(!g)break;if(!eligible(g)){toast('Not eligible yet');break}if(!state.channels.email)state.channels.email=true;deliver(g,'certificate');commit();toast(`Certificate sent to ${g.email}`);if(cur()==='guest-view'){const m=gvInbox(g)[0];setTimeout(()=>{if(m&&cur()==='guest-view'){m.read=true;ui.gv.msgId=m.id;commit()}},700)}break;
+    case 'cert-send-all':sendBatch(state.guests.filter(x=>eligible(x)&&!x.certSentAt),'certificate');break;
+    case 'cert-download':if(!g)break;drawCert(g,2400).toBlob(b=>b&&saveFile(`Certificate-${g.name.replace(/[^\w]+/g,'-')}.png`,b),'image/png');break;
     case 'present':document.body.classList.toggle('present');window.scrollTo(0,0);break;
     case 'banner':if(el.dataset.v!=='__keep'){state.event.banner=el.dataset.v;persist();render()}break;
     case 'banner-upload':$('#fileBanner').click();break;
     case 'banner-confirm':state.event.bannerConfirm=el.checked;persist();$('#preview')&&($('#preview').innerHTML=previewHtml());break;
     case 'ev-plus':state.event.allowPlusOne=el.checked;persist();$('#preview')&&($('#preview').innerHTML=previewHtml());break;
     case 'import':if(e.target.closest('a')&&e.target.closest('a').dataset.action==='load-sample')break;$('#fileImport').click();break;
-    case 'load-sample':e.stopPropagation();importRows(SAMPLE.map(r=>r.slice()),'Sample guest list (26 rows)');break;
+    case 'load-sample':e.stopPropagation();importRows(SAMPLE_MED.map(r=>r.slice()),'Sample guest list (26 doctors)');break;
     case 'template':if(typeof XLSX==='undefined'){toast('Excel library failed to load');break}saveFile('KODE-guest-template.xlsx',templateBlob());break;
     case 'add-guest':openAddGuest();break;
     case 'view':e.preventDefault();openGuest(id);break;
     case 'send-one':if(!g)break;if(!activeChannels().length){toast('Turn on at least one channel');break}{const ok=deliver(g,'invite');commit();toast(ok?`Invitation sent to ${g.name}`:`Invitation to ${g.name} bounced`);if(ui.modalGuest===g.id)openGuest(g.id)}break;
-    case 'checkin':if(!g)break;checkIn(g,ui.gate||'Main Gate');state.scans.unshift({t:now(),type:'ok',gid:g.id,code:g.code,gate:g.gate});commit();toast(`${g.name} checked in`);if(ui.modalGuest===g.id)openGuest(g.id);break;
-    case 'override':if(!g)break;checkIn(g,($('#gateSel')||{}).value||'Main Gate');ui.lastScan={type:'ok',title:'Access granted',sub:`${g.name} allowed in (override).`,gid:g.id,t:now(),gate:g.gate};commit();break;
+    case 'checkin':if(!g)break;{const x=curSession();if(g.att&&g.att[x.id]){toast(`${g.name} is already in ${sName(x)}`);break}recordAttendance(g,x,now(),'manual');state.scans.unshift({t:now(),type:'ok',gid:g.id,name:g.name,code:'manual',gate:sName(x),sid:x.id,synced:!ui.offline});commit();toast(`${g.name} marked present for ${sName(x)}`)}if(ui.modalGuest===g.id)openGuest(g.id);break;
+    case 'override':if(!g)break;{const x=curSession();recordAttendance(g,x,now(),'override');ui.lastScan={type:'ok',title:`Checked in · ${sName(x)}`,sub:`${g.name} allowed in (override) — ${attCount(g)} of ${state.sessions.length} sessions.`,gid:g.id,t:now(),gate:sName(x),sid:x.id,prog:state.sessions.map(y=>!!(g.att&&g.att[y.id]))};commit()}break;
     case 'delete':if(!g)break;if(el.dataset.confirm!=='1'){el.dataset.confirm='1';el.style.color='var(--bad)';el.title='Click again to remove';toast('Click again to remove '+g.name);setTimeout(()=>{el.dataset.confirm='';el.style.color=''},2500);break}
       state.guests=state.guests.filter(x=>x.id!==id);log('import',`Removed ${g.name}`,null);commit();break;
     case 'send-all':sendBatch(state.guests.filter(x=>!x.sentAt),'invite');break;
@@ -1532,8 +1807,9 @@ document.addEventListener('click',async e=>{
     case 'msg':openMessage(id);break;
     case 'scan-upload':$('#fileScan').click();break;
     case 'scan-demo':{const k=el.dataset.k;let t=null;
-      if(k==='valid'){const p=state.guests.filter(x=>!x.checkedInAt&&x.rsvp==='accepted');const q=p.length?p:state.guests.filter(x=>!x.checkedInAt&&x.rsvp!=='declined');if(!q.length){toast('No guests left to scan');break}t=payload(q[Math.floor(Math.random()*q.length)])}
-      else if(k==='dup'){const p=state.guests.filter(x=>x.checkedInAt);if(!p.length){toast('Check someone in first');break}t=payload(p[Math.floor(Math.random()*p.length)])}
+      const sid=curSession().id;
+      if(k==='valid'){const p=state.guests.filter(x=>!(x.att&&x.att[sid])&&x.rsvp==='accepted');const q=p.length?p:state.guests.filter(x=>!(x.att&&x.att[sid])&&x.rsvp!=='declined');if(!q.length){toast('Everyone is already in this session');break}t=payload(q[Math.floor(Math.random()*q.length)])}
+      else if(k==='dup'){const last=ui.lastScan&&ui.lastScan.gid&&state.guests.find(x=>x.id===ui.lastScan.gid&&x.att&&x.att[sid]);const p=state.guests.filter(x=>x.att&&x.att[sid]);if(!p.length){toast('Scan someone into this session first');break}t=payload(last||p[0])}
       else t='https://totally-real-tickets.biz/vip?id=12345';
       processScan(t)}break;
     case 'simulate-arrivals':simulateArrivals();break;
