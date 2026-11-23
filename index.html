@@ -655,7 +655,7 @@ function freshState(){
     sessions:DEFAULT_SESSIONS.map(x=>({...x})),
     event:{...EVENT_EXTRAS,cert:{...DEFAULT_CERT},name:'Annual Medical Conference 2026',date:'2026-11-25',time:'09:00',venue:'Conference Centre, Cairo',sender:'The Organising Committee',eventId:'EVT'+Math.random().toString(36).slice(2,6).toUpperCase()},
     tpl:{...DEFAULT_TPL},
-    channels:{email:true,whatsapp:false,sms:false},
+    channels:{email:true},
     guests:[],outbox:[],log:[],scans:[],tplV:4
   };
 }
@@ -663,6 +663,7 @@ let state=null;
 try{state=JSON.parse(localStorage.getItem(LS))}catch(e){}
 if(!state||!state.event||!Array.isArray(state.guests))state=freshState();
 state.event={...EVENT_EXTRAS,...state.event};
+state.channels={email:true};state.event.allowPlusOne=false;
 if(state.tplV!==4){state.tpl={...DEFAULT_TPL};state.tplV=4}
 if(!Array.isArray(state.sessions))state.sessions=DEFAULT_SESSIONS.map(x=>({...x}));
 state.event.cert={...DEFAULT_CERT,...(state.event.cert||{})};
@@ -808,7 +809,7 @@ function importRows(rows,source){
       <div class="card kpi"><div class="l">Duplicates skipped</div><div class="v">${dupes.length}</div><div class="s">matched by email / phone</div></div>
       <div class="card kpi"><div class="l">Need attention</div><div class="v">${invalid.length}</div><div class="s">invalid or missing email</div></div>
     </div>
-    ${invalid.length?`<div class="note" style="color:var(--warn)">${ic('alert')}<div><b>Check these emails</b> — they'll bounce on email but can still receive WhatsApp/SMS:<br>${invalid.slice(0,8).map(esc).join('<br>')}${invalid.length>8?'<br>…':''}</div></div>`:''}
+    ${invalid.length?`<div class="note" style="color:var(--warn)">${ic('alert')}<div><b>Check these emails</b> — they'll bounce — fix them before sending:<br>${invalid.slice(0,8).map(esc).join('<br>')}${invalid.length>8?'<br>…':''}</div></div>`:''}
     ${dupes.length?`<div class="note">${ic('info')}<div>Skipped duplicates: ${dupes.slice(0,8).map(esc).join(', ')}${dupes.length>8?'…':''}</div></div>`:''}
     <div class="row mt" style="justify-content:flex-end"><button class="btn" data-action="close-modal">Review guests</button><a class="btn pri" href="#invitations" data-action="close-modal">${ic('send')} Set up invitations</a></div>`);
 }
@@ -855,8 +856,8 @@ const MED_ORG={'Nile Ventures':'Nile Valley Hospital','Mirage Studio':'Horizon C
 const SAMPLE_MED=SAMPLE.map((r,i)=>i?['Dr. '+r[0],r[1],r[2],MED_ORG[r[3]]||r[3]]:r);
 function templateBlob(){
   const wb=XLSX.utils.book_new();
-  const ws=XLSX.utils.aoa_to_sheet([['Full Name','Email Address','Mobile Number','Company','Plus One (Yes/No)'],['Jane Doe','jane@company.com','+971 50 000 0000','Company LLC','Yes'],['John Smith','john@company.com','+20 100 000 0000','','No']]);
-  ws['!cols']=[{wch:24},{wch:30},{wch:20},{wch:22},{wch:18}];
+  const ws=XLSX.utils.aoa_to_sheet([['Full Name','Email Address','Mobile Number','Organisation'],['Dr. Jane Doe','jane@hospital.com','+20 100 000 0000','City Hospital'],['Dr. John Smith','john@clinic.com','+20 122 000 0000','']]);
+  ws['!cols']=[{wch:24},{wch:30},{wch:20},{wch:24}];
   XLSX.utils.book_append_sheet(wb,ws,'Guests');
   return new Blob([XLSX.write(wb,{bookType:'xlsx',type:'array'})]);
 }
@@ -1161,7 +1162,7 @@ function openGuest(id){
     <div class="eyebrow">Guest pass & invitation</div>
     <h2>${esc(g.name)} ${pill(st)}</h2>
     <div class="pass-grid">
-      <div>${guestEmailHtml(g,true)}<div class="note">${ic('info')}<span>This is exactly what the guest receives. The RSVP buttons are live — they open the RSVP page (with +1) and trigger the auto-reply.</span></div></div>
+      <div>${guestEmailHtml(g,true)}<div class="note">${ic('info')}<span>This is exactly what the guest receives. The RSVP buttons are live — they open the RSVP page and trigger the auto-reply.</span></div></div>
       <div>
         <div class="card">
           <h3>Details</h3>
@@ -1169,7 +1170,6 @@ function openGuest(id){
             <span>Email</span><b>${esc(g.email||'—')}${g.emailValid?'':' <span class="warn-txt">Invalid email — will bounce</span>'}</b>
             <span>Phone</span><b>${esc(g.phone||'—')}</b>
             <span>Company</span><b>${esc(g.company||'—')}</b>
-            <span>Plus one</span><b>${g.plusOne?`${esc(g.plusOne.name)} <span class="code">${g.plusOne.code}</span>${g.plusOne.checkedInAt?' · checked in':''}`:'—'}</b>
             ${g.dietary?`<span>Dietary</span><b>${esc(g.dietary)}</b>`:''}
             <span>Pass code</span><b><span class="code">${g.code}</span></b>
             <span>QR payload</span><b class="mono" style="font-size:12px;color:#aaa">${esc(payload(g))}</b>
@@ -1230,7 +1230,7 @@ function openAddGuest(){
   <form id="addForm" class="mt">
     <div class="field"><label>Full name</label><input class="input" name="name" required></div>
     <div class="field"><label>Email</label><input class="input" name="email" type="email"></div>
-    <div class="grid g2"><div class="field"><label>Phone / WhatsApp</label><input class="input" name="phone"></div><div class="field"><label>Company</label><input class="input" name="company"></div></div>
+    <div class="grid g2"><div class="field"><label>Mobile</label><input class="input" name="phone"></div><div class="field"><label>Company</label><input class="input" name="company"></div></div>
     <div class="row" style="justify-content:flex-end"><button type="button" class="btn" data-action="close-modal">Cancel</button><button class="btn pri" type="submit">${ic('plus')} Add guest</button></div>
   </form>`);
   $('#addForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target);
@@ -1284,14 +1284,14 @@ function vDashboard(s){
     <div class="hero-art">${logo('logo-big')}<div class="mini-qr">${qrSvg('KODE|DEMO|KD-HELO-2026')}</div></div>
   </div>
   <div class="grid g4 steps mt">
-    ${[['01','Import','Drop an Excel or CSV. Columns are detected automatically; duplicates and bad emails are flagged.'],['02','Invite','Personalised email + WhatsApp invitations, each carrying the guest’s own QR pass.'],['03','Auto-reply','Guests RSVP in one tap and instantly get a confirmation with their QR pass and the programme.'],['04','Scan & certify','The same pass is scanned on each day. Guests who attend both days get their certificate automatically.']].map(x=>`<div class="card"><div class="n">${x[0]}</div><b>${x[1]}</b><p>${x[2]}</p></div>`).join('')}
+    ${[['01','Import','Drop an Excel or CSV. Columns are detected automatically; duplicates and bad emails are flagged.'],['02','Invite','Personalised email invitations, each carrying the guest’s own QR pass.'],['03','Auto-reply','Guests RSVP in one tap and instantly get a confirmation with their QR pass and the programme.'],['04','Scan & certify','The same pass is scanned on each day. Guests who attend both days get their certificate automatically.']].map(x=>`<div class="card"><div class="n">${x[0]}</div><b>${x[1]}</b><p>${x[2]}</p></div>`).join('')}
   </div>`;
   const funnel=[['Imported',s.total],['Delivered',s.delivered],['Opened',s.openedAll],['Confirmed',s.accepted],['Attended 1+',s.checkedAll],['Both days',s.eligible]];
   const tiles=[];
   if(s.pending)tiles.push(`<div class="tile">${ic('send')}<div class="tx"><b>${s.pending} guests not invited yet</b><span class="muted">Send them their QR invitation</span></div><button class="btn sm pri" data-action="send-all">Send</button></div>`);
   if(s.noRsvp)tiles.push(`<div class="tile">${ic('bell')}<div class="tx"><b>${s.noRsvp} awaiting RSVP</b><span class="muted">Nudge them with a reminder</span></div><button class="btn sm" data-action="remind">Remind</button></div>`);
   if(s.noRsvp)tiles.push(`<div class="tile">${ic('bolt')}<div class="tx"><b>Demo: simulate guest replies</b><span class="muted">Opens + RSVPs trigger auto-replies</span></div><button class="btn sm" data-action="simulate-responses">Simulate</button></div>`);
-  if(s.invalid)tiles.push(`<div class="tile">${ic('alert')}<div class="tx"><b>${s.invalid} invalid emails</b><span class="muted">They’ll only get WhatsApp/SMS</span></div><a class="btn sm" href="#guests">Review</a></div>`);
+  if(s.invalid)tiles.push(`<div class="tile">${ic('alert')}<div class="tx"><b>${s.invalid} invalid emails</b><span class="muted">Their invitation will bounce</span></div><a class="btn sm" href="#guests">Review</a></div>`);
   
   if(s.accepted&&!s.checkedAll)tiles.push(`<div class="tile">${ic('bolt')}<div class="tx"><b>Demo: run the event</b><span class="muted">Simulate Day 1 and Day 2 check-ins</span></div><a class="btn sm" href="#attendance">Attendance</a></div>`);
   if(s.eligible>s.certSent)tiles.unshift(`<div class="tile">${ic('award')}<div class="tx"><b>${s.eligible-s.certSent} certificates ready</b><span class="muted">Guests who attended ${allDays()}</span></div><a class="btn sm pri" href="#certificates">Send</a></div>`);
@@ -1383,7 +1383,7 @@ function vInvites(s){
           <button class="btn ghost" data-action="simulate-responses" ${s.noRsvp&&!p?'':'disabled'}>${ic('bolt')} Simulate guest replies</button>
         </div>
         ${s.total?'':`<div class="note">${ic('info')}<span>No guests yet — <a href="#guests">import your Excel sheet</a> first.</span></div>`}
-        <div class="note">${ic('info')}<span>Prototype mode: delivery is simulated. In production this plugs into an email provider (e.g. SendGrid / SES) and the WhatsApp Business API, and RSVP clicks hit a webhook that fires the auto-reply.</span></div>
+        <div class="note">${ic('info')}<span>Prototype mode: delivery is simulated. In production this plugs into an email provider (e.g. Resend / SendGrid), and RSVP clicks hit a webhook that fires the auto-reply.</span></div>
       </div>
 
       <div class="card mt">
@@ -1403,7 +1403,7 @@ function vInvites(s){
         <div class="tabs">${tabs.map(([k,l])=>`<button data-action="tpl-tab" data-k="${k}" class="${ui.tplTab===k?'on':''}">${l}</button>`).join('')}</div>
         ${ui.tplTab==='body'?`<div class="field"><label>Email subject</label><input class="input tplf" data-k="subject" value="${esc(T.subject)}"></div>`:''}
         <div class="field"><label>${tabs.find(t=>t[0]===ui.tplTab)[1]} message</label><textarea class="input tplf" data-k="${ui.tplTab}" rows="9">${esc(T[ui.tplTab])}</textarea></div>
-        <div class="chips">${['first_name','name','event','date','time','venue','code','plus_one','rsvp_by','company','sender'].map(k=>`<span class="chip" data-action="ph" data-ph="{{${k}}}">{{${k}}}</span>`).join('')}</div>
+        <div class="chips">${['first_name','name','event','date','time','venue','code','rsvp_by','company','sender'].map(k=>`<span class="chip" data-action="ph" data-ph="{{${k}}}">{{${k}}}</span>`).join('')}</div>
         <div class="row"><span class="muted" style="font-size:12px">${ui.tplTab==='accept'?'Sent automatically the moment a guest taps “I’ll attend”. Includes their QR pass.':ui.tplTab==='decline'?'Sent automatically when a guest taps “Can’t make it”.':ui.tplTab==='reminder'?'Sent to guests who haven’t RSVP’d when you click Remind.':'Every invitation includes the guest’s personal QR pass and RSVP buttons.'}</span><button class="btn sm ghost" data-action="tpl-reset" style="margin-left:auto">${ic('reset')} Reset</button></div>
       </div>
 
@@ -1414,22 +1414,17 @@ function vInvites(s){
         </tbody></table></div>
       </div>
 
-      <div class="grid g2 mt">
-        <div class="card">
-          <h3>Event</h3>
+      <div class="card mt">
+        <h3>Event details</h3>
+        <div class="grid g2">
           <div class="field"><label>Event name</label><input class="input evf" data-k="name" value="${esc(e.name)}"></div>
-          <div class="grid g2"><div class="field"><label>Date</label><input class="input evf" type="date" data-k="date" value="${esc(e.date)}"></div><div class="field"><label>Time</label><input class="input evf" type="time" data-k="time" value="${esc(e.time)}"></div></div>
           <div class="field"><label>Venue</label><input class="input evf" data-k="venue" value="${esc(e.venue)}"></div>
           <div class="field"><label>Tagline</label><input class="input evf" data-k="tagline" value="${esc(e.tagline||'')}"></div>
-          <div class="grid g2"><div class="field"><label>Dress code</label><input class="input evf" data-k="dress" value="${esc(e.dress||'')}"></div><div class="field"><label>RSVP by</label><input class="input evf" type="date" data-k="rsvpBy" value="${esc(e.rsvpBy||'')}"></div></div>
           <div class="field"><label>Sender name</label><input class="input evf" data-k="sender" value="${esc(e.sender)}"></div>
-          <div class="toggle" style="padding-bottom:0"><div><b>Allow +1</b><small>Guests can add a plus-one when they RSVP</small></div><label class="sw"><input type="checkbox" data-action="ev-plus" ${e.allowPlusOne?'checked':''}><span></span></label></div>
+          <div class="field"><label>Dress code</label><input class="input evf" data-k="dress" value="${esc(e.dress||'')}"></div>
+          <div class="field"><label>RSVP by</label><input class="input evf" type="date" data-k="rsvpBy" value="${esc(e.rsvpBy||'')}"></div>
         </div>
-        <div class="card">
-          <h3>Channels</h3>
-          ${[['email','mail','Email','Rich invite with QR pass'],['whatsapp','wa','WhatsApp','Pass image + RSVP link'],['sms','sms','SMS','Short link to the pass']].map(([k,i,l,d])=>`<div class="toggle"><div class="row" style="gap:12px">${ic(i)}<div><b>${l}</b><small>${d}</small></div></div><label class="sw"><input type="checkbox" data-action="channel" data-k="${k}" ${state.channels[k]?'checked':''}><span></span></label></div>`).join('')}
-          <div class="note">${ic('info')}<span>Event ID <span class="code">${e.eventId}</span> is embedded in every QR so passes can't be reused at other events.</span></div>
-        </div>
+        <div class="note" style="margin-top:0">${ic('info')}<span>Dates and start times come from the Programme above. Event ID <span class="code">${e.eventId}</span> is embedded in every QR so passes can't be reused at other events.</span></div>
       </div>
     </div>
 
@@ -1609,7 +1604,7 @@ function vReports(s){
     ${kpi('Open rate',pct(s.openedAll,s.delivered)+'%',`${s.openedAll} opened`,pct(s.openedAll,s.delivered))}
     ${kpi('Response rate',pct(s.accepted+s.declinedAll,s.delivered)+'%',`${s.accepted+s.declinedAll} replied`,pct(s.accepted+s.declinedAll,s.delivered))}
     ${kpi('Acceptance',pct(s.accepted,s.accepted+s.declinedAll)+'%',`${s.accepted} yes · ${s.declinedAll} no`,pct(s.accepted,s.accepted+s.declinedAll))}
-    ${kpi('Attendance',pct(s.arrivedTotal,s.headcount)+'%',`${s.arrivedTotal} of ${s.headcount} incl. +1s`,pct(s.arrivedTotal,s.headcount))}
+    ${kpi('Attendance',pct(s.checkedAll,s.accepted)+'%',`${s.checkedAll} of ${s.accepted} attended`,pct(s.checkedAll,s.accepted))}
     ${kpi('Certificates',s.eligible,`eligible · ${s.certSent} sent`,pct(s.eligible,s.accepted))}
   </div>
   <div class="grid g2 mt">
@@ -1623,8 +1618,8 @@ function vReports(s){
   <div class="card mt"><h3>By company</h3><div class="tbl-wrap"><table><thead><tr><th>Company</th><th>Invited</th><th>Confirmed</th><th>Checked in</th><th>Attendance</th></tr></thead><tbody>
     ${Object.entries(comp).sort((a,b)=>b[1].t-a[1].t).map(([k,v])=>`<tr><td><b style="font-weight:600">${esc(k)}</b></td><td>${v.t}</td><td>${v.a}</td><td>${v.c}</td><td style="width:30%"><div class="bar-row" style="grid-template-columns:1fr 44px"><div class="track"><div class="fill" style="width:${pct(v.c,v.t)}%"></div></div><span class="n">${pct(v.c,v.t)}%</span></div></td></tr>`).join('')}
   </tbody></table></div></div>
-  <div class="card mt"><h3>Full guest report<span class="sub">${s.total} guests</span></h3><div class="tbl-wrap" style="max-height:520px"><table><thead><tr><th>Guest</th><th>Contact</th><th>Code</th><th>Status</th><th>+1</th><th>Invited</th><th>Opened</th><th>RSVP</th><th>Checked in</th><th>Gate</th></tr></thead><tbody>
-    ${state.guests.map(g=>`<tr><td class="gname"><b>${esc(g.name)}</b><small>${esc(g.company||'')}</small></td><td class="gname"><b style="font-weight:400">${esc(g.email||'—')}</b><small>${esc(g.phone||'')}</small></td><td><span class="code">${g.code}</span></td><td>${pill(status(g))}</td><td>${g.plusOne?`${esc(g.plusOne.name)}${g.plusOne.checkedInAt?' ✓':''}`:'<span class="muted">—</span>'}</td><td class="muted">${fmtDT(g.sentAt)||'—'}</td><td class="muted">${fmtDT(g.openedAt)||'—'}</td><td class="muted">${g.rsvp?fmtDT(g.rsvpAt):'—'}</td><td class="muted">${fmtDT(g.checkedInAt)||'—'}</td><td class="muted">${esc(g.gate||'—')}</td></tr>`).join('')}
+  <div class="card mt"><h3>Full guest report<span class="sub">${s.total} guests</span></h3><div class="tbl-wrap" style="max-height:520px"><table><thead><tr><th>Guest</th><th>Contact</th><th>Code</th><th>Status</th><th>Days</th><th>Invited</th><th>Opened</th><th>RSVP</th><th>Checked in</th><th>Gate</th></tr></thead><tbody>
+    ${state.guests.map(g=>`<tr><td class="gname"><b>${esc(g.name)}</b><small>${esc(g.company||'')}</small></td><td class="gname"><b style="font-weight:400">${esc(g.email||'—')}</b><small>${esc(g.phone||'')}</small></td><td><span class="code">${g.code}</span></td><td>${pill(status(g))}</td><td>${dots(g)} ${attCount(g)}/${state.sessions.length}</td><td class="muted">${fmtDT(g.sentAt)||'—'}</td><td class="muted">${fmtDT(g.openedAt)||'—'}</td><td class="muted">${g.rsvp?fmtDT(g.rsvpAt):'—'}</td><td class="muted">${fmtDT(g.checkedInAt)||'—'}</td><td class="muted">${esc(g.gate||'—')}</td></tr>`).join('')}
   </tbody></table></div></div>`;
 }
 
@@ -1683,7 +1678,7 @@ function rsvpPage(g){
         ${allow?`<label class="rp-l">Are you bringing a +1?</label>
         <div class="seg"><button type="button" data-action="gv-p1" data-v="0" class="${gv.p1?'':'on'}">Just me</button><button type="button" data-action="gv-p1" data-v="1" class="${gv.p1?'on':''}">Me + 1 guest</button></div>
         ${gv.p1?`<div class="rp-grid"><div><label class="rp-l">Guest’s full name</label><input class="rp-in gvf" data-k="p1name" value="${esc(gv.p1name)}" placeholder="e.g. Nadine Fawzy"></div><div><label class="rp-l">Guest’s email <span>(optional)</span></label><input class="rp-in gvf" data-k="p1email" type="email" value="${esc(gv.p1email)}" placeholder="We’ll send their pass"></div></div>`:''}`
-        :`<div class="rp-note">This invitation is for you only.</div>`}
+        :''}
         <label class="rp-l">Dietary requirements <span>(optional)</span></label><input class="rp-in gvf" data-k="diet" value="${esc(gv.diet)}" placeholder="e.g. vegetarian, nut allergy">`
       :`<label class="rp-l">Message to the hosts <span>(optional)</span></label><textarea class="rp-in gvf" data-k="note" rows="3" placeholder="Wishing you a great event!">${esc(gv.note)}</textarea>`}
       <button class="rp-submit" type="submit">${v==='accepted'?'Confirm RSVP':'Send response'}</button>
@@ -1740,18 +1735,18 @@ function gvReset(g){
 }
 
 /* ============ Exports ============ */
-function guestRows(){return state.guests.map(g=>({...attRow(g),'Name':g.name,'Email':g.email,'Phone':g.phone,'Company':g.company,'Pass code':g.code,'Status':ST[status(g)],'Email valid':g.emailValid?'Yes':'No','Invited at':fmtDT(g.sentAt),'Opened at':fmtDT(g.openedAt),'RSVP':g.rsvp?(g.rsvp==='accepted'?'Confirmed':'Declined'):'','RSVP at':fmtDT(g.rsvpAt),'Checked in at':fmtDT(g.checkedInAt),'Gate':g.gate||'','Plus one':g.plusOne?g.plusOne.name:'','Plus one code':g.plusOne?g.plusOne.code:'','Plus one checked in':g.plusOne?fmtDT(g.plusOne.checkedInAt):'','Dietary':g.dietary||'','Note':g.note||'','Reminders':g.reminders||0}))}
+function guestRows(){return state.guests.map(g=>({...attRow(g),'Name':g.name,'Email':g.email,'Phone':g.phone,'Company':g.company,'Pass code':g.code,'Status':ST[status(g)],'Email valid':g.emailValid?'Yes':'No','Invited at':fmtDT(g.sentAt),'Opened at':fmtDT(g.openedAt),'RSVP':g.rsvp?(g.rsvp==='accepted'?'Confirmed':'Declined'):'','RSVP at':fmtDT(g.rsvpAt),'Dietary':g.dietary||'','Note':g.note||'','Reminders':g.reminders||0}))}
 function attRow(g){const o={'Name':g.name,'Email':g.email,'Organisation':g.company,'Source':g.walkIn?'Walk-in':'Invited'};state.sessions.forEach(x=>{const a=g.att&&g.att[x.id];o[sName(x)]=a?`${fmtDT(a.t)}${a.src==='walk-in'?' (walk-in)':a.src!=='scan'?' (manual)':''}`:''});o['Days attended']=`${attCount(g)}/${state.sessions.length}`;o['Certificate']=g.certSentAt?'Sent':eligible(g)?'Eligible':'Not eligible';o['Missing']=eligible(g)?'':missingS(g).map(sName).join(', ');return o}
 function summaryLines(){const s=stats(),e=state.event;return[
  ['Event',e.name],['Date',`${fmtDate(e.date)} ${e.time}`],['Venue',e.venue],['Generated',new Date().toLocaleString('en-GB')],[],
- ['Total guests',s.total],['Walk-ins (registered at the door)',s.walkins],['Invitations sent',s.sent],['Delivered',s.delivered],['Bounced',s.bounced],['Opened',s.openedAll],['Confirmed',s.accepted],['Declined',s.declinedAll],['Awaiting RSVP',s.noRsvp],['Plus-ones confirmed',s.plusOnes],['Expected headcount',s.headcount],['Checked in (guests)',s.checkedAll],['Checked in (incl. +1s)',s.arrivedTotal],['No-shows',state.guests.filter(g=>g.rsvp==='accepted'&&!g.checkedInAt).length],
+ ['Total guests',s.total],['Walk-ins (registered at the door)',s.walkins],['Invitations sent',s.sent],['Delivered',s.delivered],['Bounced',s.bounced],['Opened',s.openedAll],['Confirmed',s.accepted],['Declined',s.declinedAll],['Awaiting RSVP',s.noRsvp],['Attended at least one day',s.checkedAll],['No-shows',state.guests.filter(g=>g.rsvp==='accepted'&&!g.checkedInAt).length],
  [],['Certificate eligible',s.eligible],['Certificates sent',s.certSent],...state.sessions.map((x,i)=>[`Attended ${sName(x)}`,s.sess[i]]),[],['Delivery rate',pct(s.delivered,s.sent)+'%'],['Open rate',pct(s.openedAll,s.delivered)+'%'],['Acceptance rate',pct(s.accepted,s.accepted+s.declinedAll)+'%'],['Attendance rate',pct(s.checkedAll,s.accepted)+'%'],['Auto-replies sent',s.autoreplies]]}
 function exportXlsx(){
   if(typeof XLSX==='undefined'){toast('Excel library failed to load');return}
   const wb=XLSX.utils.book_new();
   const ws1=XLSX.utils.aoa_to_sheet([['KODE — Event Report'],[],...summaryLines()]);ws1['!cols']=[{wch:22},{wch:44}];XLSX.utils.book_append_sheet(wb,ws1,'Summary');
   const wsA=XLSX.utils.json_to_sheet(state.guests.map(attRow));wsA['!cols']=[26,30,26,...state.sessions.map(()=>20),16,14,40].map(w=>({wch:w}));XLSX.utils.book_append_sheet(wb,wsA,'Attendance');
-  const ws2=XLSX.utils.json_to_sheet(guestRows());ws2['!cols']=[22,30,18,18,14,12,10,18,18,10,18,18,14,20,14,18,20,24,10].map(w=>({wch:w}));XLSX.utils.book_append_sheet(wb,ws2,'Guests');
+  const ws2=XLSX.utils.json_to_sheet(guestRows());ws2['!cols']=[24,30,24,10,16,10,10,40,24,30,18,18,14,12,10,18,18,10,18,16,24,10].map(w=>({wch:w}));XLSX.utils.book_append_sheet(wb,ws2,'Guests');
   const ws3=XLSX.utils.json_to_sheet(state.outbox.map(m=>{const g=state.guests.find(x=>x.id===m.gid);return{'Time':fmtDT(m.t),'Type':KIND[m.kind],'Guest':g?g.name:'','Channel':m.channel,'To':m.to,'Subject':m.subject,'Status':m.status}}));XLSX.utils.book_append_sheet(wb,ws3,'Messages');
   const ws4=XLSX.utils.json_to_sheet(state.scans.map(x=>{const g=state.guests.find(y=>y.id===x.gid);return{'Time':fmtDT(x.t),'Result':x.type==='ok'?'Granted':x.type==='dup'?'Duplicate':x.type==='warn'?'Declined RSVP':'Rejected','Guest':x.name||(g?g.name:''),'Code':x.code,'Day':x.gate}}));XLSX.utils.book_append_sheet(wb,ws4,'Scans');
   const ws5=XLSX.utils.json_to_sheet(state.log.map(l=>({'Time':fmtDT(l.t),'Event':l.text})));XLSX.utils.book_append_sheet(wb,ws5,'Activity');
