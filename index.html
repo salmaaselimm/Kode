@@ -509,6 +509,11 @@ body.present .exit-present{display:inline-flex}
 .em-done li{padding:6px 0;border-bottom:1px solid #f0f0f0;font-size:14px}
 .em-done li::before{content:"✓  ";font-weight:900}
 @media (max-width:860px){.sess-bar{grid-template-columns:1fr 1fr}.nav{overflow-x:auto;justify-content:flex-start}.nav a{min-width:60px}}
+.tag-walk{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:#1f2a3a;color:#aac4ff;border:1px solid #2f3f5a;border-radius:5px;padding:1px 6px;margin-left:6px;vertical-align:1px}
+.walk-ok{display:grid;grid-template-columns:200px 1fr;gap:22px;align-items:center;margin-top:16px}
+.walk-ok .q{background:#fff;border-radius:14px;padding:10px}
+.walk-ok .q svg{width:100%;height:auto;display:block}
+@media (max-width:600px){.walk-ok{grid-template-columns:1fr}.walk-ok .q{max-width:240px;margin:0 auto}}
 .hide{display:none!important}
 svg[viewBox="0 0 24 24"]{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none;vertical-align:-4px}
 .viewfinder .cta svg{width:42px;height:42px;stroke-width:1.5;margin-bottom:8px;display:block;margin-inline:auto}
@@ -699,7 +704,7 @@ function eventDates(long=true){
 function recordAttendance(g,x,t=now(),src='scan',p=null){
   const o=p||g;o.att=o.att||{};o.att[x.id]={t,src,synced:!ui.offline};
   if(!o.checkedInAt){o.checkedInAt=t;o.gate=x.room}
-  log('checkin',`${p?`${p.name} (+1 of ${g.name})`:g.name} attended ${sName(x)}${src==='manual'?' (marked manually)':src==='override'?' (override)':''}`,g.id,t);
+  log('checkin',`${p?`${p.name} (+1 of ${g.name})`:g.name} attended ${sName(x)}${src==='manual'?' (marked manually)':src==='override'?' (override)':src==='walk-in'?' (walk-in)':''}`,g.id,t);
   if(!p&&eligible(g))log('cert',`${g.name} attended ${allDays()} — certificate eligible`,g.id,t+1);
 }
 function stats(){
@@ -713,7 +718,8 @@ function stats(){
   c.checkedAll=G.filter(g=>g.checkedInAt).length;
   c.noRsvp=G.filter(g=>g.sentAt&&!g.bounced&&!g.rsvp).length;
   c.autoreplies=state.outbox.filter(m=>m.kind.startsWith('auto')).length;
-  c.invalid=G.filter(g=>!g.emailValid).length;
+  c.invalid=G.filter(g=>!g.emailValid&&!g.walkIn).length;
+  c.walkins=G.filter(g=>g.walkIn).length;
   c.plusOnes=G.filter(g=>g.rsvp==='accepted'&&g.plusOne).length;
   c.plusArrived=G.filter(g=>g.plusOne&&g.plusOne.checkedInAt).length;
   c.headcount=c.accepted+c.plusOnes;
@@ -1189,6 +1195,36 @@ function openMessage(id){
   openModal(`<div class="eyebrow">${esc(KIND[m.kind])} · ${esc(m.channel)} · <span class="${m.status==='delivered'?'ok-t':'bad-t'}">${m.status}</span></div><h2 style="margin-bottom:14px">${esc(m.subject)}</h2>${bodyHtml}
     ${g?`<div class="row mt" style="justify-content:flex-end"><button class="btn" data-action="view" data-id="${g.id}">${ic('eye')} Open guest</button><button class="btn pri" data-action="gv-goto" data-id="${g.id}">${ic('mail')} Guest experience</button></div>`:''}`,m.channel==='email');
 }
+function openWalkIn(){
+  const ses=curSession();
+  openModal(`<div class="eyebrow">Walk-in registration · ${esc(sName(ses))}</div><h2>Register a guest at the door</h2><p class="muted">Creates their QR pass, adds them to the guest list and checks them in.</p>
+  <form id="walkForm" class="mt" autocomplete="off">
+    <div class="field"><label>Full name *</label><input class="input" name="name" required placeholder="e.g. Dr. Mona Saleh"></div>
+    <div class="grid g2"><div class="field"><label>Mobile *</label><input class="input" name="phone" required placeholder="+20 1xx xxx xxxx"></div><div class="field"><label>Email <span class="muted">(to email the pass)</span></label><input class="input" name="email" type="email" placeholder="optional"></div></div>
+    <div class="field"><label>Organisation</label><input class="input" name="company" placeholder="Hospital / clinic (optional)"></div>
+    <div class="toggle" style="padding-top:0"><div><b>Check in now for ${esc(sName(ses))}</b><small>Counts as today's attendance</small></div><label class="sw"><input type="checkbox" name="checkin" checked><span></span></label></div>
+    <div class="row mt" style="justify-content:flex-end"><button type="button" class="btn" data-action="close-modal">Cancel</button><button class="btn pri" type="submit">${ic('qr')} Register & issue pass</button></div>
+  </form>`);
+  setTimeout(()=>{const i=document.querySelector('#walkForm [name=name]');if(i)i.focus()},50);
+  $('#walkForm').addEventListener('submit',e=>{
+    e.preventDefault();const f=new FormData(e.target);
+    const name=String(f.get('name')||'').trim(),phone=String(f.get('phone')||'').trim(),email=String(f.get('email')||'').trim().toLowerCase(),company=String(f.get('company')||'').trim();
+    if(!name||!phone){toast('Name and mobile are required');return}
+    const dup=state.guests.find(g=>(email&&g.email===email)||(g.phone&&g.phone.replace(/\D/g,'')===phone.replace(/\D/g,'')));
+    if(dup){openModal(`<h2>Already on the list</h2><p class="muted">${esc(dup.name)} is already registered with this ${dup.email===email&&email?'email':'mobile number'}.</p><div class="row mt" style="justify-content:flex-end"><button class="btn" data-action="close-modal">Cancel</button>${dup.att&&dup.att[ses.id]?'':`<button class="btn pri" data-action="mark-att" data-id="${dup.id}">Check them in for ${esc(sName(ses))}</button>`}</div>`);return}
+    const t=now(),g={id:uid(),name,email,phone,company,code:genCode(),emailValid:EMAIL_RE.test(email),walkIn:true,addedAt:t,rsvp:'accepted',rsvpAt:t,sentAt:t};
+    state.guests.push(g);log('import',`${name} registered at the door (walk-in)`,g.id,t);
+    if(f.get('checkin')){recordAttendance(g,ses,t+500,'walk-in');state.scans.unshift({t:t+500,type:'ok',gid:g.id,name,code:g.code,gate:sName(ses),sid:ses.id,synced:!ui.offline});ui.lastScan={type:'ok',title:`Walk-in registered · ${sName(ses)}`,sub:`${name} — ${attCount(g)} of ${state.sessions.length} days`,gid:g.id,t:t+500,gate:sName(ses),sid:ses.id,prog:state.sessions.map(y=>!!(g.att&&g.att[y.id]))}}
+    let mailed=false;if(g.emailValid){const was=state.channels.email;state.channels.email=true;const wa=state.channels.whatsapp,sm=state.channels.sms;state.channels.whatsapp=false;state.channels.sms=false;mailed=deliver(g,'auto-accept',t+800);state.channels.whatsapp=wa;state.channels.sms=sm;state.channels.email=was}
+    commit();
+    openModal(`<div class="eyebrow">Walk-in registered${ui.offline?' · saved offline':''}</div><h2>${esc(name)} is on the list ✓</h2>
+      <div class="walk-ok"><div class="q">${qrSvg(payload(g))}</div><div>
+        <div class="kv" style="margin-top:0"><span>Pass code</span><b><span class="code">${g.code}</span></b><span>Mobile</span><b>${esc(phone)}</b><span>Checked in</span><b>${g.att&&g.att[ses.id]?esc(sName(ses))+' · '+fmtTime(g.att[ses.id].t):'Not yet'}</b><span>Pass emailed</span><b>${mailed?esc(email):'No email given — ask them to photograph this QR'}</b></div>
+        <div class="note" style="margin-top:0">${ic('info')}<span>They use this same QR on ${state.sessions.length===2?'the other day':'every day'}.</span></div>
+      </div></div>
+      <div class="row mt" style="justify-content:flex-end"><button class="btn" data-action="download-pass" data-id="${g.id}">${ic('download')} Pass (PNG)</button><button class="btn" data-action="close-modal">Done</button><button class="btn pri" data-action="walk-in">${ic('plus')} Register another</button></div>`);
+  });
+}
 function openAddGuest(){
   openModal(`<h2>Add guest</h2><p class="muted">They'll get a unique QR pass immediately.</p>
   <form id="addForm" class="mt">
@@ -1264,7 +1300,7 @@ function vDashboard(s){
   const att=pct(s.eligible,s.accepted),C=2*Math.PI*52;
   return`
   <div class="grid g6">
-    ${kpi('Guests',s.total,`${s.invalid} need attention`,100)}
+    ${kpi('Guests',s.total,`${s.walkins?`${s.walkins} walk-ins · `:''}${s.invalid} need attention`,100)}
     ${kpi('Delivered',s.delivered,`of ${s.sent} sent · ${s.bounced} bounced`,pct(s.delivered,s.total))}
     ${kpi('Opened',s.openedAll,`${pct(s.openedAll,s.delivered)}% open rate`,pct(s.openedAll,s.total))}
     ${kpi('Confirmed',s.accepted,`${s.autoreplies} auto-replies sent`,pct(s.accepted,s.total))}
@@ -1307,7 +1343,7 @@ function vGuests(s){
   <div class="tbl-wrap"><table>
     <thead><tr><th>Guest</th><th>Email</th><th>Phone</th><th>QR pass</th><th>Status</th><th>Days</th><th>Last update</th><th></th></tr></thead>
     <tbody>${list.map(g=>{const st=status(g),lu=Math.max(g.checkedInAt||0,g.rsvpAt||0,g.openedAt||0,g.sentAt||0,g.addedAt||0);return`<tr>
-      <td class="gname"><b>${esc(g.name)}${g.plusOne?`<span class="plus" title="+1: ${esc(g.plusOne.name)}">+1</span>`:''}</b><small>${esc(g.company||'')}${g.plusOne?` · +1 ${esc(g.plusOne.name)}`:''}</small></td>
+      <td class="gname"><b>${esc(g.name)}${g.walkIn?'<span class="tag-walk">Walk-in</span>':''}${g.plusOne?`<span class="plus" title="+1: ${esc(g.plusOne.name)}">+1</span>`:''}</b><small>${esc(g.company||'')}${g.plusOne?` · +1 ${esc(g.plusOne.name)}`:''}</small></td>
       <td>${esc(g.email||'—')}${g.emailValid?'':'<span class="warn-txt">Invalid email</span>'}</td>
       <td style="white-space:nowrap">${esc(g.phone||'—')}</td>
       <td><span class="code">${g.code}</span></td>
@@ -1437,7 +1473,7 @@ function vScanner(s){
   const recent=state.scans.slice(0,12),pend=state.scans.filter(x=>x.synced===false).length;
   return`
   <div class="card">
-    <div class="eyebrow" style="margin-bottom:10px">Scanning for day</div>
+    <div class="row" style="justify-content:space-between;margin-bottom:10px"><div class="eyebrow">Scanning for day</div><button class="btn sm pri" data-action="walk-in">${ic('plus')} Register walk-in</button></div>
     <div class="sess-bar">${state.sessions.map((x,i)=>`<button class="sess ${x.id===ses.id?'on':''}" data-action="pick-session" data-id="${x.id}"><b>${esc(sName(x))}</b><small>${esc(fmtDate(x.date))} · ${esc(x.time)} · ${esc(x.room)}</small><div class="cnt">${s.sess[i]} / ${s.accepted} checked in</div></button>`).join('')}</div>
     <div class="netbar"><span class="net ${ui.offline?'off':''}">${ui.offline?'Offline — scanning continues':'Online · synced'}</span><span>${ic('check')} Guest list cached on this device (${s.total} guests)</span>${pend?`<span style="color:var(--warn)">${pend} scans waiting to sync</span>`:''}<button class="btn sm ghost" data-action="toggle-offline" style="margin-left:auto">${ic('wifi')} ${ui.offline?'Reconnect':'Simulate no internet'}</button></div>
   </div>
@@ -1477,7 +1513,7 @@ function vScanner(s){
 function findResults(){
   const q=ui.findQ.trim().toLowerCase();if(q.length<2)return'';
   const ses=curSession(),L=state.guests.filter(g=>[g.name,g.email,g.phone,g.code].join(' ').toLowerCase().includes(q)).slice(0,6);
-  if(!L.length)return`<div class="muted" style="font-size:13px">No guest matches “${esc(ui.findQ)}”.</div>`;
+  if(!L.length)return`<div class="fr"><div class="gname"><b>No guest matches “${esc(ui.findQ)}”</b><small>Not on the list? Register them now.</small></div><button class="btn sm pri" data-action="walk-in">${ic('plus')} Walk-in</button></div>`;
   return L.map(g=>`<div class="fr"><div class="gname"><b>${esc(g.name)}</b><small>${esc(g.email||g.phone||'')}</small></div>${dots(g)}${g.att&&g.att[ses.id]?`<span class="muted" style="font-size:12px">Already in</span>`:`<button class="btn sm pri" data-action="mark-att" data-id="${g.id}">Mark present</button>`}</div>`).join('');
 }
 
@@ -1504,8 +1540,8 @@ function vAttendance(s){
   </div>
   <div class="tbl-wrap"><table>
     <thead><tr><th>Guest</th>${state.sessions.map(x=>`<th>${esc(sShort(x))}</th>`).join('')}<th>Progress</th><th>Certificate</th><th></th></tr></thead>
-    <tbody>${list.map(g=>`<tr><td class="gname"><b>${esc(g.name)}</b><small>${esc(g.company||g.email||'')}</small></td>
-      ${state.sessions.map(x=>{const a=g.att&&g.att[x.id];return`<td class="att-cell ${a?'':'no'}">${a?`✓ ${fmtTime(a.t)}${a.src!=='scan'?'<span class="m">manual</span>':''}<small>${esc(fmtDate(x.date))}</small>`:'—'}</td>`}).join('')}
+    <tbody>${list.map(g=>`<tr><td class="gname"><b>${esc(g.name)}${g.walkIn?'<span class="tag-walk">Walk-in</span>':''}</b><small>${esc(g.company||g.email||'')}</small></td>
+      ${state.sessions.map(x=>{const a=g.att&&g.att[x.id];return`<td class="att-cell ${a?'':'no'}">${a?`✓ ${fmtTime(a.t)}${a.src==='walk-in'?'<span class="m">walk-in</span>':a.src!=='scan'?'<span class="m">manual</span>':''}<small>${esc(fmtDate(x.date))}</small>`:'—'}</td>`}).join('')}
       <td>${dots(g)} <b style="margin-left:6px">${attCount(g)}/${N}</b></td><td>${certPill(g)}</td>
       <td><div class="acts-cell">${eligible(g)?`<button class="iconbtn" title="View certificate" data-action="cert-view" data-id="${g.id}">${ic('award')}</button>`:''}<button class="iconbtn" title="Guest details" data-action="view" data-id="${g.id}">${ic('eye')}</button></div></td></tr>`).join('')||`<tr><td colspan="${N+4}" class="empty">No guests match.</td></tr>`}</tbody>
   </table></div>`;
@@ -1705,10 +1741,10 @@ function gvReset(g){
 
 /* ============ Exports ============ */
 function guestRows(){return state.guests.map(g=>({...attRow(g),'Name':g.name,'Email':g.email,'Phone':g.phone,'Company':g.company,'Pass code':g.code,'Status':ST[status(g)],'Email valid':g.emailValid?'Yes':'No','Invited at':fmtDT(g.sentAt),'Opened at':fmtDT(g.openedAt),'RSVP':g.rsvp?(g.rsvp==='accepted'?'Confirmed':'Declined'):'','RSVP at':fmtDT(g.rsvpAt),'Checked in at':fmtDT(g.checkedInAt),'Gate':g.gate||'','Plus one':g.plusOne?g.plusOne.name:'','Plus one code':g.plusOne?g.plusOne.code:'','Plus one checked in':g.plusOne?fmtDT(g.plusOne.checkedInAt):'','Dietary':g.dietary||'','Note':g.note||'','Reminders':g.reminders||0}))}
-function attRow(g){const o={'Name':g.name,'Email':g.email,'Organisation':g.company};state.sessions.forEach(x=>{const a=g.att&&g.att[x.id];o[sName(x)]=a?`${fmtDT(a.t)}${a.src!=='scan'?' (manual)':''}`:''});o['Days attended']=`${attCount(g)}/${state.sessions.length}`;o['Certificate']=g.certSentAt?'Sent':eligible(g)?'Eligible':'Not eligible';o['Missing']=eligible(g)?'':missingS(g).map(sName).join(', ');return o}
+function attRow(g){const o={'Name':g.name,'Email':g.email,'Organisation':g.company,'Source':g.walkIn?'Walk-in':'Invited'};state.sessions.forEach(x=>{const a=g.att&&g.att[x.id];o[sName(x)]=a?`${fmtDT(a.t)}${a.src==='walk-in'?' (walk-in)':a.src!=='scan'?' (manual)':''}`:''});o['Days attended']=`${attCount(g)}/${state.sessions.length}`;o['Certificate']=g.certSentAt?'Sent':eligible(g)?'Eligible':'Not eligible';o['Missing']=eligible(g)?'':missingS(g).map(sName).join(', ');return o}
 function summaryLines(){const s=stats(),e=state.event;return[
  ['Event',e.name],['Date',`${fmtDate(e.date)} ${e.time}`],['Venue',e.venue],['Generated',new Date().toLocaleString('en-GB')],[],
- ['Total guests',s.total],['Invitations sent',s.sent],['Delivered',s.delivered],['Bounced',s.bounced],['Opened',s.openedAll],['Confirmed',s.accepted],['Declined',s.declinedAll],['Awaiting RSVP',s.noRsvp],['Plus-ones confirmed',s.plusOnes],['Expected headcount',s.headcount],['Checked in (guests)',s.checkedAll],['Checked in (incl. +1s)',s.arrivedTotal],['No-shows',state.guests.filter(g=>g.rsvp==='accepted'&&!g.checkedInAt).length],
+ ['Total guests',s.total],['Walk-ins (registered at the door)',s.walkins],['Invitations sent',s.sent],['Delivered',s.delivered],['Bounced',s.bounced],['Opened',s.openedAll],['Confirmed',s.accepted],['Declined',s.declinedAll],['Awaiting RSVP',s.noRsvp],['Plus-ones confirmed',s.plusOnes],['Expected headcount',s.headcount],['Checked in (guests)',s.checkedAll],['Checked in (incl. +1s)',s.arrivedTotal],['No-shows',state.guests.filter(g=>g.rsvp==='accepted'&&!g.checkedInAt).length],
  [],['Certificate eligible',s.eligible],['Certificates sent',s.certSent],...state.sessions.map((x,i)=>[`Attended ${sName(x)}`,s.sess[i]]),[],['Delivery rate',pct(s.delivered,s.sent)+'%'],['Open rate',pct(s.openedAll,s.delivered)+'%'],['Acceptance rate',pct(s.accepted,s.accepted+s.declinedAll)+'%'],['Attendance rate',pct(s.checkedAll,s.accepted)+'%'],['Auto-replies sent',s.autoreplies]]}
 function exportXlsx(){
   if(typeof XLSX==='undefined'){toast('Excel library failed to load');return}
@@ -1770,7 +1806,7 @@ document.addEventListener('click',async e=>{
     case 'gv-scan':{const gg=gvGuest();if(!gg)break;processScan(`KODE|${state.event.eventId}|${gg.code}`,el.dataset.sid);ui.gv.door=ui.lastScan;render()}break;
     case 'pick-session':ui.sid=id;ui.lastScan=null;render();break;
     case 'toggle-offline':setOffline(!ui.offline);break;
-    case 'mark-att':{if(!g)break;const x=curSession();recordAttendance(g,x,now(),'manual');state.scans.unshift({t:now(),type:'ok',gid:g.id,name:g.name,code:'manual',gate:sName(x),sid:x.id,synced:!ui.offline});ui.lastScan={type:'ok',title:`Marked present · ${sName(x)}`,sub:`${g.name} — ${attCount(g)} of ${state.sessions.length} days (manual, logged for audit)`,gid:g.id,t:now(),gate:sName(x),sid:x.id,prog:state.sessions.map(y=>!!(g.att&&g.att[y.id]))};ui.findQ='';commit()}break;
+    case 'mark-att':{if(!g)break;closeModal();const x=curSession();recordAttendance(g,x,now(),'manual');state.scans.unshift({t:now(),type:'ok',gid:g.id,name:g.name,code:'manual',gate:sName(x),sid:x.id,synced:!ui.offline});ui.lastScan={type:'ok',title:`Marked present · ${sName(x)}`,sub:`${g.name} — ${attCount(g)} of ${state.sessions.length} days (manual, logged for audit)`,gid:g.id,t:now(),gate:sName(x),sid:x.id,prog:state.sessions.map(y=>!!(g.att&&g.att[y.id]))};ui.findQ='';commit()}break;
     case 'sim-session':simulateSession(curSession());break;
     case 'sim-day':simulateDay(+el.dataset.v);break;
     case 'cert-view':ui.certGid=id;location.hash='certificates';break;
@@ -1786,6 +1822,7 @@ document.addEventListener('click',async e=>{
     case 'load-sample':e.stopPropagation();importRows(SAMPLE_MED.map(r=>r.slice()),'Sample guest list (26 doctors)');break;
     case 'template':if(typeof XLSX==='undefined'){toast('Excel library failed to load');break}saveFile('KODE-guest-template.xlsx',templateBlob());break;
     case 'add-guest':openAddGuest();break;
+    case 'walk-in':openWalkIn();break;
     case 'view':e.preventDefault();openGuest(id);break;
     case 'send-one':if(!g)break;if(!activeChannels().length){toast('Turn on at least one channel');break}{const ok=deliver(g,'invite');commit();toast(ok?`Invitation sent to ${g.name}`:`Invitation to ${g.name} bounced`);if(ui.modalGuest===g.id)openGuest(g.id)}break;
     case 'checkin':if(!g)break;{const x=curSession();if(g.att&&g.att[x.id]){toast(`${g.name} is already in ${sName(x)}`);break}recordAttendance(g,x,now(),'manual');state.scans.unshift({t:now(),type:'ok',gid:g.id,name:g.name,code:'manual',gate:sName(x),sid:x.id,synced:!ui.offline});commit();toast(`${g.name} marked present for ${sName(x)}`)}if(ui.modalGuest===g.id)openGuest(g.id);break;
