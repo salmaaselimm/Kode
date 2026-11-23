@@ -636,13 +636,10 @@ function ago(t){const s=Math.max(0,(now()-t)/1000);if(s<45)return'just now';if(s
 function toast(msg){const d=document.createElement('div');d.className='toast';d.textContent=msg;$('#toasts').appendChild(d);setTimeout(()=>{d.style.transition='.3s';d.style.opacity='0';setTimeout(()=>d.remove(),300)},3200)}
 
 /* ============ State ============ */
-const LS='kode-qr-system-v3';
+const LS='kode-qr-system-v4';
 const DEFAULT_TPL={
-  subject:"Invitation: {{event}}",
-  body:"On behalf of the organising committee, we are pleased to invite you to {{event}}, taking place over two days at {{venue}}.\n\nAttendance on both days is required to receive your certificate of attendance.\n\nYour personal QR pass is below. The same code is scanned at the entrance on each day.",
-  accept:"Thank you for confirming — your place at {{event}} is reserved.\n\nPlease bring this QR pass on both days. It is scanned at the entrance each morning, and your certificate is issued once both days are recorded.",
-  decline:"Thank you for letting us know. We're sorry you can't join us for {{event}}, and we'll be sure to keep you informed about future programmes.",
-  reminder:"A gentle reminder that {{event}} begins on {{date}}. We haven't received your RSVP yet — please confirm below so we can reserve your seat.",
+  subject:"Your pass for {{event}}",
+  body:"We look forward to welcoming you to {{event}} at {{venue}}.\n\nYour personal QR pass is below. Please show it at the entrance on each day — the same code works for both days, and attending both days is required to receive your certificate of attendance.",
   cert:"Thank you for attending {{event}}. Our records show you attended both days, and your certificate of attendance is attached to this email.\n\nWe hope to welcome you again at our next programme."
 };
 const DEFAULT_SESSIONS=[
@@ -656,7 +653,7 @@ function freshState(){
     event:{...EVENT_EXTRAS,cert:{...DEFAULT_CERT},name:'Annual Medical Conference 2026',date:'2026-11-25',time:'09:00',venue:'Conference Centre, Cairo',sender:'The Organising Committee',eventId:'EVT'+Math.random().toString(36).slice(2,6).toUpperCase()},
     tpl:{...DEFAULT_TPL},
     channels:{email:true},
-    guests:[],outbox:[],log:[],scans:[],tplV:4
+    guests:[],outbox:[],log:[],scans:[],tplV:5
   };
 }
 let state=null;
@@ -664,7 +661,7 @@ try{state=JSON.parse(localStorage.getItem(LS))}catch(e){}
 if(!state||!state.event||!Array.isArray(state.guests))state=freshState();
 state.event={...EVENT_EXTRAS,...state.event};
 state.channels={email:true};state.event.allowPlusOne=false;
-if(state.tplV!==4){state.tpl={...DEFAULT_TPL};state.tplV=4}
+if(state.tplV!==5){state.tpl={...DEFAULT_TPL};state.tplV=5}
 if(!Array.isArray(state.sessions))state.sessions=DEFAULT_SESSIONS.map(x=>({...x}));
 state.event.cert={...DEFAULT_CERT,...(state.event.cert||{})};
 state.tpl={...DEFAULT_TPL,...state.tpl};
@@ -673,12 +670,13 @@ function commit(){persist();render()}
 function log(type,text,gid,t=now()){state.log.unshift({t,type,text,gid});if(state.log.length>3000)state.log.length=3000}
 
 const GV0={mode:'mail',msgId:null,rsvpV:'accepted',p1:false,p1name:'',p1email:'',diet:'',note:'',done:false,door:null};
-let ui={sid:null,offline:false,findQ:'',attQ:'',attF:'all',certGid:null,gv:{...GV0,gid:null,device:'desktop'},guestQ:'',guestF:'all',msgF:'all',tplTab:'body',previewId:null,lastScan:null,sendProg:null,lastField:null};
+let ui={tplTab:'body',sid:null,offline:false,findQ:'',attQ:'',attF:'all',certGid:null,gv:{...GV0,gid:null,device:'desktop'},guestQ:'',guestF:'all',msgF:'all',tplTab:'body',previewId:null,lastScan:null,sendProg:null,lastField:null};
 
 function genCode(){let c;do{let s='';for(let i=0;i<8;i++)s+=ALPH[Math.floor(Math.random()*ALPH.length)];c='KD-'+s.slice(0,4)+'-'+s.slice(4)}while(state.guests.some(g=>g.code===c||(g.plusOne&&g.plusOne.code===c)));return c}
 const payload=g=>`KODE|${state.event.eventId}|${g.code}`;
-function status(g){if(g.checkedInAt)return'checked';if(g.rsvp==='accepted')return'confirmed';if(g.rsvp==='declined')return'declined';if(g.bounced)return'bounced';if(g.openedAt)return'opened';if(g.sentAt)return'invited';return'pending'}
-const ST={pending:'Not invited',invited:'Invited',bounced:'Bounced',opened:'Opened',confirmed:'Confirmed',declined:'Declined',checked:'Checked in'};
+function status(g){if(g.checkedInAt)return'checked';if(g.bounced)return'bounced';if(g.openedAt)return'opened';if(g.sentAt||g.walkIn)return'invited';return'pending'}
+const expected=g=>!!g.walkIn||(!!g.sentAt&&!g.bounced);
+const ST={pending:'Pass not sent',invited:'Pass sent',opened:'Pass opened',bounced:'Bounced',checked:'Attended'};
 const pill=s=>`<span class="pill st-${s}">${ST[s]}</span>`;
 const sName=x=>x.type?`Day ${x.day} · ${x.type}`:`Day ${x.day}`;
 const sShort=x=>x.type?`D${x.day} ${x.type}`:`Day ${x.day}`;
@@ -709,26 +707,26 @@ function recordAttendance(g,x,t=now(),src='scan',p=null){
   if(!p&&eligible(g))log('cert',`${g.name} attended ${allDays()} — certificate eligible`,g.id,t+1);
 }
 function stats(){
-  const G=state.guests,c={total:G.length,pending:0,invited:0,bounced:0,opened:0,confirmed:0,declined:0,checked:0};
+  const G=state.guests,c={total:G.length,pending:0,invited:0,bounced:0,opened:0,checked:0};
   G.forEach(g=>c[status(g)]++);
   c.sent=G.filter(g=>g.sentAt).length;
   c.delivered=G.filter(g=>g.sentAt&&!g.bounced).length;
   c.openedAll=G.filter(g=>g.openedAt).length;
-  c.accepted=G.filter(g=>g.rsvp==='accepted').length;
+  c.accepted=G.filter(g=>expected(g)).length;
   c.declinedAll=G.filter(g=>g.rsvp==='declined').length;
   c.checkedAll=G.filter(g=>g.checkedInAt).length;
   c.noRsvp=G.filter(g=>g.sentAt&&!g.bounced&&!g.rsvp).length;
   c.autoreplies=state.outbox.filter(m=>m.kind.startsWith('auto')).length;
   c.invalid=G.filter(g=>!g.emailValid&&!g.walkIn).length;
   c.walkins=G.filter(g=>g.walkIn).length;
-  c.plusOnes=G.filter(g=>g.rsvp==='accepted'&&g.plusOne).length;
+  c.plusOnes=G.filter(g=>expected(g)&&g.plusOne).length;
   c.plusArrived=G.filter(g=>g.plusOne&&g.plusOne.checkedInAt).length;
   c.headcount=c.accepted+c.plusOnes;
   c.sess=state.sessions.map(x=>G.filter(g=>g.att&&g.att[x.id]).length);
   c.eligible=G.filter(eligible).length;
   c.certSent=G.filter(g=>g.certSentAt).length;
   c.incomplete=G.filter(g=>attCount(g)>0&&!eligible(g)).length;
-  c.complete=[0,1,2,3,4].map(n=>G.filter(g=>g.rsvp==='accepted'&&attCount(g)===n).length);
+  c.complete=Array.from({length:state.sessions.length+1},(_,i)=>i).map(n=>G.filter(g=>expected(g)&&attCount(g)===n).length);
   c.arrivedTotal=c.checkedAll+c.plusArrived;
   return c;
 }
@@ -864,7 +862,7 @@ function templateBlob(){
 
 /* ============ Messaging engine ============ */
 function activeChannels(){return Object.keys(state.channels).filter(k=>state.channels[k])}
-const KIND={certificate:'Certificate',invite:'Invitation',reminder:'Reminder','auto-accept':'Auto-reply · Confirmed','auto-decline':'Auto-reply · Declined'};
+const KIND={certificate:'Certificate',invite:'Pass email',reminder:'Reminder','auto-accept':'Auto-reply · Confirmed','auto-decline':'Auto-reply · Declined'};
 function deliver(g,kind,t=now()){
   const ch=activeChannels();let ok=false;
   const subject=kind==='certificate'?`Your certificate of attendance — ${state.event.name}`:kind==='invite'?fill(state.tpl.subject,g):kind==='reminder'?`Reminder: ${state.event.name}`:kind==='auto-accept'?`You're confirmed — ${state.event.name}`:`RSVP received — ${state.event.name}`;
@@ -895,7 +893,7 @@ function setRsvp(g,v,t=now(),x={}){
 }
 async function sendBatch(list,kind){
   if(ui.sendProg){toast('A send is already in progress');return}
-  if(!list.length){toast(kind==='invite'?'Everyone has already been invited':kind==='certificate'?'No eligible guests waiting for a certificate':'No one to remind');return}
+  if(!list.length){toast(kind==='invite'?'Every guest already has their pass':kind==='certificate'?'No eligible guests waiting for a certificate':'No one to remind');return}
   if(!activeChannels().length){toast('Turn on at least one channel');return}
   ui.sendProg={done:0,total:list.length,kind};render();
   let ok=0,bad=0;
@@ -905,16 +903,16 @@ async function sendBatch(list,kind){
     if(i%2===0||i===list.length-1){updateProg();await sleep(55)}
   }
   ui.sendProg=null;commit();
-  toast(`${{invite:'Invitations',reminder:'Reminders',certificate:'Certificates'}[kind]}: ${ok} delivered${bad?` · ${bad} bounced`:''}`);
+  toast(`${{invite:'Passes',reminder:'Reminders',certificate:'Certificates'}[kind]}: ${ok} delivered${bad?` · ${bad} bounced`:''}`);
 }
-function updateProg(){const p=ui.sendProg,el=$('#sendProg');if(!p||!el)return;el.querySelector('div').style.width=pct(p.done,p.total)+'%';const t=$('#sendProgT');if(t)t.textContent=`Sending ${{invite:'invitations',reminder:'reminders',certificate:'certificates'}[p.kind]}… ${p.done}/${p.total}`}
+function updateProg(){const p=ui.sendProg,el=$('#sendProg');if(!p||!el)return;el.querySelector('div').style.width=pct(p.done,p.total)+'%';const t=$('#sendProgT');if(t)t.textContent=`Sending ${{invite:'passes',reminder:'reminders',certificate:'certificates'}[p.kind]}… ${p.done}/${p.total}`}
 function simulateResponses(){
   const pool=state.guests.filter(g=>g.sentAt&&!g.bounced&&!g.rsvp);
   if(!pool.length){toast(state.guests.some(g=>g.sentAt)?'Everyone reachable has already responded':'Send invitations first');return}
   let o=0,a=0,d=0;const T=now();
   pool.forEach(g=>{
     if(g.openedAt||Math.random()<.82){
-      if(!g.openedAt){g.openedAt=Math.min(T,g.sentAt+rand(20,900)*1000);log('open',`${g.name} opened the invitation`,g.id,g.openedAt);o++}
+      if(!g.openedAt){g.openedAt=Math.min(T,g.sentAt+rand(20,900)*1000);log('open',`${g.name} opened their pass email`,g.id,g.openedAt);o++}
       const r=Math.random(),rt=Math.min(T,g.openedAt+rand(10,300)*1000);
       if(r<.72){const bring=state.event.allowPlusOne&&g.plusOneAllowed!==false&&Math.random()<.4;setRsvp(g,'accepted',rt,{plusOne:bring?{name:PLUS_NAMES[Math.floor(Math.random()*PLUS_NAMES.length)]}:null});a++}else if(r<.86){setRsvp(g,'declined',rt);d++}
     }
@@ -943,8 +941,7 @@ function processScan(raw,sidOverride){
       const {g,p}=f,o=p||g,who=p?`${p.name} (+1 of ${g.name})`:g.name;res={gid:g.id,name:who};
       res.sid=ses.id;
       if(o.att&&o.att[ses.id])Object.assign(res,{type:'dup',title:`Already checked in for ${sName(ses)}`,sub:`${who} was scanned in at ${fmtTime(o.att[ses.id].t)} — not counted twice.`});
-      else if(!p&&g.rsvp==='declined')Object.assign(res,{type:'warn',title:'Guest declined RSVP',sub:`${g.name} declined the invitation. Allow entry anyway?`,override:true});
-      else{recordAttendance(g,ses,now(),'scan',p);const n=attCount(o),N=state.sessions.length;Object.assign(res,{type:'ok',title:`Checked in · ${sName(ses)}`,sub:`${who} — ${n} of ${N} days${n===N?' · certificate eligible 🎓':''}${p||g.rsvp?'':' · no RSVP on file'}`})}
+            else{recordAttendance(g,ses,now(),'scan',p);const n=attCount(o),N=state.sessions.length;Object.assign(res,{type:'ok',title:`Checked in · ${sName(ses)}`,sub:`${who} — ${n} of ${N} days${n===N?' · certificate eligible 🎓':''}`})}
       res.prog=state.sessions.map(y=>!!(o.att&&o.att[y.id]));
     }
   }
@@ -977,7 +974,7 @@ async function scanImage(file){
 }
 function simulateSession(x,silent){
   const idx=state.sessions.indexOf(x);if(idx<0)return 0;
-  const pool=state.guests.filter(g=>g.rsvp==='accepted'&&!(g.att&&g.att[x.id]));
+  const pool=state.guests.filter(g=>expected(g)&&!(g.att&&g.att[x.id]));
   let n=0;
   pool.forEach(g=>{
     const prev=state.sessions.slice(0,idx).filter(y=>g.att&&g.att[y.id]).length;
@@ -988,7 +985,7 @@ function simulateSession(x,silent){
   return n;
 }
 function simulateDay(d){
-  if(!state.guests.some(g=>g.rsvp==='accepted')){toast('No confirmed guests yet — send invitations and simulate replies first');return}
+  if(!state.guests.some(g=>expected(g))){toast('Send the passes first');return}
   let n=0;state.sessions.filter(x=>x.day===d).forEach(x=>n+=simulateSession(x,true));
   state.log.sort((a,b)=>b.t-a.t);state.scans.sort((a,b)=>b.t-a.t);commit();toast(`Day ${d} simulated: ${n} guests checked in`);
 }
@@ -1128,10 +1125,9 @@ function renderEmail(kind,g,opt={}){
   const e=state.event,first=firstName(g),I=!!opt.interactive,allow=e.allowPlusOne&&g.plusOneAllowed!==false;
   let hero,body;
   if(kind==='invite'||kind==='reminder'){
-    hero=`<div class="em-hero"><div class="em-eyebrow">${kind==='invite'?'You’re invited':'Friendly reminder'}</div><h1>${esc(e.name)}</h1>${e.tagline?`<p>${esc(e.tagline)}</p>`:''}</div>`;
-    const rs=g.rsvp?`<div class="em-status ${g.rsvp}">${g.rsvp==='accepted'?`✓ You’re attending${g.plusOne?` with ${esc(g.plusOne.name)}`:''}`:'You’ve let us know you can’t make it'}${I?` · <a ${rsvpAttr(g,g.rsvp,I)}>Change response</a>`:''}</div>`
-      :`<div class="em-rsvp"><div class="em-q">Will you be joining us?</div><div class="em-btns"><a class="em-yes" ${rsvpAttr(g,'accepted',I)}>Yes, I’ll be there</a><a class="em-no" ${rsvpAttr(g,'declined',I)}>Sorry, I can’t make it</a></div><div class="em-small">${e.rsvpBy?`Kindly respond by ${esc(fmtDateLong(e.rsvpBy))}.`:''}${allow?' You’re welcome to bring a +1 — you can add them when you respond.':''}</div></div>`;
-    body=`<p>Dear ${esc(first)},</p>${paras(fill(kind==='invite'?state.tpl.body:state.tpl.reminder,g))}${emDetails()}${emProgramme()}${rs}${emPass(g.name,g.code,'Your personal pass')}${emCal(g)}<p class="em-sign">Warm regards,<br><b>${esc(e.sender)}</b></p>`;
+    hero=`<div class="em-hero"><div class="em-eyebrow">${kind==='invite'?'Your conference pass':'Friendly reminder'}</div><h1>${esc(e.name)}</h1>${e.tagline?`<p>${esc(e.tagline)}</p>`:''}</div>`;
+    const rs='';
+    body=`<p>Dear ${esc(first)},</p>${paras(fill(kind==='invite'?state.tpl.body:state.tpl.reminder,g))}${emDetails()}${emProgramme()}${rs}${emPass(g.name,g.code,'Your personal pass')}<div class="em-expect"><b>Good to know</b><ul><li>Doors open 30 minutes before the start each day.</li><li>Have this QR ready on your phone — no need to print.</li><li>The same QR is scanned at the entrance on both days.</li><li>Your certificate is emailed after Day 2 once ${allDays()} are recorded.</li></ul></div>${emCal(g)}<p class="em-sign">We look forward to seeing you,<br><b>${esc(e.sender)}</b></p>`;
   }else if(kind==='confirm'){
     hero=`<div class="em-hero"><div class="em-badge">✓</div><div class="em-eyebrow">RSVP confirmed</div><h1>See you there, ${esc(first)}</h1><p>${esc(e.name)} · ${esc(fmtDateLong(e.date))}</p></div>`;
     body=`<p>Dear ${esc(first)},</p>${paras(fill(state.tpl.accept,g))}${g.plusOne?`<p>Your +1, <b>${esc(g.plusOne.name)}</b>, has their own pass below — feel free to forward it to them${g.plusOne.email?` (we’ve also sent it to ${esc(g.plusOne.email)})`:''}.</p>`:''}
@@ -1147,8 +1143,8 @@ function renderEmail(kind,g,opt={}){
     hero=`<div class="em-hero"><div class="em-eyebrow">RSVP received</div><h1>We’ll miss you, ${esc(first)}</h1><p>${esc(e.name)} · ${esc(fmtDateLong(e.date))}</p></div>`;
     body=`<p>Dear ${esc(first)},</p>${paras(fill(state.tpl.decline,g))}<div class="em-btns"><a class="em-no" ${rsvpAttr(g,'accepted',I)}>Changed your mind? Update RSVP</a></div><p class="em-sign">Warm regards,<br><b>${esc(e.sender)}</b></p>`;
   }
-  const label={invite:'Invitation',reminder:'Reminder',confirm:'Confirmation',decline:'RSVP received',certificate:'Certificate'}[kind];
-  const bsrc=bannerSrc(e.banner),showB=bsrc&&(kind==='invite'||kind==='reminder'||(kind==='confirm'&&e.bannerConfirm));
+  const label={invite:'Your pass',reminder:'Reminder',confirm:'Confirmation',decline:'RSVP received',certificate:'Certificate'}[kind];
+  const bsrc=bannerSrc(e.banner),showB=bsrc&&(kind==='invite'||kind==='reminder'||(kind==='certificate'&&e.bannerConfirm));
   return`<div class="em"><div class="em-head">${logo()}<span>${label}</span></div>${showB?`<img class="em-banner" src="${bsrc}" alt="${esc(e.name)}">`:''}${hero}<div class="em-body">${body}</div>${emFoot(g)}</div>`;
 }
 function guestEmailHtml(g,interactive){return`<div class="em-wrap" style="border-radius:14px">${renderEmail('invite',g,{interactive})}</div>`}
@@ -1162,7 +1158,7 @@ function openGuest(id){
     <div class="eyebrow">Guest pass & invitation</div>
     <h2>${esc(g.name)} ${pill(st)}</h2>
     <div class="pass-grid">
-      <div>${guestEmailHtml(g,true)}<div class="note">${ic('info')}<span>This is exactly what the guest receives. The RSVP buttons are live — they open the RSVP page and trigger the auto-reply.</span></div></div>
+      <div>${guestEmailHtml(g,true)}<div class="note">${ic('info')}<span>This is exactly what the guest receives. It’s sent from the Invitations page, or on the spot for walk-ins.</span></div></div>
       <div>
         <div class="card">
           <h3>Details</h3>
@@ -1173,14 +1169,13 @@ function openGuest(id){
             ${g.dietary?`<span>Dietary</span><b>${esc(g.dietary)}</b>`:''}
             <span>Pass code</span><b><span class="code">${g.code}</span></b>
             <span>QR payload</span><b class="mono" style="font-size:12px;color:#aaa">${esc(payload(g))}</b>
-            <span>Invited</span><b>${g.sentAt?fmtDT(g.sentAt):'—'}</b>
-            <span>RSVP</span><b>${g.rsvp?`${g.rsvp==='accepted'?'Confirmed':'Declined'} · ${fmtDT(g.rsvpAt)}`:'—'}</b>
+            <span>Pass sent</span><b>${g.sentAt?fmtDT(g.sentAt):'—'}</b>
             <span>Check-in</span><b>${g.checkedInAt?`${fmtDT(g.checkedInAt)} · ${esc(g.gate)}`:'—'}</b>
           </div>
           <div class="row">
             <button class="btn sm pri" data-action="gv-goto" data-id="${g.id}">${ic('mail')} Guest experience</button>
             <button class="btn sm" data-action="download-pass" data-id="${g.id}">${ic('download')} Pass (PNG)</button>
-            <button class="btn sm" data-action="send-one" data-id="${g.id}">${ic('send')} ${g.sentAt?'Resend':'Send'} invite</button>
+            <button class="btn sm" data-action="send-one" data-id="${g.id}">${ic('send')} ${g.sentAt?'Resend':'Send'} pass</button>
             ${g.checkedInAt?'':`<button class="btn sm" data-action="checkin" data-id="${g.id}">${ic('door')} Check in</button>`}
             <button class="btn sm ghost" data-action="copy-code" data-id="${g.id}">${ic('copy')} Copy code</button>
           </div>
@@ -1212,10 +1207,10 @@ function openWalkIn(){
     if(!name||!phone){toast('Name and mobile are required');return}
     const dup=state.guests.find(g=>(email&&g.email===email)||(g.phone&&g.phone.replace(/\D/g,'')===phone.replace(/\D/g,'')));
     if(dup){openModal(`<h2>Already on the list</h2><p class="muted">${esc(dup.name)} is already registered with this ${dup.email===email&&email?'email':'mobile number'}.</p><div class="row mt" style="justify-content:flex-end"><button class="btn" data-action="close-modal">Cancel</button>${dup.att&&dup.att[ses.id]?'':`<button class="btn pri" data-action="mark-att" data-id="${dup.id}">Check them in for ${esc(sName(ses))}</button>`}</div>`);return}
-    const t=now(),g={id:uid(),name,email,phone,company,code:genCode(),emailValid:EMAIL_RE.test(email),walkIn:true,addedAt:t,rsvp:'accepted',rsvpAt:t,sentAt:t};
+    const t=now(),g={id:uid(),name,email,phone,company,code:genCode(),emailValid:EMAIL_RE.test(email),walkIn:true,addedAt:t};
     state.guests.push(g);log('import',`${name} registered at the door (walk-in)`,g.id,t);
     if(f.get('checkin')){recordAttendance(g,ses,t+500,'walk-in');state.scans.unshift({t:t+500,type:'ok',gid:g.id,name,code:g.code,gate:sName(ses),sid:ses.id,synced:!ui.offline});ui.lastScan={type:'ok',title:`Walk-in registered · ${sName(ses)}`,sub:`${name} — ${attCount(g)} of ${state.sessions.length} days`,gid:g.id,t:t+500,gate:sName(ses),sid:ses.id,prog:state.sessions.map(y=>!!(g.att&&g.att[y.id]))}}
-    let mailed=false;if(g.emailValid){const was=state.channels.email;state.channels.email=true;const wa=state.channels.whatsapp,sm=state.channels.sms;state.channels.whatsapp=false;state.channels.sms=false;mailed=deliver(g,'auto-accept',t+800);state.channels.whatsapp=wa;state.channels.sms=sm;state.channels.email=was}
+    let mailed=false;if(g.emailValid){const was=state.channels.email;state.channels.email=true;const wa=state.channels.whatsapp,sm=state.channels.sms;state.channels.whatsapp=false;state.channels.sms=false;mailed=deliver(g,'invite',t+800);state.channels.whatsapp=wa;state.channels.sms=sm;state.channels.email=was}
     commit();
     openModal(`<div class="eyebrow">Walk-in registered${ui.offline?' · saved offline':''}</div><h2>${esc(name)} is on the list ✓</h2>
       <div class="walk-ok"><div class="q">${qrSvg(payload(g))}</div><div>
@@ -1244,9 +1239,9 @@ function openAddGuest(){
 const VIEWS={
   dashboard:{t:'Dashboard',n:'Home',s:()=>`${state.event.name} · ${fmtDate(state.event.date)}`,ic:'dash',r:vDashboard},
   guests:{t:'Guests',s:()=>`${state.guests.length} on the list · import from Excel or CSV`,ic:'users',r:vGuests},
-  invitations:{t:'Invitations',n:'Invite',s:()=>'Event details, message templates, auto-replies and sending',ic:'send',r:vInvites},
-  'guest-view':{t:'Guest experience',n:'Guest view',s:()=>'Exactly what your guest sees — invitation, RSVP, auto-reply, daily check-ins, certificate',ic:'mail',r:vGuestView},
-  messages:{t:'Messages',n:'Inbox',s:()=>'Every invitation, reminder and auto-reply sent',ic:'inbox',r:vMessages},
+  invitations:{t:'Invitations',n:'Invite',s:()=>'Programme, email design and sending the passes',ic:'send',r:vInvites},
+  'guest-view':{t:'Guest experience',n:'Guest view',s:()=>'Exactly what your guest sees — pass email, daily check-ins, certificate',ic:'mail',r:vGuestView},
+  messages:{t:'Messages',n:'Inbox',s:()=>'Every pass and certificate email sent',ic:'inbox',r:vMessages},
   scanner:{t:'Scanner',s:()=>'One QR per guest — pick the day, scan at the entrance',ic:'scan',r:vScanner},
   attendance:{t:'Attendance',n:'Attend',s:()=>`Who attended which day · strict ${state.sessions.length}/${state.sessions.length} for the certificate`,ic:'check',r:vAttendance},
   certificates:{t:'Certificates',n:'Certs',s:()=>`Issued automatically to guests who attended ${allDays()}`,ic:'award',r:vCertificates},
@@ -1258,7 +1253,7 @@ function render(){
   const badges={guests:s.total||'',messages:state.outbox.length||'',certificates:s.eligible||''};
   $('#nav').innerHTML=Object.entries(VIEWS).map(([k,o])=>`<a href="#${k}" class="${k===v?'on':''}">${ic(o.ic,'ico')}<span class="lbl">${o.n&&innerWidth<860?o.n:o.t}</span>${badges[k]?`<span class="badge">${badges[k]}</span>`:''}</a>`).join('');
   const days=Math.ceil((new Date(state.event.date+'T'+(state.event.time||'00:00'))-now())/864e5);
-  $('#sideEvent').innerHTML=`<div class="lbl">Current event</div><div class="nm">${esc(state.event.name)}</div><div class="dt">${esc(fmtDate(state.event.date))} · ${esc(state.event.time)}</div><div class="dt muted" style="font-size:12px">${esc(state.event.venue)}</div><div class="cd">${isNaN(days)?'':days>0?`<b>${days}</b> days to go`:days===0?'<b>Today</b>':'Event passed'} · <b>${s.accepted}</b> confirmed</div>`;
+  $('#sideEvent').innerHTML=`<div class="lbl">Current event</div><div class="nm">${esc(state.event.name)}</div><div class="dt">${esc(fmtDate(state.event.date))} · ${esc(state.event.time)}</div><div class="dt muted" style="font-size:12px">${esc(state.event.venue)}</div><div class="cd">${isNaN(days)?'':days>0?`<b>${days}</b> days to go`:days===0?'<b>Today</b>':'Event passed'} · <b>${s.accepted}</b> expected</div>`;
   $('#vTitle').textContent=VIEWS[v].t;$('#vSub').textContent=VIEWS[v].s();
   $('#topActs').innerHTML=topActs(v,s);
   $('#view').innerHTML=VIEWS[v].r(s);
@@ -1268,7 +1263,7 @@ function topActs(v,s){
   if(v==='guests')return`<button class="btn" data-action="template">${ic('file')} Excel template</button><button class="btn" data-action="add-guest">${ic('plus')} Add guest</button><button class="btn pri" data-action="import">${ic('upload')} Import Excel</button>`;
   if(v==='attendance')return`<button class="btn" data-action="sim-day" data-v="1">${ic('bolt')} Simulate Day 1</button><button class="btn" data-action="sim-day" data-v="2">${ic('bolt')} Simulate Day 2</button><button class="btn pri" data-action="export-xlsx">${ic('download')} Export attendance</button>`;
   if(v==='reports')return`<button class="btn" data-action="copy-summary">${ic('copy')} Copy summary</button><button class="btn" data-action="export-csv">${ic('download')} CSV</button><button class="btn pri" data-action="export-xlsx">${ic('download')} Export Excel report</button>`;
-  if(v==='dashboard'&&s.total)return`<button class="btn ghost" data-action="reset">${ic('reset')} Reset demo</button><a class="btn" href="#scanner">${ic('scan')} Open scanner</a><a class="btn pri" href="#invitations">${ic('send')} Send invitations</a>`;
+  if(v==='dashboard'&&s.total)return`<button class="btn ghost" data-action="reset">${ic('reset')} Reset demo</button><a class="btn" href="#scanner">${ic('scan')} Open scanner</a><a class="btn pri" href="#invitations">${ic('send')} Send passes</a>`;
   return'';
 }
 
@@ -1278,44 +1273,41 @@ function vDashboard(s){
     <div>
       <div class="eyebrow">QR Invitation & Access System</div>
       <h2>From a spreadsheet to <em>certified attendance.</em></h2>
-      <p>Upload an Excel sheet of attendees. KODE issues each guest one QR pass, sends the invitation, auto-replies when they RSVP, scans them in on each day, and issues certificates automatically to everyone who attended both days.</p>
+      <p>Upload an Excel sheet of attendees. KODE issues each guest one QR pass, emails it, scans them in on each day, and issues certificates automatically to everyone who attended both days.</p>
       <div class="row"><button class="btn pri" data-action="import">${ic('upload')} Import Excel / CSV</button><button class="btn" data-action="load-sample">${ic('bolt')} Load sample guests</button><button class="btn ghost" data-action="template">${ic('file')} Get the Excel template</button></div>
     </div>
     <div class="hero-art">${logo('logo-big')}<div class="mini-qr">${qrSvg('KODE|DEMO|KD-HELO-2026')}</div></div>
   </div>
   <div class="grid g4 steps mt">
-    ${[['01','Import','Drop an Excel or CSV. Columns are detected automatically; duplicates and bad emails are flagged.'],['02','Invite','Personalised email invitations, each carrying the guest’s own QR pass.'],['03','Auto-reply','Guests RSVP in one tap and instantly get a confirmation with their QR pass and the programme.'],['04','Scan & certify','The same pass is scanned on each day. Guests who attend both days get their certificate automatically.']].map(x=>`<div class="card"><div class="n">${x[0]}</div><b>${x[1]}</b><p>${x[2]}</p></div>`).join('')}
+    ${[['01','Import','Drop an Excel or CSV. Columns are detected automatically; duplicates and bad emails are flagged.'],['02','Send passes','Each guest gets a branded email with their own QR pass and the programme.'],['03','Scan each day','Staff scan the same pass at the entrance on Day 1 and Day 2 — walk-ins registered on the spot.'],['04','Scan & certify','The same pass is scanned on each day. Guests who attend both days get their certificate automatically.']].map(x=>`<div class="card"><div class="n">${x[0]}</div><b>${x[1]}</b><p>${x[2]}</p></div>`).join('')}
   </div>`;
-  const funnel=[['Imported',s.total],['Delivered',s.delivered],['Opened',s.openedAll],['Confirmed',s.accepted],['Attended 1+',s.checkedAll],['Both days',s.eligible]];
+  const funnel=[['Imported',s.total],['Delivered',s.delivered],['Opened',s.openedAll],['Attended 1+',s.checkedAll],['Both days',s.eligible]];
   const tiles=[];
-  if(s.pending)tiles.push(`<div class="tile">${ic('send')}<div class="tx"><b>${s.pending} guests not invited yet</b><span class="muted">Send them their QR invitation</span></div><button class="btn sm pri" data-action="send-all">Send</button></div>`);
-  if(s.noRsvp)tiles.push(`<div class="tile">${ic('bell')}<div class="tx"><b>${s.noRsvp} awaiting RSVP</b><span class="muted">Nudge them with a reminder</span></div><button class="btn sm" data-action="remind">Remind</button></div>`);
-  if(s.noRsvp)tiles.push(`<div class="tile">${ic('bolt')}<div class="tx"><b>Demo: simulate guest replies</b><span class="muted">Opens + RSVPs trigger auto-replies</span></div><button class="btn sm" data-action="simulate-responses">Simulate</button></div>`);
+  if(s.pending)tiles.push(`<div class="tile">${ic('send')}<div class="tx"><b>${s.pending} guests without a pass yet</b><span class="muted">Email them their QR pass</span></div><button class="btn sm pri" data-action="send-all">Send</button></div>`);
   if(s.invalid)tiles.push(`<div class="tile">${ic('alert')}<div class="tx"><b>${s.invalid} invalid emails</b><span class="muted">Their invitation will bounce</span></div><a class="btn sm" href="#guests">Review</a></div>`);
   
-  if(s.accepted&&!s.checkedAll)tiles.push(`<div class="tile">${ic('bolt')}<div class="tx"><b>Demo: run the event</b><span class="muted">Simulate Day 1 and Day 2 check-ins</span></div><a class="btn sm" href="#attendance">Attendance</a></div>`);
+  if(s.delivered&&!s.checkedAll)tiles.push(`<div class="tile">${ic('bolt')}<div class="tx"><b>Demo: run the event</b><span class="muted">Simulate Day 1 and Day 2 check-ins</span></div><a class="btn sm" href="#attendance">Attendance</a></div>`);
   if(s.eligible>s.certSent)tiles.unshift(`<div class="tile">${ic('award')}<div class="tx"><b>${s.eligible-s.certSent} certificates ready</b><span class="muted">Guests who attended ${allDays()}</span></div><a class="btn sm pri" href="#certificates">Send</a></div>`);
-  tiles.unshift(`<div class="tile">${ic('mail')}<div class="tx"><b>See what guests receive</b><span class="muted">Invitation → RSVP → check-ins → certificate</span></div><a class="btn sm pri" href="#guest-view">Open</a></div>`);
+  tiles.unshift(`<div class="tile">${ic('mail')}<div class="tx"><b>See what guests receive</b><span class="muted">Pass email → daily check-ins → certificate</span></div><a class="btn sm pri" href="#guest-view">Open</a></div>`);
   if(!tiles.length)tiles.push(`<div class="tile">${ic('chart')}<div class="tx"><b>All caught up</b><span class="muted">Export the full report</span></div><a class="btn sm" href="#reports">Reports</a></div>`);
   const att=pct(s.eligible,s.accepted),C=2*Math.PI*52;
   return`
   <div class="grid g6">
     ${kpi('Guests',s.total,`${s.walkins?`${s.walkins} walk-ins · `:''}${s.invalid} need attention`,100)}
-    ${kpi('Delivered',s.delivered,`of ${s.sent} sent · ${s.bounced} bounced`,pct(s.delivered,s.total))}
+    ${kpi('Passes delivered',s.delivered,`of ${s.sent} sent · ${s.bounced} bounced`,pct(s.delivered,s.total))}
     ${kpi('Opened',s.openedAll,`${pct(s.openedAll,s.delivered)}% open rate`,pct(s.openedAll,s.total))}
-    ${kpi('Confirmed',s.accepted,`${s.autoreplies} auto-replies sent`,pct(s.accepted,s.total))}
-    ${kpi('Declined',s.declinedAll,`${s.noRsvp} still pending`,pct(s.declinedAll,s.total))}
-    ${kpi('Certificate eligible',s.eligible,`${pct(s.eligible,s.accepted)}% of confirmed · ${s.certSent} sent`,pct(s.eligible,s.accepted))}
+    ${state.sessions.map((x,i)=>kpi(esc(sName(x)),s.sess[i],`${pct(s.sess[i],s.accepted)}% of ${s.accepted} expected`,pct(s.sess[i],s.accepted))).join('')}
+        ${kpi('Certificate eligible',s.eligible,`${pct(s.eligible,s.accepted)}% of expected · ${s.certSent} sent`,pct(s.eligible,s.accepted))}
   </div>
   <div class="grid g-main mt">
-    <div class="card"><h3>Invitation funnel<span class="sub">from import to the door</span></h3><div class="bars">${funnel.map(([t,n])=>barRow(t,n,s.total)).join('')}</div></div>
+    <div class="card"><h3>Pass funnel<span class="sub">from import to certificate</span></h3><div class="bars">${funnel.map(([t,n])=>barRow(t,n,s.total)).join('')}</div></div>
     <div class="card"><h3>Certificates<span class="sub">strict ${state.sessions.length}/${state.sessions.length}</span></h3>
       <div class="ring-wrap">
         <svg class="ring" viewBox="0 0 132 132"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".5" stop-color="#8e8e8e"/><stop offset="1" stop-color="#e8e8e8"/></linearGradient></defs>
           <circle cx="66" cy="66" r="52" fill="none" stroke="#1e1e1e" stroke-width="12"/>
           <circle cx="66" cy="66" r="52" fill="none" stroke="url(#rg)" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C*att/100} ${C}" transform="rotate(-90 66 66)"/>
           <text x="66" y="68" text-anchor="middle" class="big">${att}%</text><text x="66" y="86" text-anchor="middle" class="sm">ELIGIBLE</text></svg>
-        <div class="legend" style="flex:1">${state.sessions.map((x,i)=>`<div><span class="muted">${esc(sName(x))}</span><b>${s.sess[i]}</b></div>`).join('')}<div><span class="muted">All ${state.sessions.length} sessions</span><b>${s.eligible}</b></div></div>
+        <div class="legend" style="flex:1">${state.sessions.map((x,i)=>`<div><span class="muted">${esc(sName(x))}</span><b>${s.sess[i]}</b></div>`).join('')}<div><span class="muted">${state.sessions.length===2?'Both days':'All days'}</span><b>${s.eligible}</b></div></div>
       </div>
     </div>
   </div>
@@ -1363,7 +1355,7 @@ function vGuests(s){
 function vInvites(s){
   const e=state.event,T=state.tpl;
   if(!ui.previewId||!state.guests.find(g=>g.id===ui.previewId))ui.previewId=(state.guests[0]||{}).id||null;
-  const tabs=[['body','Invitation'],['accept','Auto-reply: confirmed'],['decline','Auto-reply: declined'],['reminder','Reminder']];
+  const tabs=[['body','Pass email'],['cert','Certificate email']];
   const p=ui.sendProg;
   return`
   <div class="grid g-main">
@@ -1371,19 +1363,17 @@ function vInvites(s){
       <div class="card">
         <h3>Send</h3>
         <div class="grid g3" style="margin-bottom:6px">
-          <div><div class="eyebrow">Not invited</div><div class="counter"><span class="v">${s.pending}</span></div></div>
-          <div><div class="eyebrow">Awaiting RSVP</div><div class="counter"><span class="v">${s.noRsvp}</span></div></div>
-          <div><div class="eyebrow">Auto-replies</div><div class="counter"><span class="v">${s.autoreplies}</span></div></div>
+          <div><div class="eyebrow">Not sent yet</div><div class="counter"><span class="v">${s.pending}</span></div></div>
+          <div><div class="eyebrow">Delivered</div><div class="counter"><span class="v">${s.delivered}</span></div></div>
+          <div><div class="eyebrow">Opened</div><div class="counter"><span class="v">${s.openedAll}</span></div></div>
         </div>
         <div id="sendProg" class="progress ${p?'':'hide'}"><div style="width:${p?pct(p.done,p.total):0}%"></div></div>
         <div id="sendProgT" class="muted ${p?'':'hide'}" style="font-size:12.5px;margin-bottom:10px">${p?`Sending… ${p.done}/${p.total}`:''}</div>
         <div class="row mt">
-          <button class="btn pri" data-action="send-all" ${s.pending&&!p?'':'disabled'}>${ic('send')} Send ${s.pending} invitation${s.pending===1?'':'s'}</button>
-          <button class="btn" data-action="remind" ${s.noRsvp&&!p?'':'disabled'}>${ic('bell')} Remind ${s.noRsvp} pending</button>
-          <button class="btn ghost" data-action="simulate-responses" ${s.noRsvp&&!p?'':'disabled'}>${ic('bolt')} Simulate guest replies</button>
+          <button class="btn pri" data-action="send-all" ${s.pending&&!p?'':'disabled'}>${ic('send')} Send ${s.pending} pass${s.pending===1?'':'es'}</button>
         </div>
         ${s.total?'':`<div class="note">${ic('info')}<span>No guests yet — <a href="#guests">import your Excel sheet</a> first.</span></div>`}
-        <div class="note">${ic('info')}<span>Prototype mode: delivery is simulated. In production this plugs into an email provider (e.g. Resend / SendGrid), and RSVP clicks hit a webhook that fires the auto-reply.</span></div>
+        <div class="note">${ic('info')}<span>Prototype mode: delivery is simulated. In production this plugs into an email provider (e.g. Resend / SendGrid), with each pass rendered as a real QR image.</span></div>
       </div>
 
       <div class="card mt">
@@ -1394,7 +1384,7 @@ function vInvites(s){
           <button class="bn up" data-action="banner-upload">${ic('upload')}<span>Upload image</span></button>
           <button class="bn ${e.banner?'':'on'}" data-action="banner" data-v="">No image</button>
         </div>
-        <div class="toggle" style="padding-bottom:0;margin-top:6px"><div><b>Also show on confirmation email</b><small>The auto-reply guests get after they RSVP</small></div><label class="sw"><input type="checkbox" data-action="banner-confirm" ${e.bannerConfirm?'checked':''}><span></span></label></div>
+        <div class="toggle" style="padding-bottom:0;margin-top:6px"><div><b>Also show on certificate email</b><small>The email sent after Day 2</small></div><label class="sw"><input type="checkbox" data-action="banner-confirm" ${e.bannerConfirm?'checked':''}><span></span></label></div>
         <div class="note">${ic('info')}<span>Best size: 1200 × 500 px, JPG or PNG — a flyer, venue photo or brand visual. Large images are compressed automatically.</span></div>
       </div>
 
@@ -1403,8 +1393,8 @@ function vInvites(s){
         <div class="tabs">${tabs.map(([k,l])=>`<button data-action="tpl-tab" data-k="${k}" class="${ui.tplTab===k?'on':''}">${l}</button>`).join('')}</div>
         ${ui.tplTab==='body'?`<div class="field"><label>Email subject</label><input class="input tplf" data-k="subject" value="${esc(T.subject)}"></div>`:''}
         <div class="field"><label>${tabs.find(t=>t[0]===ui.tplTab)[1]} message</label><textarea class="input tplf" data-k="${ui.tplTab}" rows="9">${esc(T[ui.tplTab])}</textarea></div>
-        <div class="chips">${['first_name','name','event','date','time','venue','code','rsvp_by','company','sender'].map(k=>`<span class="chip" data-action="ph" data-ph="{{${k}}}">{{${k}}}</span>`).join('')}</div>
-        <div class="row"><span class="muted" style="font-size:12px">${ui.tplTab==='accept'?'Sent automatically the moment a guest taps “I’ll attend”. Includes their QR pass.':ui.tplTab==='decline'?'Sent automatically when a guest taps “Can’t make it”.':ui.tplTab==='reminder'?'Sent to guests who haven’t RSVP’d when you click Remind.':'Every invitation includes the guest’s personal QR pass and RSVP buttons.'}</span><button class="btn sm ghost" data-action="tpl-reset" style="margin-left:auto">${ic('reset')} Reset</button></div>
+        <div class="chips">${['first_name','name','event','date','time','venue','code','company','sender'].map(k=>`<span class="chip" data-action="ph" data-ph="{{${k}}}">{{${k}}}</span>`).join('')}</div>
+        <div class="row"><span class="muted" style="font-size:12px">${ui.tplTab==='cert'?'Sent after Day 2 to guests who attended '+allDays()+'. Includes the certificate.':'Every pass email includes the guest’s personal QR pass, the programme and the event details.'}</span><button class="btn sm ghost" data-action="tpl-reset" style="margin-left:auto">${ic('reset')} Reset</button></div>
       </div>
 
       <div class="card mt">
@@ -1422,7 +1412,6 @@ function vInvites(s){
           <div class="field"><label>Tagline</label><input class="input evf" data-k="tagline" value="${esc(e.tagline||'')}"></div>
           <div class="field"><label>Sender name</label><input class="input evf" data-k="sender" value="${esc(e.sender)}"></div>
           <div class="field"><label>Dress code</label><input class="input evf" data-k="dress" value="${esc(e.dress||'')}"></div>
-          <div class="field"><label>RSVP by</label><input class="input evf" type="date" data-k="rsvpBy" value="${esc(e.rsvpBy||'')}"></div>
         </div>
         <div class="note" style="margin-top:0">${ic('info')}<span>Dates and start times come from the Programme above. Event ID <span class="code">${e.eventId}</span> is embedded in every QR so passes can't be reused at other events.</span></div>
       </div>
@@ -1437,13 +1426,9 @@ function vInvites(s){
   </div>`;
 }
 function previewHtml(){
-  const g=state.guests.find(x=>x.id===ui.previewId)||{id:'x',name:'Jana Rizk',email:'jana@company.com',phone:'',company:'Company',code:'KD-DEMO-0001',emailValid:true};
-  const k={body:'invite',accept:'confirm',decline:'decline',reminder:'reminder'}[ui.tplTab];
-  let gg={...g};
-  if(k==='invite'||k==='reminder')gg.rsvp=null;
-  if(k==='confirm'){gg.rsvp='accepted';if(!gg.plusOne&&state.event.allowPlusOne)gg.plusOne={name:'Nadine Fawzy',code:'KD-PLUS-0001'}}
-  if(k==='decline'){gg.rsvp='declined';gg.plusOne=null}
-  return`<div class="em-wrap" style="border-radius:14px;padding:14px 10px">${renderEmail(k,gg,{})}</div>`;
+  const g=state.guests.find(x=>x.id===ui.previewId)||{id:'x',name:'Dr. Jana Rizk',email:'jana@hospital.com',phone:'',company:'City Hospital',code:'KD-DEMO-0001',emailValid:true};
+  if(ui.tplTab==='cert'){const gg={...g,att:Object.fromEntries(state.sessions.map(x=>[x.id,{t:sAt(x)+12*60000,src:'scan'}]))};return`<div class="em-wrap" style="border-radius:14px;padding:14px 10px">${renderEmail('certificate',gg,{})}</div>`}
+  return`<div class="em-wrap" style="border-radius:14px;padding:14px 10px">${renderEmail('invite',{...g,rsvp:null},{})}</div>`;
 }
 function vMessages(){
   const f=ui.msgF;
@@ -1451,7 +1436,7 @@ function vMessages(){
   const cnt=k=>state.outbox.filter(m=>k==='auto'?m.kind.startsWith('auto'):k==='bounced'?m.status==='bounced':m.kind===k).length;
   if(!state.outbox.length)return`<div class="card empty">${ic('inbox')}<p>No messages yet. <a href="#invitations">Send your invitations</a> to see them here.</p></div>`;
   const chI={email:'mail',whatsapp:'wa',sms:'sms'};
-  return`<div class="tabs" style="display:inline-flex">${[['all','All',state.outbox.length],['invite','Invitations',cnt('invite')],['auto','Auto-replies',cnt('auto')],['reminder','Reminders',cnt('reminder')],['certificate','Certificates',cnt('certificate')],['bounced','Bounced',cnt('bounced')]].map(([k,l,n])=>`<button data-action="msg-f" data-k="${k}" class="${f===k?'on':''}">${l} · ${n}</button>`).join('')}</div>
+  return`<div class="tabs" style="display:inline-flex">${[['all','All',state.outbox.length],['invite','Pass emails',cnt('invite')],['certificate','Certificates',cnt('certificate')],['bounced','Bounced',cnt('bounced')]].map(([k,l,n])=>`<button data-action="msg-f" data-k="${k}" class="${f===k?'on':''}">${l} · ${n}</button>`).join('')}</div>
   <div class="tbl-wrap"><table><thead><tr><th>Time</th><th>Type</th><th>Recipient</th><th>Channel</th><th>Subject</th><th>Status</th></tr></thead><tbody>
   ${list.slice(0,400).map(m=>{const g=state.guests.find(x=>x.id===m.gid);return`<tr class="msg-row" data-action="msg" data-id="${m.id}"><td class="muted" style="white-space:nowrap">${fmtDT(m.t)}</td><td><span class="type ${m.kind.startsWith('auto')?'auto':''}">${esc(KIND[m.kind])}</span></td><td class="gname"><b>${esc(g?g.name:'(removed)')}</b><small>${esc(m.to)}</small></td><td><span class="ch">${ic(chI[m.channel])}${m.channel}</span></td><td>${esc(m.subject)}</td><td class="${m.status==='delivered'?'ok-t':'bad-t'}">${m.status}</td></tr>`}).join('')}
   </tbody></table></div>`;
@@ -1469,7 +1454,7 @@ function vScanner(s){
   return`
   <div class="card">
     <div class="row" style="justify-content:space-between;margin-bottom:10px"><div class="eyebrow">Scanning for day</div><button class="btn sm pri" data-action="walk-in">${ic('plus')} Register walk-in</button></div>
-    <div class="sess-bar">${state.sessions.map((x,i)=>`<button class="sess ${x.id===ses.id?'on':''}" data-action="pick-session" data-id="${x.id}"><b>${esc(sName(x))}</b><small>${esc(fmtDate(x.date))} · ${esc(x.time)} · ${esc(x.room)}</small><div class="cnt">${s.sess[i]} / ${s.accepted} checked in</div></button>`).join('')}</div>
+    <div class="sess-bar">${state.sessions.map((x,i)=>`<button class="sess ${x.id===ses.id?'on':''}" data-action="pick-session" data-id="${x.id}"><b>${esc(sName(x))}</b><small>${esc(fmtDate(x.date))} · ${esc(x.time)} · ${esc(x.room)}</small><div class="cnt">${s.sess[i]} / ${s.accepted} expected</div></button>`).join('')}</div>
     <div class="netbar"><span class="net ${ui.offline?'off':''}">${ui.offline?'Offline — scanning continues':'Online · synced'}</span><span>${ic('check')} Guest list cached on this device (${s.total} guests)</span>${pend?`<span style="color:var(--warn)">${pend} scans waiting to sync</span>`:''}<button class="btn sm ghost" data-action="toggle-offline" style="margin-left:auto">${ic('wifi')} ${ui.offline?'Reconnect':'Simulate no internet'}</button></div>
   </div>
   <div class="scanner mt">
@@ -1485,7 +1470,7 @@ function vScanner(s){
         </div>
         <div class="find-res" id="findRes">${findResults()}</div>
         <div class="row mt"><span class="eyebrow" style="margin-right:4px">Demo</span>
-          <button class="btn sm" data-action="scan-demo" data-k="valid">Scan a confirmed guest</button>
+          <button class="btn sm" data-action="scan-demo" data-k="valid">Scan a guest</button>
           <button class="btn sm" data-action="scan-demo" data-k="dup">Scan same pass again</button>
           <button class="btn sm" data-action="scan-demo" data-k="bad">Scan a fake QR</button>
           <button class="btn sm ghost" data-action="sim-session">${ic('bolt')} Fill this day</button>
@@ -1496,12 +1481,12 @@ function vScanner(s){
       ${resHtml}
       <div class="card mt">
         <div class="row" style="justify-content:space-between;align-items:flex-end">
-          <div><div class="eyebrow">In ${esc(sName(ses))}</div><div class="counter"><span class="v">${s.sess[si]}</span><span class="of">/ ${s.accepted} confirmed</span></div></div>
+          <div><div class="eyebrow">In ${esc(sName(ses))}</div><div class="counter"><span class="v">${s.sess[si]}</span><span class="of">/ ${s.accepted} expected</span></div></div>
           <div style="text-align:right"><div class="eyebrow">Certificate eligible</div><div class="counter" style="justify-content:flex-end"><span class="v" style="font-size:28px">${s.eligible}</span></div></div>
         </div>
         <div class="progress"><div style="width:${pct(s.sess[si],s.accepted)}%"></div></div>
       </div>
-      <div class="card mt"><h3>Recent scans</h3>${recent.length?`<div class="feed">${recent.map(x=>{const g=state.guests.find(y=>y.id===x.gid);return`<div class="it"><div class="dot" style="${x.type==='ok'?'':'border-color:#4a3a2a'}">${ic(x.type==='ok'?'check':x.type==='bad'?'x':'alert')}</div><div><b style="font-weight:600">${esc(x.name||(g?g.name:'Unknown pass'))}</b> ${g?dots(g):''}<br><span class="muted" style="font-size:12px">${x.type==='ok'?'Granted':x.type==='dup'?'Duplicate':x.type==='warn'?'Declined RSVP':'Rejected'} · ${esc(x.gate)}${x.synced===false?' · <span style="color:var(--warn)">pending sync</span>':''}</span></div><span class="tm">${fmtTime(x.t)}</span></div>`}).join('')}</div>`:'<div class="muted">No scans yet.</div>'}</div>
+      <div class="card mt"><h3>Recent scans</h3>${recent.length?`<div class="feed">${recent.map(x=>{const g=state.guests.find(y=>y.id===x.gid);return`<div class="it"><div class="dot" style="${x.type==='ok'?'':'border-color:#4a3a2a'}">${ic(x.type==='ok'?'check':x.type==='bad'?'x':'alert')}</div><div><b style="font-weight:600">${esc(x.name||(g?g.name:'Unknown pass'))}</b> ${g?dots(g):''}<br><span class="muted" style="font-size:12px">${x.type==='ok'?'Granted':x.type==='dup'?'Duplicate':'Rejected'} · ${esc(x.gate)}${x.synced===false?' · <span style="color:var(--warn)">pending sync</span>':''}</span></div><span class="tm">${fmtTime(x.t)}</span></div>`}).join('')}</div>`:'<div class="muted">No scans yet.</div>'}</div>
     </div>
   </div>`;
 }
@@ -1515,17 +1500,17 @@ function findResults(){
 function vAttendance(s){
   if(!s.total)return`<div class="card empty">${ic('users')}<p>Import guests first. <a href="#guests">Go to guests</a></p></div>`;
   const N=state.sessions.length,q=ui.attQ.toLowerCase();
-  const F={all:g=>true,elig:g=>eligible(g),m1:g=>attCount(g)===N-1,m2:g=>attCount(g)>0&&attCount(g)<N-1,none:g=>g.rsvp==='accepted'&&!attCount(g)};
+  const F={all:g=>true,elig:g=>eligible(g),m1:g=>attCount(g)===N-1,m2:g=>attCount(g)>0&&attCount(g)<N-1,none:g=>expected(g)&&!attCount(g)};
   const list=state.guests.filter(g=>(F[ui.attF]||F.all)(g)&&(!q||[g.name,g.email,g.company,g.code].join(' ').toLowerCase().includes(q)));
-  const opts=[['all',`All guests (${s.total})`],['elig',`Eligible ${N}/${N} (${s.eligible})`],['m1',`Missing 1 day (${state.guests.filter(F.m1).length})`],...(N>2?[['m2',`Missing 2+ days (${state.guests.filter(F.m2).length})`]]:[]),['none',`Confirmed, no check-ins (${state.guests.filter(F.none).length})`]];
+  const opts=[['all',`All guests (${s.total})`],['elig',`Eligible ${N}/${N} (${s.eligible})`],['m1',`Missing 1 day (${state.guests.filter(F.m1).length})`],...(N>2?[['m2',`Missing 2+ days (${state.guests.filter(F.m2).length})`]]:[]),['none',`Not checked in yet (${state.guests.filter(F.none).length})`]];
   return`
   <div class="grid g6">
-    ${state.sessions.map((x,i)=>kpi(esc(sName(x)),s.sess[i],`${pct(s.sess[i],s.accepted)}% of ${s.accepted} confirmed`,pct(s.sess[i],s.accepted))).join('')}
-    ${kpi('Eligible '+N+'/'+N,s.eligible,`${pct(s.eligible,s.accepted)}% of confirmed`,pct(s.eligible,s.accepted))}
+    ${state.sessions.map((x,i)=>kpi(esc(sName(x)),s.sess[i],`${pct(s.sess[i],s.accepted)}% of ${s.accepted} expected`,pct(s.sess[i],s.accepted))).join('')}
+    ${kpi('Eligible '+N+'/'+N,s.eligible,`${pct(s.eligible,s.accepted)}% of expected`,pct(s.eligible,s.accepted))}
     ${kpi('Incomplete',s.incomplete,'attended one day only',pct(s.incomplete,s.accepted))}
   </div>
   <div class="grid g2 mt">
-    <div class="card"><h3>Attendance per day<span class="sub">of ${s.accepted} confirmed</span></h3><div class="bars">${state.sessions.map((x,i)=>barRow(sName(x),s.sess[i],s.accepted)).join('')}</div></div>
+    <div class="card"><h3>Attendance per day<span class="sub">of ${s.accepted} expected</span></h3><div class="bars">${state.sessions.map((x,i)=>barRow(sName(x),s.sess[i],s.accepted)).join('')}</div></div>
     <div class="card"><h3>Completion<span class="sub">days attended per guest</span></h3><div class="bars">${Array.from({length:N+1},(_,i)=>N-i).map(n=>barRow(`${n} of ${N}`,s.complete[n]||0,s.accepted)).join('')}</div></div>
   </div>
   <div class="toolbar mt">
@@ -1549,7 +1534,7 @@ function vCertificates(s){
   const sample=!g;if(!g)g={id:'sample',name:'Dr. Sample Guest',code:'KD-SAMP-L001',att:Object.fromEntries(state.sessions.map(x=>[x.id,{t:sAt(x)}]))};
   ui.certGid=sample?null:g.id;
   const waiting=elig.filter(x=>!x.certSentAt).length,p=ui.sendProg;
-  const inc=state.guests.filter(x=>x.rsvp==='accepted'&&attCount(x)>0&&!eligible(x));
+  const inc=state.guests.filter(x=>expected(x)&&attCount(x)>0&&!eligible(x));
   return`
   <div class="grid g6">
     ${kpi('Eligible',s.eligible,`attended ${allDays()}`,pct(s.eligible,s.accepted))}
@@ -1596,30 +1581,28 @@ function vReports(s){
   if(!s.total)return`<div class="card empty">${ic('chart')}<p>Reports fill in as soon as you import guests. <a href="#guests">Import now</a></p></div>`;
   const arr=arrivals(),mx=arr?Math.max(...arr.map(x=>x.c)):0;
   const gates={};state.guests.forEach(g=>{if(g.checkedInAt)gates[g.gate]=(gates[g.gate]||0)+1;if(g.plusOne&&g.plusOne.checkedInAt)gates[g.plusOne.gate]=(gates[g.plusOne.gate]||0)+1});
-  const comp={};state.guests.forEach(g=>{const k=g.company||'—';comp[k]=comp[k]||{t:0,a:0,c:0};comp[k].t++;if(g.rsvp==='accepted')comp[k].a++;if(g.checkedInAt)comp[k].c++});
-  const noShows=state.guests.filter(g=>g.rsvp==='accepted'&&!g.checkedInAt).length;
+  const comp={};state.guests.forEach(g=>{const k=g.company||'—';comp[k]=comp[k]||{t:0,a:0,c:0};comp[k].t++;if(expected(g))comp[k].a++;if(g.checkedInAt)comp[k].c++});
+  const noShows=state.guests.filter(g=>expected(g)&&!g.checkedInAt).length;
   return`
   <div class="grid g6">
     ${kpi('Delivery rate',pct(s.delivered,s.sent)+'%',`${s.delivered} of ${s.sent} sent`,pct(s.delivered,s.sent))}
     ${kpi('Open rate',pct(s.openedAll,s.delivered)+'%',`${s.openedAll} opened`,pct(s.openedAll,s.delivered))}
-    ${kpi('Response rate',pct(s.accepted+s.declinedAll,s.delivered)+'%',`${s.accepted+s.declinedAll} replied`,pct(s.accepted+s.declinedAll,s.delivered))}
-    ${kpi('Acceptance',pct(s.accepted,s.accepted+s.declinedAll)+'%',`${s.accepted} yes · ${s.declinedAll} no`,pct(s.accepted,s.accepted+s.declinedAll))}
-    ${kpi('Attendance',pct(s.checkedAll,s.accepted)+'%',`${s.checkedAll} of ${s.accepted} attended`,pct(s.checkedAll,s.accepted))}
+            ${kpi('Attendance',pct(s.checkedAll,s.accepted)+'%',`${s.checkedAll} of ${s.accepted} attended`,pct(s.checkedAll,s.accepted))}
     ${kpi('Certificates',s.eligible,`eligible · ${s.certSent} sent`,pct(s.eligible,s.accepted))}
   </div>
   <div class="grid g2 mt">
     <div class="card"><h3>Guests by status</h3><div class="bars">${Object.keys(ST).map(k=>barRow(ST[k],s[k],s.total)).join('')}</div></div>
-    <div class="card"><h3>Check-ins per day<span class="sub">of ${s.accepted} confirmed</span></h3>
+    <div class="card"><h3>Check-ins per day<span class="sub">of ${s.accepted} expected</span></h3>
       ${s.checkedAll?(()=>{const m=Math.max(1,...s.sess);return`<div class="vchart">${state.sessions.map((x,i)=>`<div class="col"><span class="c">${s.sess[i]}</span><div class="b" style="height:${s.sess[i]/m*100}%"></div></div>`).join('')}<div class="col"><span class="c">${s.eligible}</span><div class="b" style="height:${s.eligible/m*100}%;opacity:.55"></div></div></div><div class="vlabels">${state.sessions.map(x=>`<span>${esc(sShort(x))}</span>`).join('')}<span>All ${state.sessions.length}</span></div>`})():'<div class="empty">No check-ins yet.</div>'}
       
       ${Object.keys(gates).length?`<div class="legend mt">${Object.entries(gates).sort((a,b)=>b[1]-a[1]).map(([g,n])=>`<div><span class="muted">${esc(g)}</span><b>${n}</b></div>`).join('')}</div>`:''}
     </div>
   </div>
-  <div class="card mt"><h3>By company</h3><div class="tbl-wrap"><table><thead><tr><th>Company</th><th>Invited</th><th>Confirmed</th><th>Checked in</th><th>Attendance</th></tr></thead><tbody>
+  <div class="card mt"><h3>By company</h3><div class="tbl-wrap"><table><thead><tr><th>Organisation</th><th>Guests</th><th>Passes delivered</th><th>Checked in</th><th>Attendance</th></tr></thead><tbody>
     ${Object.entries(comp).sort((a,b)=>b[1].t-a[1].t).map(([k,v])=>`<tr><td><b style="font-weight:600">${esc(k)}</b></td><td>${v.t}</td><td>${v.a}</td><td>${v.c}</td><td style="width:30%"><div class="bar-row" style="grid-template-columns:1fr 44px"><div class="track"><div class="fill" style="width:${pct(v.c,v.t)}%"></div></div><span class="n">${pct(v.c,v.t)}%</span></div></td></tr>`).join('')}
   </tbody></table></div></div>
-  <div class="card mt"><h3>Full guest report<span class="sub">${s.total} guests</span></h3><div class="tbl-wrap" style="max-height:520px"><table><thead><tr><th>Guest</th><th>Contact</th><th>Code</th><th>Status</th><th>Days</th><th>Invited</th><th>Opened</th><th>RSVP</th><th>Checked in</th><th>Gate</th></tr></thead><tbody>
-    ${state.guests.map(g=>`<tr><td class="gname"><b>${esc(g.name)}</b><small>${esc(g.company||'')}</small></td><td class="gname"><b style="font-weight:400">${esc(g.email||'—')}</b><small>${esc(g.phone||'')}</small></td><td><span class="code">${g.code}</span></td><td>${pill(status(g))}</td><td>${dots(g)} ${attCount(g)}/${state.sessions.length}</td><td class="muted">${fmtDT(g.sentAt)||'—'}</td><td class="muted">${fmtDT(g.openedAt)||'—'}</td><td class="muted">${g.rsvp?fmtDT(g.rsvpAt):'—'}</td><td class="muted">${fmtDT(g.checkedInAt)||'—'}</td><td class="muted">${esc(g.gate||'—')}</td></tr>`).join('')}
+  <div class="card mt"><h3>Full guest report<span class="sub">${s.total} guests</span></h3><div class="tbl-wrap" style="max-height:520px"><table><thead><tr><th>Guest</th><th>Contact</th><th>Code</th><th>Status</th><th>Days</th><th>Pass sent</th><th>Opened</th><th>Checked in</th><th>Gate</th></tr></thead><tbody>
+    ${state.guests.map(g=>`<tr><td class="gname"><b>${esc(g.name)}</b><small>${esc(g.company||'')}</small></td><td class="gname"><b style="font-weight:400">${esc(g.email||'—')}</b><small>${esc(g.phone||'')}</small></td><td><span class="code">${g.code}</span></td><td>${pill(status(g))}</td><td>${dots(g)} ${attCount(g)}/${state.sessions.length}</td><td class="muted">${fmtDT(g.sentAt)||'—'}</td><td class="muted">${fmtDT(g.openedAt)||'—'}</td><td class="muted">${fmtDT(g.checkedInAt)||'—'}</td><td class="muted">${esc(g.gate||'—')}</td></tr>`).join('')}
   </tbody></table></div></div>`;
 }
 
@@ -1634,8 +1617,8 @@ function vGuestView(s){
   if(!s.total)return`<div class="card empty">${ic('mail')}<p>Add guests to see the guest experience.</p><div class="row" style="justify-content:center"><button class="btn pri" data-action="load-sample">${ic('bolt')} Load sample guests</button><button class="btn" data-action="import">${ic('upload')} Import Excel</button></div></div>`;
   const g=gvGuest(),gv=ui.gv,inbox=gvInbox(g);
   const N=state.sessions.length,ac=attCount(g);
-  const stepN=!g.sentAt?0:!g.rsvp?1:ac<N?3:!g.certSentAt?4:5;
-  const steps=['Invitation email','RSVP','Auto-reply',`Days ${ac}/${N}`,'Certificate'];
+  const stepN=(g.sentAt?1:0)+ac+(g.certSentAt?1:0);
+  const steps=['Pass email',...state.sessions.map(x=>`${sName(x)} check-in`),'Certificate'];
   const stepper=`<div class="stepper">${steps.map((t,i)=>`<div class="${i<stepN?'done':i===stepN?'act':''}"><b>${i<stepN?'✓':i+1}</b>${t}</div>`).join('')}</div>`;
   const stage=gv.mode==='rsvp'?rsvpPage(g):mailClient(g,inbox);
   return`
@@ -1657,9 +1640,9 @@ function mailClient(g,inbox){
   const gv=ui.gv,sel=inbox.find(m=>m.id===gv.msgId);
   const unread=inbox.filter(m=>!m.read).length;
   const list=`<div class="mc-list"><div class="mc-lh">Inbox ${unread?`<span>${unread}</span>`:''}</div>${inbox.length?inbox.map(m=>`<div class="mc-item ${m.read?'':'unread'} ${sel&&sel.id===m.id?'on':''}" data-action="gv-open" data-id="${m.id}"><div class="mc-av">${logo()}</div><div class="mc-it"><div class="mc-r1"><b>${esc(state.event.sender)}</b><span>${fmtTime(m.t)}</span></div><div class="mc-sub">${esc(m.subject)}</div><div class="mc-pre">${esc(snippet(m))}</div></div></div>`).join('')
-    :`<div class="mc-empty">${ic('inbox')}<div>No emails yet</div>${g.emailValid?`<button class="btn sm pri" data-action="gv-send">${ic('send')} Send invitation to ${esc(firstName(g))}</button>`:`<div style="color:#b54">This guest's email is invalid — pick another guest.</div>`}</div>`}</div>`;
+    :`<div class="mc-empty">${ic('inbox')}<div>No emails yet</div>${g.emailValid?`<button class="btn sm pri" data-action="gv-send">${ic('send')} Send pass to ${esc(firstName(g))}</button>`:`<div style="color:#b54">This guest's email is invalid — pick another guest.</div>`}</div>`}</div>`;
   const read=sel?`<div class="mc-read">${gv.device==='phone'?`<button class="mc-back" data-action="gv-back">‹ Inbox</button>`:''}${mailMeta(sel,g)}<div class="em-wrap">${renderEmail(EMAIL_KIND[sel.kind],g,{interactive:true})}</div></div>`
-    :`<div class="mc-read mc-none">${logo()}<div>${inbox.length?'Select an email to read':'Waiting for the invitation…'}</div></div>`;
+    :`<div class="mc-read mc-none">${logo()}<div>${inbox.length?'Select an email to read':'Waiting for the pass email…'}</div></div>`;
   return`<div class="mc ${gv.device} ${sel?'has-sel':''}"><div class="mc-top"><i></i><i></i><i></i><div class="mc-search">${ic('search')} Search mail</div><div class="mc-me" title="${esc(g.email)}">${esc(initials(g.name))}</div></div><div class="mc-main">${list}${read}</div></div>`;
 }
 function rsvpPage(g){
@@ -1693,13 +1676,8 @@ function behind(g){
     <div class="row" style="justify-content:space-between;flex-wrap:nowrap"><div class="gname" style="min-width:0"><b>${esc(g.name)}</b><small>${esc(g.email||'—')}</small></div>${pill(status(g))}</div>
     <div class="kv">
       <span>Pass</span><b><span class="code">${g.code}</span></b>
-      <span>Invitation</span><b>${g.sentAt?(g.bounced?'Bounced':`Delivered ${fmtTime(g.sentAt)}`):'Not sent yet'}</b>
+      <span>Pass email</span><b>${g.sentAt?(g.bounced?'Bounced':`Delivered ${fmtTime(g.sentAt)}`):'Not sent yet'}</b>
       <span>Opened</span><b>${g.openedAt?fmtTime(g.openedAt):'—'}</b>
-      <span>RSVP</span><b>${g.rsvp?`${g.rsvp==='accepted'?'Attending':'Not attending'} · ${fmtTime(g.rsvpAt)}`:'Awaiting'}</b>
-      ${g.plusOne?`<span>Plus one</span><b>${esc(g.plusOne.name)}<br><span class="code">${g.plusOne.code}</span></b>`:''}
-      ${g.dietary?`<span>Dietary</span><b>${esc(g.dietary)}</b>`:''}
-      ${g.note?`<span>Note</span><b>“${esc(g.note)}”</b>`:''}
-      <span>Auto-reply</span><b>${(()=>{const m=state.outbox.find(x=>x.gid===g.id&&x.kind.startsWith('auto'));return m?`Sent ${fmtTime(m.t)}`:'—'})()}</b>
       <span>Days</span><b>${dots(g)} ${attCount(g)}/${state.sessions.length}</b>
       <span>Certificate</span><b>${g.certSentAt?`Sent ${fmtTime(g.certSentAt)}`:eligible(g)?'Eligible':'—'}</b>
     </div>
@@ -1708,7 +1686,7 @@ function behind(g){
     ${eligible(g)?`<div class="row mt"><button class="btn sm pri" data-action="cert-send-one" data-id="${g.id}">${ic('award')} ${g.certSentAt?'Resend':'Send'} certificate</button></div>`:''}
     ${d?`<div class="door ${d.type}">${ic(d.type==='ok'?'check':d.type==='bad'?'x':'alert')}<div><b>${esc(d.title)}</b><br><span>${esc(d.sub)}</span></div></div>`:''}
   </div>
-  <div class="card mt"><h3>Live log</h3>${tl.length?`<div class="timeline">${tl.map(l=>`<div>${esc(l.text)}<small>${fmtDT(l.t)}</small></div>`).join('')}</div>`:'<div class="muted">Nothing yet — send the invitation to start.</div>'}</div>`;
+  <div class="card mt"><h3>Live log</h3>${tl.length?`<div class="timeline">${tl.map(l=>`<div>${esc(l.text)}<small>${fmtDT(l.t)}</small></div>`).join('')}</div>`:'<div class="muted">Nothing yet — send the pass to start.</div>'}</div>`;
 }
 function gvSubmit(){
   const g=gvGuest(),gv=ui.gv,v=gv.rsvpV;if(!g)return;
@@ -1726,7 +1704,7 @@ function gvSubmit(){
 }
 function gvStartRsvp(g,v){
   Object.assign(ui.gv,{...GV0,gid:g.id,mode:'rsvp',rsvpV:v,p1:!!g.plusOne,p1name:g.plusOne?g.plusOne.name:'',p1email:g.plusOne&&g.plusOne.email||'',diet:g.dietary||'',note:g.note||''});
-  if(!g.openedAt){g.openedAt=now();log('open',`${g.name} opened the invitation`,g.id);persist()}
+  if(!g.openedAt){g.openedAt=now();log('open',`${g.name} opened their pass email`,g.id);persist()}
 }
 function gvReset(g){
   state.outbox=state.outbox.filter(m=>m.gid!==g.id);state.log=state.log.filter(l=>l.gid!==g.id);state.scans=state.scans.filter(x=>x.gid!==g.id);
@@ -1735,12 +1713,12 @@ function gvReset(g){
 }
 
 /* ============ Exports ============ */
-function guestRows(){return state.guests.map(g=>({...attRow(g),'Name':g.name,'Email':g.email,'Phone':g.phone,'Company':g.company,'Pass code':g.code,'Status':ST[status(g)],'Email valid':g.emailValid?'Yes':'No','Invited at':fmtDT(g.sentAt),'Opened at':fmtDT(g.openedAt),'RSVP':g.rsvp?(g.rsvp==='accepted'?'Confirmed':'Declined'):'','RSVP at':fmtDT(g.rsvpAt),'Dietary':g.dietary||'','Note':g.note||'','Reminders':g.reminders||0}))}
+function guestRows(){return state.guests.map(g=>({...attRow(g),'Name':g.name,'Email':g.email,'Phone':g.phone,'Company':g.company,'Pass code':g.code,'Status':ST[status(g)],'Email valid':g.emailValid?'Yes':'No','Pass sent at':fmtDT(g.sentAt),'Opened at':fmtDT(g.openedAt)}))}
 function attRow(g){const o={'Name':g.name,'Email':g.email,'Organisation':g.company,'Source':g.walkIn?'Walk-in':'Invited'};state.sessions.forEach(x=>{const a=g.att&&g.att[x.id];o[sName(x)]=a?`${fmtDT(a.t)}${a.src==='walk-in'?' (walk-in)':a.src!=='scan'?' (manual)':''}`:''});o['Days attended']=`${attCount(g)}/${state.sessions.length}`;o['Certificate']=g.certSentAt?'Sent':eligible(g)?'Eligible':'Not eligible';o['Missing']=eligible(g)?'':missingS(g).map(sName).join(', ');return o}
 function summaryLines(){const s=stats(),e=state.event;return[
- ['Event',e.name],['Date',`${fmtDate(e.date)} ${e.time}`],['Venue',e.venue],['Generated',new Date().toLocaleString('en-GB')],[],
- ['Total guests',s.total],['Walk-ins (registered at the door)',s.walkins],['Invitations sent',s.sent],['Delivered',s.delivered],['Bounced',s.bounced],['Opened',s.openedAll],['Confirmed',s.accepted],['Declined',s.declinedAll],['Awaiting RSVP',s.noRsvp],['Attended at least one day',s.checkedAll],['No-shows',state.guests.filter(g=>g.rsvp==='accepted'&&!g.checkedInAt).length],
- [],['Certificate eligible',s.eligible],['Certificates sent',s.certSent],...state.sessions.map((x,i)=>[`Attended ${sName(x)}`,s.sess[i]]),[],['Delivery rate',pct(s.delivered,s.sent)+'%'],['Open rate',pct(s.openedAll,s.delivered)+'%'],['Acceptance rate',pct(s.accepted,s.accepted+s.declinedAll)+'%'],['Attendance rate',pct(s.checkedAll,s.accepted)+'%'],['Auto-replies sent',s.autoreplies]]}
+ ['Event',e.name],['Dates',eventDates()],['Venue',e.venue],['Generated',new Date().toLocaleString('en-GB')],[],
+ ['Total guests',s.total],['Walk-ins (registered at the door)',s.walkins],['Passes sent',s.sent],['Delivered',s.delivered],['Bounced',s.bounced],['Opened',s.openedAll],['Expected (pass delivered or walk-in)',s.accepted],['Attended at least one day',s.checkedAll],['Did not attend',state.guests.filter(g=>expected(g)&&!g.checkedInAt).length],
+ [],['Certificate eligible',s.eligible],['Certificates sent',s.certSent],...state.sessions.map((x,i)=>[`Attended ${sName(x)}`,s.sess[i]]),[],['Delivery rate',pct(s.delivered,s.sent)+'%'],['Open rate',pct(s.openedAll,s.delivered)+'%'],['Attendance rate',pct(s.checkedAll,s.accepted)+'%']]}
 function exportXlsx(){
   if(typeof XLSX==='undefined'){toast('Excel library failed to load');return}
   const wb=XLSX.utils.book_new();
@@ -1791,12 +1769,12 @@ document.addEventListener('click',async e=>{
     case 'close-modal':closeModal();break;
     case 'rsvp-start':if(!g)break;gvStartRsvp(g,el.dataset.v);if(cur()==='guest-view'){closeModal();render();$('#view').scrollIntoView({behavior:'smooth'})}else location.hash='guest-view';break;
     case 'gv-goto':if(!g)break;{const m=gvInbox(g)[0];Object.assign(ui.gv,{...GV0,gid:g.id,msgId:m?m.id:null});if(m)m.read=true;if(cur()==='guest-view'){closeModal();render()}else location.hash='guest-view'}break;
-    case 'gv-open':{const m=state.outbox.find(x=>x.id===id);if(!m)break;m.read=true;ui.gv.msgId=id;const gg=state.guests.find(x=>x.id===m.gid);if(gg&&!gg.openedAt&&(m.kind==='invite'||m.kind==='reminder')){gg.openedAt=now();log('open',`${gg.name} opened the invitation`,gg.id)}commit()}break;
+    case 'gv-open':{const m=state.outbox.find(x=>x.id===id);if(!m)break;m.read=true;ui.gv.msgId=id;const gg=state.guests.find(x=>x.id===m.gid);if(gg&&!gg.openedAt&&(m.kind==='invite'||m.kind==='reminder')){gg.openedAt=now();log('open',`${gg.name} opened their pass email`,gg.id)}commit()}break;
     case 'gv-back':if(ui.gv.mode==='rsvp'){ui.gv.mode='mail';ui.gv.done=false}else ui.gv.msgId=null;render();break;
     case 'gv-v':ui.gv.rsvpV=el.dataset.v;render();break;
     case 'gv-p1':ui.gv.p1=el.dataset.v==='1';render();if(ui.gv.p1){const i=document.querySelector('[data-k="p1name"]');if(i)i.focus()}break;
     case 'gv-device':ui.gv.device=el.dataset.v;render();break;
-    case 'gv-send':{const gg=gvGuest();if(!gg)break;if(!state.channels.email){state.channels.email=true;toast('Email channel turned on')}deliver(gg,'invite');const m=gvInbox(gg)[0];ui.gv.msgId=null;commit();toast(`Invitation delivered to ${gg.email}`);setTimeout(()=>{if(cur()==='guest-view'&&m&&!ui.gv.msgId){m.read=true;ui.gv.msgId=m.id;const g3=gvGuest();if(g3&&!g3.openedAt){g3.openedAt=now();log('open',`${g3.name} opened the invitation`,g3.id)}commit()}},1100)}break;
+    case 'gv-send':{const gg=gvGuest();if(!gg)break;if(!state.channels.email){state.channels.email=true;toast('Email channel turned on')}deliver(gg,'invite');const m=gvInbox(gg)[0];ui.gv.msgId=null;commit();toast(`Pass delivered to ${gg.email}`);setTimeout(()=>{if(cur()==='guest-view'&&m&&!ui.gv.msgId){m.read=true;ui.gv.msgId=m.id;const g3=gvGuest();if(g3&&!g3.openedAt){g3.openedAt=now();log('open',`${g3.name} opened their pass email`,g3.id)}commit()}},1100)}break;
     case 'gv-reset':{const gg=gvGuest();if(!gg)break;gvReset(gg);commit();toast(`Restarted the demo for ${gg.name}`)}break;
     case 'gv-scan':{const gg=gvGuest();if(!gg)break;processScan(`KODE|${state.event.eventId}|${gg.code}`,el.dataset.sid);ui.gv.door=ui.lastScan;render()}break;
     case 'pick-session':ui.sid=id;ui.lastScan=null;render();break;
@@ -1839,7 +1817,7 @@ document.addEventListener('click',async e=>{
     case 'scan-upload':$('#fileScan').click();break;
     case 'scan-demo':{const k=el.dataset.k;let t=null;
       const sid=curSession().id;
-      if(k==='valid'){const p=state.guests.filter(x=>!(x.att&&x.att[sid])&&x.rsvp==='accepted');const q=p.length?p:state.guests.filter(x=>!(x.att&&x.att[sid])&&x.rsvp!=='declined');if(!q.length){toast('Everyone is already checked in today');break}t=payload(q[Math.floor(Math.random()*q.length)])}
+      if(k==='valid'){const p=state.guests.filter(x=>!(x.att&&x.att[sid])&&expected(x));const q=p.length?p:state.guests.filter(x=>!(x.att&&x.att[sid]));if(!q.length){toast('Everyone is already checked in today');break}t=payload(q[Math.floor(Math.random()*q.length)])}
       else if(k==='dup'){const last=ui.lastScan&&ui.lastScan.gid&&state.guests.find(x=>x.id===ui.lastScan.gid&&x.att&&x.att[sid]);const p=state.guests.filter(x=>x.att&&x.att[sid]);if(!p.length){toast('Check someone in first');break}t=payload(last||p[0])}
       else t='https://totally-real-tickets.biz/vip?id=12345';
       processScan(t)}break;
