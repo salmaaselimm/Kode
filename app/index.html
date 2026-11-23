@@ -14,6 +14,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 :root{--bg:#080808;--p1:#101010;--p2:#161616;--line:#232323;--line2:#303030;--text:#f3f3f3;--soft:#c9c9c9;--muted:#8a8a8a;--dim:#5c5c5c;
 --metal:linear-gradient(135deg,#fff 0%,#cfcfcf 28%,#8e8e8e 52%,#d9d9d9 74%,#f4f4f4 100%);--ok:#5fdc94;--warn:#f0c15a;--bad:#f07474;--r:16px}
@@ -150,6 +151,46 @@ td small{color:var(--muted)}
 .drop{border:1.5px dashed #333;border-radius:16px;padding:26px;text-align:center;cursor:pointer}
 .drop:hover,.drop.over{border-color:#888;background:rgba(255,255,255,.03)}
 .note{font-size:12.5px;color:var(--muted);margin-top:10px;line-height:1.5}
+#printArea{display:none}
+.bdg{background:#fff;color:#111;font-family:Inter,Arial,sans-serif;overflow:hidden;position:relative;-webkit-print-color-adjust:exact;print-color-adjust:exact;border:.3mm dashed #c8c8c8}
+.bdg .bh{background:#0a0a0a;color:#fff;text-align:center}
+.bdg .be{font-family:Montserrat,Arial,sans-serif;font-weight:800;line-height:1.15}
+.bdg .bt{color:#bdbdbd}
+.bdg .bn{font-family:Montserrat,Arial,sans-serif;font-weight:800;line-height:1.1;color:#0a0a0a;word-break:break-word}
+.bdg .bo{color:#555}
+.bdg .bq svg{display:block;width:100%;height:auto}
+.bdg .bc{font-family:'JetBrains Mono',monospace;color:#333;letter-spacing:.06em}
+.bdg .bf{color:#666;text-align:center;border-top:.3mm solid #e2e2e2}
+.bdg.a6{width:97mm;height:138mm;display:flex;flex-direction:column}
+.bdg.a6 .bh{padding:6mm 5mm 5mm}
+.bdg.a6 .be{font-size:13pt}.bdg.a6 .bt{font-size:8pt;margin-top:1.2mm}
+.bdg.a6 .bb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:4mm 6mm}
+.bdg.a6 .bn{font-size:20pt}.bdg.a6 .bn.l{font-size:16pt}.bdg.a6 .bn.xl{font-size:13.5pt}
+.bdg.a6 .bo{font-size:10pt;margin-top:1.5mm}
+.bdg.a6 .bq{width:44mm;margin:5mm auto 1.5mm}
+.bdg.a6 .bc{font-size:8pt}
+.bdg.a6 .bf{font-size:8pt;padding:3mm}
+.bdg.wallet{width:85mm;height:55mm;display:grid;grid-template-columns:31mm 1fr;grid-template-rows:auto 1fr;}
+.bdg.wallet .bh{grid-column:1/3;padding:2mm 3mm;text-align:left}
+.bdg.wallet .be{font-size:7.5pt}.bdg.wallet .bt{display:none}
+.bdg.wallet .bq{padding:2.5mm 0 2.5mm 3mm;display:flex;flex-direction:column;justify-content:center}
+.bdg.wallet .bb{padding:2.5mm 3mm;display:flex;flex-direction:column;justify-content:center;min-width:0}
+.bdg.wallet .bn{font-size:12pt}.bdg.wallet .bn.l{font-size:10.5pt}.bdg.wallet .bn.xl{font-size:9pt}
+.bdg.wallet .bo{font-size:7pt;margin-top:1mm}
+.bdg.wallet .bc{font-size:6.5pt;margin-top:1.5mm}
+.bdg.wallet .bf{display:none}
+.bdg-prev{display:flex;justify-content:center;margin:14px 0;transform-origin:top center}
+.bdg-prev .bdg{border:0;box-shadow:0 10px 40px rgba(0,0,0,.5);border-radius:6px}
+@media print{
+  @page{size:A4 portrait;margin:7mm}
+  html,body{background:#fff!important}
+  body>*:not(#printArea){display:none!important}
+  #printArea{display:block!important}
+  .sheet{display:grid;justify-content:center;break-after:page;page-break-after:always}
+  .sheet:last-child{break-after:auto;page-break-after:auto}
+  .sheet.a6{grid-template-columns:repeat(2,97mm);grid-auto-rows:138mm}
+  .sheet.wallet{grid-template-columns:repeat(2,85mm);grid-auto-rows:55mm;column-gap:4mm}
+}
 @media (max-width:900px){.scan-wrap{grid-template-columns:1fr}.g6{grid-template-columns:repeat(3,minmax(0,1fr))}.cam{max-height:56vh;aspect-ratio:4/5}}
 @media (max-width:560px){.brand small{display:none}.net{font-size:11px;padding:5px 9px}.g6,.g3{grid-template-columns:repeat(2,minmax(0,1fr))}.g2{grid-template-columns:1fr}.hide-sm{display:none!important}.kpi .v{font-size:26px}}
 </style>
@@ -194,14 +235,15 @@ const CFG={
   key:'sb_publishable_8hAhBYh0deSvCVrJ05SpMA_pHTLBByV',
   eventId:'EECCS26',
   eventName:'Euro-Egyptian Critical Care Summit',
-  days:[{n:1,label:'Day 1',date:'2026-11-26'},{n:2,label:'Day 2',date:'2026-11-27'}]
+  days:[{n:1,label:'Day 1',date:'2026-11-26'},{n:2,label:'Day 2',date:'2026-11-27'}],
+  badge:{tagline:'Connecting Knowledge, Saving Lives',footer:'26–27 November 2026 · Safir Hotel, Dokki, Cairo'}
 };
 const MOCK=/[?&]mock\b/.test(location.search);
 
 /* ================= Helpers ================= */
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const I={scan:'<path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/>',users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',chart:'<path d="M3 3v18h18"/><path d="M7 16v-5M12 16V8M17 16v-9"/>',upload:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5M12 3v12"/>',download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/>',check:'<path d="M20 6 9 17l-5-5"/>',x:'<path d="M18 6 6 18M6 6l12 12"/>',alert:'<path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>',plus:'<path d="M12 5v14M5 12h14"/>',search:'<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',undo:'<path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/>',flip:'<path d="M20 16v4h-4M4 8V4h4M4 4l6 6M20 20l-6-6"/>',logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',refresh:'<path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/>',stop:'<rect x="6" y="6" width="12" height="12" rx="2"/>'};
+const I={scan:'<path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/>',users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',chart:'<path d="M3 3v18h18"/><path d="M7 16v-5M12 16V8M17 16v-9"/>',upload:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5M12 3v12"/>',download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/>',check:'<path d="M20 6 9 17l-5-5"/>',x:'<path d="M18 6 6 18M6 6l12 12"/>',alert:'<path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>',plus:'<path d="M12 5v14M5 12h14"/>',search:'<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',undo:'<path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/>',flip:'<path d="M20 16v4h-4M4 8V4h4M4 4l6 6M20 20l-6-6"/>',logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',refresh:'<path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/>',stop:'<rect x="6" y="6" width="12" height="12" rx="2"/>',qr:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/>',print:'<path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>',zip:'<path d="M21 8v13H3V8"/><path d="M1 3h22v5H1zM10 12h4"/>'};
 const ic=n=>`<svg class="i" viewBox="0 0 24 24">${I[n]||''}</svg>`;
 const pad=n=>String(n).padStart(2,'0');
 const fmtT=t=>{if(!t)return'';const d=new Date(t);return`${pad(d.getHours())}:${pad(d.getMinutes())}`};
@@ -420,16 +462,19 @@ function foundHtml(){
 }
 function bindFind(){const f=$('#findQ');if(f&&!f._b){f._b=1;f.addEventListener('input',e=>{S.findQ=e.target.value;$('#found').innerHTML=foundHtml()})}}
 
-function vGuests(){
+function guestList(){
   const q=S.q.toLowerCase();const F={all:()=>true,d1:g=>!!S.att.get(K(g.code,1)),d2:g=>!!S.att.get(K(g.code,2)),both:g=>attOf(g.code).every(Boolean),none:g=>!attOf(g.code).some(Boolean),one:g=>{const n=attOf(g.code).filter(Boolean).length;return n>0&&n<CFG.days.length},walk:g=>!!g.walk_in};
-  const L=[...S.guests.values()].filter(g=>F[S.f](g)&&(!q||[g.name,g.email,g.phone,g.org,g.code].join(' ').toLowerCase().includes(q))).sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+  return [...S.guests.values()].filter(g=>F[S.f](g)&&(!q||[g.name,g.email,g.phone,g.org,g.code].join(' ').toLowerCase().includes(q))).sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+}
+function vGuests(){
+  const L=guestList();
   const c=counts();
   const opts=[['all',`All (${c.total})`],['d1',`Day 1 (${c.n[0]})`],['d2',`Day 2 (${c.n[1]})`],['both',`Both days (${c.both})`],['one','One day only'],['none','Not checked in'],['walk',`Walk-ins (${c.walk})`]];
-  return`<div class="toolbar"><input class="input" id="gq" placeholder="Search name, email, mobile, code…" value="${esc(S.q)}"><select class="input" id="gf" style="width:auto">${opts.map(([k,l])=>`<option value="${k}" ${S.f===k?'selected':''}>${l}</option>`).join('')}</select><span class="sp"></span><span class="muted" style="font-size:13px">${L.length} shown</span><button class="btn sm" data-a="export">${ic('download')} Excel</button></div>
-  <div class="tbl"><table><thead><tr><th>Guest</th><th class="hide-sm">Contact</th><th class="hide-sm">Pass</th>${CFG.days.map(d=>`<th>${d.label}</th>`).join('')}<th>Status</th></tr></thead><tbody>
+  return`<div class="toolbar"><input class="input" id="gq" placeholder="Search name, email, mobile, code…" value="${esc(S.q)}"><select class="input" id="gf" style="width:auto">${opts.map(([k,l])=>`<option value="${k}" ${S.f===k?'selected':''}>${l}</option>`).join('')}</select><span class="sp"></span><span class="muted" style="font-size:13px">${L.length} shown</span><button class="btn sm" data-a="badges">${ic('print')} Print badges</button><button class="btn sm" data-a="zip">${ic('zip')} QR images</button><button class="btn sm" data-a="export">${ic('download')} Excel</button></div>
+  <div class="tbl"><table><thead><tr><th>Guest</th><th class="hide-sm">Contact</th><th class="hide-sm">Pass</th>${CFG.days.map(d=>`<th>${d.label}</th>`).join('')}<th>Status</th><th>QR</th></tr></thead><tbody>
   ${L.slice(0,600).map(g=>{const a=attOf(g.code),n=a.filter(Boolean).length;return`<tr><td><div class="nm">${esc(g.name)}${g.walk_in?'<span class="tag">Walk-in</span>':''}</div><small>${esc(g.org||'')}</small></td><td class="hide-sm"><small>${esc(g.email||'')}<br>${esc(g.phone||'')}</small></td><td class="hide-sm"><span class="code">${esc(g.code)}</span></td>
     ${CFG.days.map((d,i)=>a[i]?`<td class="chk">✓ ${fmtT(a[i].scanned_at)}${a[i].pending?' <span class="pend">⟳</span>':''}${a[i].method&&a[i].method!=='scan'?`<br><small>${esc(a[i].method)}</small>`:''} <button class="btn sm ghost" data-a="undo" data-code="${g.code}" data-day="${d.n}" title="Remove this check-in">${ic('undo')}</button></td>`:`<td class="chk no">—${d.n===S.day?` <button class="btn sm" data-a="mark" data-code="${g.code}">Check in</button>`:''}</td>`).join('')}
-    <td><span class="pill ${n===CFG.days.length?'both':n?'one':'none'}">${n===CFG.days.length?'Both days':n?`${n}/${CFG.days.length}`:'Not yet'}</span></td></tr>`}).join('')||`<tr><td colspan="6" class="muted" style="padding:24px;text-align:center">${S.guests.size?'No guests match.':'No guests yet — upload the list in Import.'}</td></tr>`}
+    <td><span class="pill ${n===CFG.days.length?'both':n?'one':'none'}">${n===CFG.days.length?'Both days':n?`${n}/${CFG.days.length}`:'Not yet'}</span></td><td><button class="btn sm" data-a="qr" data-code="${g.code}" title="QR & badge">${ic('qr')}</button></td></tr>`}).join('')||`<tr><td colspan="8" class="muted" style="padding:24px;text-align:center">${S.guests.size?'No guests match.':'No guests yet — upload the list in Import.'}</td></tr>`}
   </tbody></table></div>${L.length>600?`<div class="note">Showing the first 600 — search to narrow down.</div>`:''}`;
 }
 function vDash(){
@@ -496,10 +541,66 @@ async function doImport(){
   catch(e){toast('Upload failed: '+(e.message||e));if(b){b.disabled=false;b.textContent='Try again'}}
 }
 function exportXlsx(){
-  const rows=[...S.guests.values()].sort((a,b)=>(a.name||'').localeCompare(b.name||'')).map(g=>{const a=attOf(g.code),n=a.filter(Boolean).length;const o={Name:g.name,Email:g.email||'',Mobile:g.phone||'',Organisation:g.org||'','Pass code':g.code,Source:g.walk_in?'Walk-in':'Invited'};CFG.days.forEach((d,i)=>{o[d.label]=a[i]?fmtDT(a[i].scanned_at):''});o['Days attended']=`${n}/${CFG.days.length}`;o['Certificate eligible']=n===CFG.days.length?'Yes':'No';return o});
+  const rows=[...S.guests.values()].sort((a,b)=>(a.name||'').localeCompare(b.name||'')).map(g=>{const a=attOf(g.code),n=a.filter(Boolean).length;const o={Name:g.name,Email:g.email||'',Mobile:g.phone||'',Organisation:g.org||'','Pass code':g.code,'QR text':`KODE|${CFG.eventId}|${g.code}`,Source:g.walk_in?'Walk-in':'Invited'};CFG.days.forEach((d,i)=>{o[d.label]=a[i]?fmtDT(a[i].scanned_at):''});o['Days attended']=`${n}/${CFG.days.length}`;o['Certificate eligible']=n===CFG.days.length?'Yes':'No';return o});
   const wb=XLSX.utils.book_new();const ws=XLSX.utils.json_to_sheet(rows);ws['!cols']=[28,32,18,28,16,10,18,18,14,18].map(w=>({wch:w}));XLSX.utils.book_append_sheet(wb,ws,'Attendance');
   const c=counts();const sum=XLSX.utils.aoa_to_sheet([[CFG.eventName],['Exported',new Date().toLocaleString('en-GB')],[],['Guests',c.total],['Walk-ins',c.walk],...CFG.days.map((d,i)=>[d.label,c.n[i]]),['Both days (certificate eligible)',c.both]]);sum['!cols']=[{wch:34},{wch:24}];XLSX.utils.book_append_sheet(wb,sum,'Summary');
   XLSX.writeFile(wb,`KODE-attendance-${new Date().toISOString().slice(0,16).replace(/[:T]/g,'-')}.xlsx`);
+}
+
+/* ================= Badges & QR images ================= */
+const qrText=g=>`KODE|${CFG.eventId}|${g.code}`;
+function badgeHtml(g,size){
+  const len=(g.name||'').length,cls=len>34?'xl':len>22?'l':'';
+  return`<div class="bdg ${size}"><div class="bh"><div class="be">${esc(CFG.eventName)}</div><div class="bt">${esc(CFG.badge.tagline)}</div></div>
+    ${size==='wallet'?`<div class="bq">${qrSvg(qrText(g))}</div><div class="bb"><div class="bn ${cls}">${esc(g.name)}</div>${g.org?`<div class="bo">${esc(g.org)}</div>`:''}<div class="bc">${esc(g.code)}</div></div>`
+    :`<div class="bb"><div class="bn ${cls}">${esc(g.name)}</div>${g.org?`<div class="bo">${esc(g.org)}</div>`:''}<div class="bq">${qrSvg(qrText(g))}</div><div class="bc">${esc(g.code)}</div></div><div class="bf">${esc(CFG.badge.footer)}</div>`}</div>`;
+}
+function printBadges(list,size){
+  if(!list.length){toast('No guests to print');return}
+  const per=size==='wallet'?10:4;let html='';
+  for(let i=0;i<list.length;i+=per)html+=`<div class="sheet ${size}">${list.slice(i,i+per).map(g=>badgeHtml(g,size)).join('')}</div>`;
+  let pa=$('#printArea');if(!pa){pa=document.createElement('div');pa.id='printArea';document.body.appendChild(pa)}
+  pa.innerHTML=html;closeModal();
+  const go=()=>{try{window.print()}catch(e){toast('Printing isn’t available here')}};
+  (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(()=>setTimeout(go,150));
+}
+function openBadges(){
+  const cur=guestList(),all=[...S.guests.values()].sort((a,b)=>(a.name||'').localeCompare(b.name||'')),walk=all.filter(g=>g.walk_in);
+  const sample=cur[0]||all[0]||{name:'Dr. Sample Guest',org:'Hospital',code:'KD-SAMP-LE01'};
+  openModal(`<h2>Print badges</h2><div class="muted" style="font-size:13px">Name, organisation and QR on each badge — print on A4, or choose “Save as PDF” to send to a print shop.</div>
+    <label class="l">Badge size</label><div class="seg" id="bsz"><button data-sz="a6" class="on">Large badge · 4 per A4</button><button data-sz="wallet">Card 85×55 · 10 per A4</button></div>
+    <label class="l">Who</label><select class="input" id="bwho"><option value="all">All guests (${all.length})</option>${cur.length!==all.length?`<option value="cur">Current search / filter (${cur.length})</option>`:''}${walk.length?`<option value="walk">Walk-ins only (${walk.length})</option>`:''}</select>
+    <div class="bdg-prev" id="bprev">${badgeHtml(sample,'a6')}</div>
+    <button class="btn pri block" data-a="doprint">${ic('print')} Print / Save as PDF</button>
+    <div class="note">In the print window choose <b>A4</b>, scale <b>100%</b> (or “Actual size”), and turn <b>Background graphics</b> on so the black header prints.</div>`);
+  S.bsize='a6';
+  $('#bsz').addEventListener('click',e=>{const b=e.target.closest('[data-sz]');if(!b)return;S.bsize=b.dataset.sz;[...$('#bsz').children].forEach(x=>x.classList.toggle('on',x===b));$('#bprev').innerHTML=badgeHtml(sample,S.bsize)});
+  S.bpick=()=>{const w=$('#bwho').value;return w==='cur'?cur:w==='walk'?walk:all};
+}
+function openQr(code){
+  const g=S.guests.get(code);if(!g)return;
+  openModal(`<div class="eyebrow">Guest pass</div><h2>${esc(g.name)}</h2><div class="muted" style="font-size:13px">${esc(g.org||'')}</div>
+    <div class="qrbox">${qrSvg(qrText(g))}</div><div style="text-align:center"><span class="code" style="font-size:15px">${esc(g.code)}</span></div>
+    <div class="grid g2 mt"><button class="btn" data-a="png" data-code="${g.code}">${ic('download')} QR image</button><button class="btn pri" data-a="print1" data-code="${g.code}">${ic('print')} Print badge</button></div>`);
+}
+function qrCanvas(g,px=900){
+  const q=qrcode(0,'M');q.addData(qrText(g));q.make();const n=q.getModuleCount(),m=4,cell=Math.floor(px/(n+m*2)),W=cell*(n+m*2);
+  const c=document.createElement('canvas');c.width=W;c.height=W;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,W,W);x.fillStyle='#000';
+  for(let r=0;r<n;r++)for(let k=0;k<n;k++)if(q.isDark(r,k))x.fillRect((k+m)*cell,(r+m)*cell,cell,cell);return c;
+}
+const fileSafe=s=>String(s||'').replace(/[\\/:*?"<>|]+/g,'').replace(/\s+/g,' ').trim().slice(0,60);
+function dl(blob,name){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}
+function downloadPng(code){const g=S.guests.get(code);if(!g)return;qrCanvas(g).toBlob(b=>dl(b,`${g.code} - ${fileSafe(g.name)}.png`),'image/png')}
+async function downloadZip(){
+  if(typeof JSZip==='undefined'){toast('ZIP library didn’t load — check the internet');return}
+  const list=[...S.guests.values()].sort((a,b)=>(a.name||'').localeCompare(b.name||''));if(!list.length){toast('No guests yet');return}
+  toast(`Preparing ${list.length} QR images…`);
+  const zip=new JSZip(),dir=zip.folder('qr-codes'),rows=[];
+  for(const g of list){const f=`${g.code} - ${fileSafe(g.name)}.png`;const b=await new Promise(r=>qrCanvas(g).toBlob(r,'image/png'));dir.file(f,b);rows.push({Name:g.name,Organisation:g.org||'','Pass code':g.code,'QR text':qrText(g),'QR image':'qr-codes/'+f,Source:g.walk_in?'Walk-in':'Invited'})}
+  const ws=XLSX.utils.json_to_sheet(rows);ws['!cols']=[30,30,16,28,46,10].map(w=>({wch:w}));const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Badges');
+  zip.file('badges.xlsx',XLSX.write(wb,{bookType:'xlsx',type:'array'}));
+  zip.file('READ ME.txt',`Badge data for ${CFG.eventName}\r\n\r\nbadges.xlsx lists every guest with their name, organisation, pass code and QR image file.\r\nPrint shops can use it for a data merge (e.g. InDesign / Word mail merge with images).\r\nEach QR must be printed at least 2.5 cm wide.\r\n`);
+  const blob=await zip.generateAsync({type:'blob'});dl(blob,`KODE-badges-${list.length}-guests.zip`);
 }
 
 /* ================= Walk-in ================= */
@@ -518,7 +619,7 @@ function walkIn(){
     const g={code:newCode(),name,phone,email:email||null,org:org||null,walk_in:true,pending:true};
     S.guests.set(g.code,g);enqueue({t:'guest',row:{code:g.code,name,phone,email:g.email,org:g.org,walk_in:true}});
     checkIn(g,'walk-in');saveCache();
-    openModal(`<div class="eyebrow">Walk-in registered${!navigator.onLine||S.netErr?' · saved on phone':''}</div><h2>${esc(name)} ✓</h2><div class="muted" style="font-size:13px">Checked in for ${esc(day.label)}. Ask them to photograph this QR — it’s their pass for ${CFG.days.length===2?'the other day':'every day'}.</div><div class="qrbox">${qrSvg(`KODE|${CFG.eventId}|${g.code}`)}</div><div style="text-align:center"><span class="code" style="font-size:15px">${g.code}</span></div><div class="row mt"><button class="btn block" data-a="close">Done</button><button class="btn pri block" data-a="walkin">${ic('plus')} Register another</button></div>`);
+    openModal(`<div class="eyebrow">Walk-in registered${!navigator.onLine||S.netErr?' · saved on phone':''}</div><h2>${esc(name)} ✓</h2><div class="muted" style="font-size:13px">Checked in for ${esc(day.label)}. Ask them to photograph this QR — it’s their pass for ${CFG.days.length===2?'the other day':'every day'}.</div><div class="qrbox">${qrSvg(`KODE|${CFG.eventId}|${g.code}`)}</div><div style="text-align:center"><span class="code" style="font-size:15px">${g.code}</span></div><div class="grid g2 mt"><button class="btn" data-a="print1" data-code="${g.code}">${ic('print')} Print badge</button><button class="btn pri" data-a="walkin">${ic('plus')} Register another</button></div>`);
     renderSide();
   });
 }
@@ -536,6 +637,12 @@ document.addEventListener('click',e=>{
   if(a==='undo'){const code=el.dataset.code,day=+el.dataset.day;const g=S.guests.get(code);if(el.dataset.c!=='1'){el.dataset.c='1';el.style.color='var(--bad)';toast(`Tap again to remove ${g?g.name:''} from Day ${day}`);setTimeout(()=>{el.dataset.c='';el.style.color=''},2500);return}undoCheckin(code,day)}
   if(a==='refresh')refresh(false);
   if(a==='export')exportXlsx();
+  if(a==='qr')openQr(el.dataset.code);
+  if(a==='png')downloadPng(el.dataset.code);
+  if(a==='print1'){const g=S.guests.get(el.dataset.code);if(g)printBadges([g],LS.get('kode-bsize','a6'))}
+  if(a==='badges')openBadges();
+  if(a==='doprint'){LS.set('kode-bsize',S.bsize||'a6');printBadges(S.bpick?S.bpick():[],S.bsize||'a6')}
+  if(a==='zip')downloadZip();
   if(a==='pick')$('#fileImport').click();
   if(a==='doimport')doImport();
   if(a==='logout'){api.signOut().then(()=>{stopCam();location.hash='';location.reload()})}
