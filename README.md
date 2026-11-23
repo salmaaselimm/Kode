@@ -10,7 +10,7 @@ A working front-end prototype of KODE's QR invitation system.
 - **Invite** via email / WhatsApp / SMS with editable templates and live preview
 - **Guest experience** demo: professional invitation email → RSVP page (attending / not, +1 with name, dietary) → instant auto-reply with QR passes for the guest and their +1
 - **Auto-reply** instantly when a guest confirms or declines
-- **Sessions & certificates**: one QR per guest, scanned at each of the 4 sessions (Day 1/2 × Conference/Workshop); strict 4/4 attendance → certificate of attendance generated and emailed
+- **Sessions & certificates**: one QR per guest, scanned once on each day (Day 1 & Day 2); strict 2/2 attendance → certificate of attendance generated and emailed
 - **Offline-first scanning** (prototype simulation): scans keep working without internet and sync when reconnected
 - **Scan** passes at the door (photo/camera upload, manual code entry) — duplicates and fake codes rejected
 - **Report** live KPIs, funnel, arrivals over time, per-company stats, and export to Excel / CSV
