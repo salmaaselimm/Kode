@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="robots" content="noindex">
+<title>KODE — Check-in</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<style>
+:root{--bg:#080808;--p1:#101010;--p2:#161616;--line:#232323;--line2:#303030;--text:#f3f3f3;--soft:#c9c9c9;--muted:#8a8a8a;--dim:#5c5c5c;
+--metal:linear-gradient(135deg,#fff 0%,#cfcfcf 28%,#8e8e8e 52%,#d9d9d9 74%,#f4f4f4 100%);--ok:#5fdc94;--warn:#f0c15a;--bad:#f07474;--r:16px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 Inter,system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+.hide{display:none!important}
+svg.i{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.logo{width:34px;height:34px;color:#fff;flex:none}
+
+/* layout */
+header{position:sticky;top:0;z-index:30;background:rgba(8,8,8,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:calc(env(safe-area-inset-top) + 10px) 16px 10px}
+.hrow{display:flex;align-items:center;gap:12px;max-width:1200px;margin:0 auto}
+.brand b{font-family:Montserrat;font-weight:900;letter-spacing:.28em;font-size:14px;display:block}
+.brand small{display:block;color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:42vw}
+.sp{flex:1}
+.net{display:inline-flex;align-items:center;gap:7px;padding:6px 11px;border-radius:99px;font-size:12px;font-weight:700;border:1px solid #2a4a35;background:#0f1912;color:var(--ok);white-space:nowrap;cursor:pointer}
+.net::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.net.off{border-color:#5a4a22;background:#19150d;color:var(--warn)}
+.net.err{border-color:#5a2626;background:#1a0f0f;color:var(--bad)}
+.seg{display:inline-grid;grid-auto-flow:column;gap:4px;background:#0d0d0d;border:1px solid var(--line);padding:3px;border-radius:12px}
+.seg button{border:0;background:transparent;color:#9a9a9a;padding:7px 12px;border-radius:9px;font-weight:700;cursor:pointer;font-size:13px;white-space:nowrap}
+.seg button.on{background:var(--metal);color:#0a0a0a}
+main{max-width:1200px;margin:0 auto;padding:16px 16px calc(96px + env(safe-area-inset-bottom))}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(6,6,6,.96);backdrop-filter:blur(10px);border-top:1px solid var(--line);display:flex;justify-content:center;padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+nav.tabs a{flex:1;max-width:160px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 4px;color:#8f8f8f;text-decoration:none;font-size:11.5px;font-weight:600;border-radius:12px}
+nav.tabs a.on{color:#fff;background:#151515}
+nav.tabs svg.i{width:22px;height:22px}
+
+.card{background:linear-gradient(180deg,rgba(22,22,22,.95),rgba(14,14,14,.95));border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.card h3{font-family:Montserrat;font-size:14px;margin:0 0 12px;display:flex;align-items:center;gap:8px}
+.card h3 .sub{font-family:Inter;font-weight:500;color:var(--muted);font-size:12.5px;margin-left:auto}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g6{grid-template-columns:repeat(6,minmax(0,1fr))}
+.mt{margin-top:14px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.muted{color:var(--muted)}
+.eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line2);background:#141414;color:#eee;padding:11px 16px;border-radius:12px;cursor:pointer;font-weight:700;font-size:14px;white-space:nowrap;text-decoration:none}
+.btn:hover{border-color:#4a4a4a}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.pri{background:var(--metal);color:#0a0a0a;border-color:transparent}
+.btn.sm{padding:7px 11px;font-size:12.5px;border-radius:10px}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--soft)}
+.btn.danger{color:#ffb1b1;border-color:#4a2626}
+.btn.block{width:100%}
+.input{width:100%;background:#0c0c0c;border:1px solid var(--line2);border-radius:12px;padding:12px 13px;outline:none;font-size:15px}
+.input:focus{border-color:#777}
+label.l{display:block;font-size:12px;color:var(--muted);font-weight:600;margin:12px 0 6px}
+.kpi .l{font-size:12px;color:var(--muted);font-weight:600}
+.kpi .v{font-family:Montserrat;font-weight:800;font-size:30px;line-height:1.1;margin-top:4px}
+.kpi .s{font-size:12px;color:var(--dim)}
+.bar{height:8px;background:#1d1d1d;border-radius:99px;overflow:hidden;margin-top:10px}
+.bar>div{height:100%;background:var(--metal);border-radius:99px;transition:width .4s}
+
+/* login */
+.login{min-height:100vh;display:grid;place-items:center;padding:24px}
+.login .box{width:100%;max-width:380px;text-align:center}
+.login .logo{width:74px;height:74px;margin:0 auto 16px;display:block}
+.login h1{font-family:Montserrat;font-weight:800;font-size:22px;margin:0 0 4px}
+.err{color:var(--bad);font-size:13px;margin-top:10px;min-height:18px}
+
+/* scanner */
+.scan-wrap{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:14px}
+.cam{position:relative;aspect-ratio:3/4;max-height:68vh;width:100%;border-radius:20px;overflow:hidden;background:#000;border:1px solid var(--line)}
+.cam video{width:100%;height:100%;object-fit:cover;display:block}
+.cam .frame{position:absolute;inset:18% 14%;border-radius:18px;box-shadow:0 0 0 9999px rgba(0,0,0,.35)}
+.cam .frame i{position:absolute;width:38px;height:38px;border-color:#fff;border-style:solid}
+.cam .frame i:nth-child(1){left:0;top:0;border-width:4px 0 0 4px;border-top-left-radius:16px}
+.cam .frame i:nth-child(2){right:0;top:0;border-width:4px 4px 0 0;border-top-right-radius:16px}
+.cam .frame i:nth-child(3){left:0;bottom:0;border-width:0 0 4px 4px;border-bottom-left-radius:16px}
+.cam .frame i:nth-child(4){right:0;bottom:0;border-width:0 4px 4px 0;border-bottom-right-radius:16px}
+.cam .start{position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:12px;text-align:center;padding:20px;background:radial-gradient(circle at 50% 40%,#1a1a1a,#050505)}
+.cam .start b{font-family:Montserrat;font-size:18px}
+.cam .daytag{position:absolute;top:12px;left:12px;background:rgba(0,0,0,.7);border:1px solid #333;border-radius:99px;padding:5px 12px;font-weight:800;font-size:13px}
+.cam .camctl{position:absolute;top:12px;right:12px;display:flex;gap:6px}
+.flash{position:fixed;inset:0;z-index:80;display:grid;place-items:center;align-content:center;text-align:center;padding:30px;gap:10px;animation:fin .12s ease}
+.flash.ok{background:rgba(10,60,30,.96)}.flash.dup{background:rgba(90,65,10,.96)}.flash.bad{background:rgba(90,18,18,.96)}
+.flash .ico{width:96px;height:96px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.14);margin:0 auto 6px}
+.flash .ico svg{width:54px;height:54px;stroke:#fff;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.flash h1{font-family:Montserrat;font-weight:900;font-size:clamp(26px,7vw,48px);margin:0;line-height:1.1}
+.flash .who{font-size:clamp(20px,5vw,30px);font-weight:700}
+.flash .sub{font-size:16px;opacity:.85}
+.flash .days{display:flex;gap:8px;justify-content:center;margin-top:8px}
+.flash .days span{padding:6px 14px;border-radius:99px;background:rgba(255,255,255,.14);font-weight:800}
+.flash .days span.on{background:#fff;color:#111}
+.flash .tap{font-size:13px;opacity:.6;margin-top:16px}
+@keyframes fin{from{opacity:0}to{opacity:1}}
+.res{display:flex;gap:12px;align-items:center;padding:12px;border-radius:14px;border:1px solid var(--line);background:#0e0e0e}
+.res .d{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;flex:none}
+.res.ok .d{background:rgba(95,220,148,.15);color:var(--ok)}.res.dup .d{background:rgba(240,193,90,.15);color:var(--warn)}.res.bad .d{background:rgba(240,116,116,.15);color:var(--bad)}
+.feed{display:flex;flex-direction:column;max-height:330px;overflow:auto}
+.feed .it{display:flex;gap:10px;align-items:center;padding:9px 2px;border-bottom:1px solid #1a1a1a;font-size:13.5px}
+.feed .it:last-child{border:0}
+.feed .tm{margin-left:auto;color:var(--dim);font-size:12px;white-space:nowrap}
+.pend{color:var(--warn);font-size:11px;font-weight:700}
+.found{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.found .fr{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--line);border-radius:12px;background:#0f0f0f}
+.found .fr .nm{flex:1;min-width:0}
+.found .fr .nm b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.found .fr .nm small{color:var(--muted)}
+
+/* tables */
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.toolbar .input{max-width:320px;padding:10px 12px}
+.tbl{overflow:auto;border:1px solid var(--line);border-radius:14px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:11px 12px;background:#0d0d0d;border-bottom:1px solid var(--line);white-space:nowrap;position:sticky;top:0}
+td{padding:10px 12px;border-bottom:1px solid #191919;vertical-align:middle}
+tr:last-child td{border:0}
+td .nm{font-weight:600}
+td small{color:var(--muted)}
+.code{font-family:'JetBrains Mono',monospace;font-size:12px;background:#171717;border:1px solid #282828;padding:2px 7px;border-radius:6px;white-space:nowrap}
+.chk{font-weight:700;white-space:nowrap}.chk.no{color:#444}
+.tag{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;background:#1f2a3a;color:#aac4ff;border:1px solid #2f3f5a;border-radius:5px;padding:1px 6px;margin-left:6px}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;font-size:11.5px;font-weight:700;border:1px solid;white-space:nowrap}
+.pill.both{color:#0a0a0a;background:var(--metal);border-color:transparent}
+.pill.one{color:var(--warn);border-color:#4a3d1f;background:#1c1810}
+.pill.none{color:#8a8a8a;border-color:#2e2e2e;background:#141414}
+
+/* modal & toast */
+.mbg{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);display:none;align-items:flex-start;justify-content:center;padding:30px 14px;overflow:auto}
+.mbg.on{display:flex}
+.modal{background:#0f0f0f;border:1px solid #2a2a2a;border-radius:20px;width:100%;max-width:520px;padding:22px;position:relative}
+.modal h2{font-family:Montserrat;font-weight:800;margin:0 0 4px;font-size:20px}
+.modal .x{position:absolute;right:12px;top:12px}
+.qrbox{background:#fff;border-radius:16px;padding:12px;width:min(260px,70vw);margin:14px auto 8px}
+.qrbox svg{display:block;width:100%;height:auto}
+.toasts{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top) + 70px);z-index:100;display:flex;flex-direction:column;gap:8px;align-items:center;width:max-content;max-width:92vw}
+.toast{background:#f1f1f1;color:#0a0a0a;padding:10px 16px;border-radius:12px;font-weight:600;font-size:13.5px;box-shadow:0 14px 40px rgba(0,0,0,.5)}
+.drop{border:1.5px dashed #333;border-radius:16px;padding:26px;text-align:center;cursor:pointer}
+.drop:hover,.drop.over{border-color:#888;background:rgba(255,255,255,.03)}
+.note{font-size:12.5px;color:var(--muted);margin-top:10px;line-height:1.5}
+@media (max-width:900px){.scan-wrap{grid-template-columns:1fr}.g6{grid-template-columns:repeat(3,minmax(0,1fr))}.cam{max-height:56vh;aspect-ratio:4/5}}
+@media (max-width:560px){.brand small{display:none}.net{font-size:11px;padding:5px 9px}.g6,.g3{grid-template-columns:repeat(2,minmax(0,1fr))}.g2{grid-template-columns:1fr}.hide-sm{display:none!important}.kpi .v{font-size:26px}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><symbol id="lg" viewBox="0 0 100 100"><rect x="5" y="5" width="90" height="90" fill="none" stroke="currentColor" stroke-width="5.5"/><text x="18" y="46" font-family="Montserrat,Arial Black,sans-serif" font-weight="800" font-size="36" fill="currentColor" textLength="64" lengthAdjust="spacingAndGlyphs">KO</text><rect x="18" y="52" width="64" height="4.5" fill="currentColor"/><text x="18" y="87" font-family="Montserrat,Arial Black,sans-serif" font-weight="800" font-size="36" fill="currentColor" textLength="64" lengthAdjust="spacingAndGlyphs">DE</text></symbol></svg>
+
+<div id="loginView" class="login hide">
+  <form class="box" id="loginForm">
+    <svg class="logo"><use href="#lg"/></svg>
+    <h1>Staff sign in</h1>
+    <div class="muted" id="loginEvent"></div>
+    <label class="l" style="text-align:left">Email</label>
+    <input class="input" name="email" type="email" autocomplete="username" required value="kode.eg.events@gmail.com">
+    <label class="l" style="text-align:left">Password</label>
+    <input class="input" name="password" type="password" autocomplete="current-password" required>
+    <button class="btn pri block mt" type="submit">Sign in</button>
+    <div class="err" id="loginErr"></div>
+  </form>
+</div>
+
+<div id="appView" class="hide">
+  <header><div class="hrow">
+    <svg class="logo"><use href="#lg"/></svg>
+    <div class="brand"><b>KODE</b><small id="evName"></small></div>
+    <div class="sp"></div>
+    <div class="seg" id="daySeg"></div>
+    <span class="net" id="net" title="Sync status">…</span>
+  </div></header>
+  <main id="main"></main>
+  <nav class="tabs" id="tabs"></nav>
+</div>
+
+<div class="mbg" id="mbg"><div class="modal" id="modal"></div></div>
+<div class="toasts" id="toasts"></div>
+<input type="file" id="fileImport" accept=".xlsx,.xls,.csv" class="hide">
+
+<script>
+/* ================= Config ================= */
+const CFG={
+  url:'https://eucqxswykzalhaaainxb.supabase.co',
+  key:'sb_publishable_8hAhBYh0deSvCVrJ05SpMA_pHTLBByV',
+  eventId:'KODEMED26',
+  eventName:'Euro-Egyptian Critical Care Summit',
+  days:[{n:1,label:'Day 1',date:'2026-11-25'},{n:2,label:'Day 2',date:'2026-11-26'}]
+};
+const MOCK=/[?&]mock\b/.test(location.search);
+
+/* ================= Helpers ================= */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const I={scan:'<path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/>',users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',chart:'<path d="M3 3v18h18"/><path d="M7 16v-5M12 16V8M17 16v-9"/>',upload:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5M12 3v12"/>',download:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/>',check:'<path d="M20 6 9 17l-5-5"/>',x:'<path d="M18 6 6 18M6 6l12 12"/>',alert:'<path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>',plus:'<path d="M12 5v14M5 12h14"/>',search:'<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',undo:'<path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/>',flip:'<path d="M20 16v4h-4M4 8V4h4M4 4l6 6M20 20l-6-6"/>',logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',refresh:'<path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5"/>',stop:'<rect x="6" y="6" width="12" height="12" rx="2"/>'};
+const ic=n=>`<svg class="i" viewBox="0 0 24 24">${I[n]||''}</svg>`;
+const pad=n=>String(n).padStart(2,'0');
+const fmtT=t=>{if(!t)return'';const d=new Date(t);return`${pad(d.getHours())}:${pad(d.getMinutes())}`};
+const fmtDT=t=>{if(!t)return'';const d=new Date(t);return d.toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})};
+const ago=t=>{const s=(Date.now()-new Date(t))/1000;if(s<45)return'just now';if(s<3600)return Math.round(s/60)+'m ago';if(s<86400)return Math.round(s/3600)+'h ago';return fmtDT(t)};
+const EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const ALPH='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+function toast(m){const d=document.createElement('div');d.className='toast';d.textContent=m;$('#toasts').appendChild(d);setTimeout(()=>{d.style.transition='.3s';d.style.opacity=0;setTimeout(()=>d.remove(),300)},2600)}
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+function deviceName(){let d=LS.get('kode-device');if(!d){d='Phone-'+Array.from(crypto.getRandomValues(new Uint8Array(2))).map(b=>ALPH[b%ALPH.length]).join('');LS.set('kode-device',d)}return d}
+function newCode(){let c;do{const b=crypto.getRandomValues(new Uint8Array(8));let s='';for(const x of b)s+=ALPH[x%ALPH.length];c=`KD-${s.slice(0,4)}-${s.slice(4)}`}while(S.guests.has(c));return c}
+function parseCode(raw){raw=String(raw||'').trim();const m=raw.match(/^KODE\|([^|]+)\|(KD-[A-Z0-9]{4}-[A-Z0-9]{4})$/i);if(m)return{code:m[2].toUpperCase(),event:m[1]};const m2=raw.toUpperCase().replace(/\s/g,'').match(/^KD-?([A-Z0-9]{4})-?([A-Z0-9]{4})$/);if(m2)return{code:`KD-${m2[1]}-${m2[2]}`,event:CFG.eventId};return null}
+function qrSvg(text){const q=qrcode(0,'M');q.addData(text);q.make();const n=q.getModuleCount(),m=3,T=n+m*2;let p='';for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(q.isDark(r,c))p+=`M${c+m} ${r+m}h1v1h-1z`;return`<svg viewBox="0 0 ${T} ${T}" shape-rendering="crispEdges"><rect width="${T}" height="${T}" fill="#fff"/><path d="${p}" fill="#000"/></svg>`}
+function todayDay(){const t=new Date(),s=`${t.getFullYear()}-${pad(t.getMonth()+1)}-${pad(t.getDate())}`;const d=CFG.days.find(x=>x.date===s);return d?d.n:null}
+
+/* ================= Data layer ================= */
+const api=(()=>{
+  if(MOCK){
+    const db=LS.get('kode-mock-db',{guests:[],checkins:[]});const save=()=>LS.set('kode-mock-db',db);let subs=[];let user=LS.get('kode-mock-user',null);
+    const fail=()=>{if(window.__mockOffline)throw new Error('offline')};
+    return{mock:true,
+      async session(){return user},async signIn(e,p){if(p!=='test')throw new Error('Invalid login credentials');user={email:e};LS.set('kode-mock-user',user);return user},async signOut(){user=null;LS.set('kode-mock-user',null)},
+      async fetchAll(){fail();return{guests:db.guests.slice(),checkins:db.checkins.slice()}},
+      async upsertGuests(rows){fail();rows.forEach(r=>{const i=db.guests.findIndex(g=>g.code===r.code);if(i>=0)db.guests[i]={...db.guests[i],...r};else db.guests.push({created_at:new Date().toISOString(),...r})});save()},
+      async insertCheckins(rows){fail();rows.forEach(r=>{if(!db.guests.some(g=>g.code===r.code))throw new Error('fk');if(!db.checkins.some(c=>c.code===r.code&&c.day===r.day)){const row={id:Date.now()+Math.random(),...r};db.checkins.push(row);subs.forEach(f=>f({table:'checkins',type:'INSERT',row}))}});save()},
+      async deleteCheckin(code,day){fail();db.checkins=db.checkins.filter(c=>!(c.code===code&&c.day===day));save()},
+      subscribe(f){subs.push(f);return()=>{subs=subs.filter(x=>x!==f)}}};
+  }
+  const sb=window.supabase.createClient(CFG.url,CFG.key,{auth:{persistSession:true,autoRefreshToken:true}});
+  async function all(table,cols){let out=[],from=0;for(;;){const{data,error}=await sb.from(table).select(cols).range(from,from+999);if(error)throw error;out=out.concat(data);if(data.length<1000)break;from+=1000}return out}
+  return{mock:false,sb,
+    async session(){const{data}=await sb.auth.getSession();return data.session?data.session.user:null},
+    async signIn(email,password){const{data,error}=await sb.auth.signInWithPassword({email,password});if(error)throw error;return data.user},
+    async signOut(){await sb.auth.signOut()},
+    async fetchAll(){const[guests,checkins]=await Promise.all([all('guests','*'),all('checkins','code,day,scanned_at,method,device')]);return{guests,checkins}},
+    async upsertGuests(rows){for(let i=0;i<rows.length;i+=500){const{error}=await sb.from('guests').upsert(rows.slice(i,i+500),{onConflict:'code'});if(error)throw error}},
+    async insertCheckins(rows){const{error}=await sb.from('checkins').upsert(rows,{onConflict:'code,day',ignoreDuplicates:true});if(error)throw error},
+    async deleteCheckin(code,day){const{error}=await sb.from('checkins').delete().eq('code',code).eq('day',day);if(error)throw error},
+    subscribe(f){const ch=sb.channel('kode-live')
+      .on('postgres_changes',{event:'*',schema:'public',table:'checkins'},p=>f({table:'checkins',type:p.eventType,row:p.new&&p.new.code?p.new:p.old}))
+      .on('postgres_changes',{event:'*',schema:'public',table:'guests'},p=>f({table:'guests',type:p.eventType,row:p.new}))
+      .subscribe();return()=>sb.removeChannel(ch)}};
+})();
+
+/* ================= State ================= */
+const S={user:null,guests:new Map(),att:new Map(),queue:LS.get('kode-queue',[]),day:LS.get('kode-day',null)||todayDay()||1,view:'scan',online:navigator.onLine,netErr:false,syncing:false,lastSync:LS.get('kode-lastsync',null),recent:LS.get('kode-recent',[]),q:'',f:'all',findQ:''};
+const K=(code,day)=>`${code}|${day}`;
+function loadCache(){const c=LS.get('kode-cache',null);if(!c)return;c.guests.forEach(g=>S.guests.set(g.code,g));c.checkins.forEach(x=>S.att.set(K(x.code,x.day),x))}
+function saveCache(){LS.set('kode-cache',{guests:[...S.guests.values()],checkins:[...S.att.values()].filter(x=>!x.pending)});LS.set('kode-queue',S.queue);LS.set('kode-recent',S.recent.slice(0,40))}
+function applyServer(data){
+  const pendG=new Set(S.queue.filter(q=>q.t==='guest').map(q=>q.row.code));
+  const keepG=[...S.guests.values()].filter(g=>pendG.has(g.code));
+  S.guests=new Map(data.guests.map(g=>[g.code,g]));keepG.forEach(g=>{if(!S.guests.has(g.code))S.guests.set(g.code,g)});
+  const pend=[...S.att.values()].filter(x=>x.pending);
+  const dels=new Set(S.queue.filter(q=>q.t==='del').map(q=>K(q.code,q.day)));
+  S.att=new Map(data.checkins.filter(x=>!dels.has(K(x.code,x.day))).map(x=>[K(x.code,x.day),x]));pend.forEach(x=>{if(!S.att.has(K(x.code,x.day)))S.att.set(K(x.code,x.day),x)});
+  S.lastSync=new Date().toISOString();LS.set('kode-lastsync',S.lastSync);saveCache();
+}
+async function refresh(silent){if(!S.user)return;try{const d=await api.fetchAll();applyServer(d);S.netErr=false;if(!silent)toast(`Guest list loaded · ${S.guests.size} guests`)}catch(e){S.netErr=true;if(!silent)toast('Offline — using the guest list saved on this device')}renderNet();if(!S.scanning||S.view!=='scan')render();else renderSide()}
+async function flush(){
+  if(S.syncing||!S.queue.length||!S.user)return;S.syncing=true;renderNet();
+  const batch=S.queue.slice();
+  try{
+    const gs=batch.filter(q=>q.t==='guest').map(q=>q.row);if(gs.length)await api.upsertGuests(gs);
+    const cs=batch.filter(q=>q.t==='in').map(q=>q.row);if(cs.length)await api.insertCheckins(cs);
+    for(const d of batch.filter(q=>q.t==='del'))await api.deleteCheckin(d.code,d.day);
+    const ids=new Set(batch.map(q=>q.id));S.queue=S.queue.filter(q=>!ids.has(q.id));
+    cs.forEach(r=>{const a=S.att.get(K(r.code,r.day));if(a&&a.scanned_at===r.scanned_at)a.pending=false});
+    gs.forEach(r=>{const g=S.guests.get(r.code);if(g)g.pending=false});
+    S.netErr=false;S.lastSync=new Date().toISOString();LS.set('kode-lastsync',S.lastSync);
+  }catch(e){S.netErr=true;console.warn('sync failed',e)}
+  S.syncing=false;saveCache();renderNet();
+}
+function enqueue(item){item.id=Date.now()+'-'+Math.random().toString(36).slice(2,7);S.queue.push(item);saveCache();renderNet();setTimeout(flush,50)}
+function liveChange(ev){
+  if(ev.table==='checkins'&&ev.row){const k=K(ev.row.code,ev.row.day);if(ev.type==='DELETE')S.att.delete(k);else if(!S.att.has(k)||S.att.get(k).pending)S.att.set(k,{...ev.row,pending:false})}
+  if(ev.table==='guests'&&ev.row&&ev.row.code)S.guests.set(ev.row.code,{...S.guests.get(ev.row.code),...ev.row,pending:false});
+  saveCache();if(S.view!=='scan')render();else renderSide();
+}
+
+/* ================= Actions ================= */
+function attOf(code){return CFG.days.map(d=>S.att.get(K(code,d.n))||null)}
+function checkIn(g,method){
+  const row={code:g.code,day:S.day,scanned_at:new Date().toISOString(),method,device:deviceName()};
+  S.att.set(K(g.code,S.day),{...row,pending:true});
+  enqueue({t:'in',row});
+  S.recent.unshift({t:row.scanned_at,code:g.code,name:g.name,type:'ok',day:S.day,method});
+}
+function handleScan(raw,method='scan'){
+  const p=parseCode(raw);const day=CFG.days.find(d=>d.n===S.day);
+  if(!p){feedback('bad','Not a KODE pass','This QR code was not issued for this event.');S.recent.unshift({t:new Date().toISOString(),name:'Unknown QR',type:'bad',day:S.day});return}
+  if(p.event!==CFG.eventId){feedback('bad','Wrong event','This pass belongs to a different event.');return}
+  const g=S.guests.get(p.code);
+  if(!g){feedback('bad','Pass not found',`${p.code} isn’t on the guest list${S.guests.size?'':' (guest list not loaded on this phone yet)'}. Search by name or register as walk-in.`);S.recent.unshift({t:new Date().toISOString(),name:p.code,type:'bad',day:S.day});saveCache();renderSide();return}
+  const k=K(g.code,S.day),prev=S.att.get(k);
+  if(prev){feedback('dup','Already checked in',`${g.name} was checked in for ${day.label} at ${fmtT(prev.scanned_at)}.`,g);S.recent.unshift({t:new Date().toISOString(),code:g.code,name:g.name,type:'dup',day:S.day});saveCache();renderSide();return}
+  checkIn(g,method);saveCache();
+  const n=attOf(g.code).filter(Boolean).length;
+  feedback('ok',`Welcome${g.walk_in?'':''}`,`${day.label} · ${n} of ${CFG.days.length} days${n===CFG.days.length?' · certificate eligible':''}`,g);
+  renderSide();
+}
+function feedback(type,title,sub,g){
+  beep(type);try{navigator.vibrate&&navigator.vibrate(type==='ok'?80:[60,60,160])}catch(e){}
+  const a=g?attOf(g.code):null;
+  const el=document.createElement('div');el.className='flash '+type;
+  el.innerHTML=`<div class="ico"><svg viewBox="0 0 24 24">${type==='ok'?I.check:type==='bad'?I.x:I.alert}</svg></div><h1>${esc(title)}</h1>${g?`<div class="who">${esc(g.name)}</div>`:''}<div class="sub">${esc(sub)}</div>${a?`<div class="days">${CFG.days.map((d,i)=>`<span class="${a[i]?'on':''}">${a[i]?'✓ ':''}${d.label}</span>`).join('')}</div>`:''}<div class="tap">Tap to continue</div>`;
+  document.body.appendChild(el);S.paused=true;
+  const close=()=>{if(!el.isConnected)return;el.remove();S.paused=false;S.lastCode=null};
+  el.addEventListener('click',close);setTimeout(close,type==='ok'?1600:3200);
+}
+let actx=null;function beep(type){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain();o.connect(g);g.connect(actx.destination);o.frequency.value=type==='ok'?1046:type==='dup'?520:220;g.gain.setValueAtTime(.0001,actx.currentTime);g.gain.exponentialRampToValueAtTime(.25,actx.currentTime+.01);g.gain.exponentialRampToValueAtTime(.0001,actx.currentTime+(type==='ok'?.18:.45));o.start();o.stop(actx.currentTime+.5)}catch(e){}}
+function undoCheckin(code,day){const k=K(code,day);if(!S.att.has(k))return;const a=S.att.get(k);S.att.delete(k);if(a.pending){S.queue=S.queue.filter(q=>!(q.t==='in'&&q.row.code===code&&q.row.day===day));saveCache();renderNet()}else enqueue({t:'del',code,day});const g=S.guests.get(code);toast(`Removed ${g?g.name:code} from Day ${day}`);render()}
+
+/* ================= Camera ================= */
+let stream=null,detector=null,raf=0,lastTick=0;const cv=document.createElement('canvas'),cx=cv.getContext('2d',{willReadFrequently:true});
+async function startCam(){
+  try{
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw new Error('This browser can’t use the camera. Use Chrome (Android) or Safari (iPhone).');
+    const facing=LS.get('kode-facing','environment');
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:facing},width:{ideal:1280},height:{ideal:720}},audio:false});
+    const v=$('#vid');v.srcObject=stream;v.setAttribute('playsinline','');v.muted=true;await v.play();
+    try{if('BarcodeDetector' in window){const f=await BarcodeDetector.getSupportedFormats();if(f.includes('qr_code'))detector=new BarcodeDetector({formats:['qr_code']})}}catch(e){detector=null}
+    S.scanning=true;$('#camStart').classList.add('hide');$('#camCtl').classList.remove('hide');loop();
+  }catch(e){toast(e.name==='NotAllowedError'?'Camera permission was blocked — allow it in the browser settings':(e.message||'Camera not available'));stopCam()}
+}
+function stopCam(){S.scanning=false;cancelAnimationFrame(raf);if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}const s=$('#camStart'),c=$('#camCtl');if(s)s.classList.remove('hide');if(c)c.classList.add('hide')}
+async function loop(){
+  if(!S.scanning)return;raf=requestAnimationFrame(loop);
+  const now=performance.now();if(now-lastTick<110||S.paused||S.busy)return;lastTick=now;
+  const v=$('#vid');if(!v||v.readyState<2)return;S.busy=true;
+  try{
+    let txt=null;
+    if(detector){const r=await detector.detect(v);if(r&&r[0])txt=r[0].rawValue}
+    else{const w=640,h=Math.round(v.videoHeight*w/v.videoWidth)||480;cv.width=w;cv.height=h;cx.drawImage(v,0,0,w,h);const d=cx.getImageData(0,0,w,h);const r=jsQR(d.data,w,h,{inversionAttempts:'dontInvert'});if(r)txt=r.data}
+    if(txt&&!(txt===S.lastCode)){S.lastCode=txt;handleScan(txt,'scan')}
+  }catch(e){}
+  S.busy=false;
+}
+function flipCam(){LS.set('kode-facing',LS.get('kode-facing','environment')==='environment'?'user':'environment');stopCam();startCam()}
+
+/* ================= Views ================= */
+const TABS=[['scan','Scan','scan'],['guests','Guests','users'],['dash','Dashboard','chart'],['import','Import','upload']];
+function counts(){const n=CFG.days.map(d=>0);let both=0,walk=0;for(const g of S.guests.values()){const a=attOf(g.code);a.forEach((x,i)=>{if(x)n[i]++});if(a.every(Boolean))both++;if(g.walk_in)walk++}return{total:S.guests.size,n,both,walk,pend:S.queue.length}}
+function renderNet(){const el=$('#net');if(!el)return;const p=S.queue.length;
+  if(!navigator.onLine||S.netErr){el.className='net off';el.textContent=p?`Offline · ${p} waiting`:'Offline · saved on phone'}
+  else if(S.syncing||p){el.className='net off';el.textContent=`Syncing ${p}…`}
+  else{el.className='net';el.textContent='Live · synced'}}
+function renderHeader(){
+  $('#evName').textContent=CFG.eventName;
+  $('#daySeg').innerHTML=CFG.days.map(d=>`<button data-day="${d.n}" class="${S.day===d.n?'on':''}">${d.label}</button>`).join('');
+  $('#tabs').innerHTML=TABS.map(([k,l,i])=>`<a href="#${k}" class="${S.view===k?'on':''}">${ic(i)}<span>${l}</span></a>`).join('');
+  renderNet();
+}
+function render(){
+  renderHeader();
+  const v=S.view,m=$('#main');
+  if(v!=='scan'&&S.scanning)stopCam();
+  if(v==='scan')m.innerHTML=vScan();
+  else if(v==='guests')m.innerHTML=vGuests();
+  else if(v==='dash')m.innerHTML=vDash();
+  else m.innerHTML=vImport();
+  after(v);
+}
+function vScan(){
+  const day=CFG.days.find(d=>d.n===S.day);
+  return`<div class="scan-wrap">
+    <div>
+      <div class="cam">
+        <video id="vid" playsinline muted></video>
+        <div class="frame"><i></i><i></i><i></i><i></i></div>
+        <div class="daytag">Scanning · ${esc(day.label)}</div>
+        <div class="camctl hide" id="camCtl"><button class="btn sm" data-a="flip" title="Switch camera">${ic('flip')}</button><button class="btn sm" data-a="stopcam" title="Stop camera">${ic('stop')}</button></div>
+        <div class="start" id="camStart"><svg class="logo" style="width:56px;height:56px"><use href="#lg"/></svg><b>Ready to scan · ${esc(day.label)}</b><div class="muted" style="font-size:13px">Point the camera at the guest’s QR pass</div><button class="btn pri" data-a="startcam">${ic('scan')} Start camera</button></div>
+      </div>
+      ${!todayDay()?`<div class="note">${ic('alert')} Today isn’t an event day — make sure <b>${esc(day.label)}</b> is the day you want to record.</div>`:''}
+    </div>
+    <div id="side">${vSide()}</div>
+  </div>`;
+}
+function vSide(){
+  const c=counts(),i=S.day-1;
+  return`<div class="card">
+      <div class="row" style="justify-content:space-between;align-items:flex-end">
+        <div><div class="eyebrow">Checked in · Day ${S.day}</div><div style="font-family:Montserrat;font-weight:900;font-size:44px;line-height:1">${c.n[i]}<span class="muted" style="font-size:18px;font-weight:600"> / ${c.total}</span></div></div>
+        <button class="btn pri" data-a="walkin">${ic('plus')} Walk-in</button>
+      </div>
+      <div class="bar"><div style="width:${c.total?Math.round(c.n[i]/c.total*100):0}%"></div></div>
+    </div>
+    <div class="card mt">
+      <h3>${ic('search')} Find guest<span class="sub">lost pass or no phone</span></h3>
+      <input class="input" id="findQ" placeholder="Name, mobile, email or pass code" value="${esc(S.findQ)}" autocomplete="off">
+      <div class="found" id="found">${foundHtml()}</div>
+    </div>
+    <div class="card mt"><h3>Recent scans<span class="sub">this phone</span></h3><div class="feed">${S.recent.slice(0,15).map(r=>`<div class="it"><span style="color:${r.type==='ok'?'var(--ok)':r.type==='dup'?'var(--warn)':'var(--bad)'}">${ic(r.type==='ok'?'check':r.type==='dup'?'alert':'x')}</span><div><b>${esc(r.name||'')}</b><br><small class="muted">${r.type==='ok'?`Checked in · Day ${r.day}${r.method&&r.method!=='scan'?' ('+r.method+')':''}`:r.type==='dup'?`Already in · Day ${r.day}`:'Rejected'}${r.code&&S.att.get(K(r.code,r.day))&&S.att.get(K(r.code,r.day)).pending?' · <span class="pend">waiting to sync</span>':''}</small></div><span class="tm">${fmtT(r.t)}</span></div>`).join('')||'<div class="muted" style="font-size:13px">No scans yet on this phone.</div>'}</div></div>`;
+}
+function renderSide(){const s=$('#side');if(s){const f=document.activeElement&&document.activeElement.id==='findQ';const pos=f?document.activeElement.selectionStart:0;s.innerHTML=vSide();if(f){const n=$('#findQ');n.focus();n.setSelectionRange(pos,pos)}bindFind()}renderNet()}
+function foundHtml(){
+  const q=S.findQ.trim().toLowerCase();if(q.length<2)return'';
+  const qd=q.replace(/\D/g,'');
+  const L=[...S.guests.values()].filter(g=>(g.name||'').toLowerCase().includes(q)||(g.email||'').toLowerCase().includes(q)||(g.code||'').toLowerCase().includes(q)||(qd.length>=4&&(g.phone||'').replace(/\D/g,'').includes(qd))).slice(0,8);
+  if(!L.length)return`<div class="fr"><div class="nm"><b>No match for “${esc(S.findQ)}”</b><small>Not on the list? Register them now.</small></div><button class="btn sm pri" data-a="walkin">${ic('plus')} Walk-in</button></div>`;
+  return L.map(g=>{const a=S.att.get(K(g.code,S.day));return`<div class="fr"><div class="nm"><b>${esc(g.name)}${g.walk_in?'<span class="tag">Walk-in</span>':''}</b><small>${esc(g.org||g.email||g.phone||'')}</small></div>${a?`<span class="muted" style="font-size:12px">In at ${fmtT(a.scanned_at)}</span>`:`<button class="btn sm pri" data-a="mark" data-code="${g.code}">Check in</button>`}</div>`}).join('');
+}
+function bindFind(){const f=$('#findQ');if(f&&!f._b){f._b=1;f.addEventListener('input',e=>{S.findQ=e.target.value;$('#found').innerHTML=foundHtml()})}}
+
+function vGuests(){
+  const q=S.q.toLowerCase();const F={all:()=>true,d1:g=>!!S.att.get(K(g.code,1)),d2:g=>!!S.att.get(K(g.code,2)),both:g=>attOf(g.code).every(Boolean),none:g=>!attOf(g.code).some(Boolean),one:g=>{const n=attOf(g.code).filter(Boolean).length;return n>0&&n<CFG.days.length},walk:g=>!!g.walk_in};
+  const L=[...S.guests.values()].filter(g=>F[S.f](g)&&(!q||[g.name,g.email,g.phone,g.org,g.code].join(' ').toLowerCase().includes(q))).sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+  const c=counts();
+  const opts=[['all',`All (${c.total})`],['d1',`Day 1 (${c.n[0]})`],['d2',`Day 2 (${c.n[1]})`],['both',`Both days (${c.both})`],['one','One day only'],['none','Not checked in'],['walk',`Walk-ins (${c.walk})`]];
+  return`<div class="toolbar"><input class="input" id="gq" placeholder="Search name, email, mobile, code…" value="${esc(S.q)}"><select class="input" id="gf" style="width:auto">${opts.map(([k,l])=>`<option value="${k}" ${S.f===k?'selected':''}>${l}</option>`).join('')}</select><span class="sp"></span><span class="muted" style="font-size:13px">${L.length} shown</span><button class="btn sm" data-a="export">${ic('download')} Excel</button></div>
+  <div class="tbl"><table><thead><tr><th>Guest</th><th class="hide-sm">Contact</th><th class="hide-sm">Pass</th>${CFG.days.map(d=>`<th>${d.label}</th>`).join('')}<th>Status</th></tr></thead><tbody>
+  ${L.slice(0,600).map(g=>{const a=attOf(g.code),n=a.filter(Boolean).length;return`<tr><td><div class="nm">${esc(g.name)}${g.walk_in?'<span class="tag">Walk-in</span>':''}</div><small>${esc(g.org||'')}</small></td><td class="hide-sm"><small>${esc(g.email||'')}<br>${esc(g.phone||'')}</small></td><td class="hide-sm"><span class="code">${esc(g.code)}</span></td>
+    ${CFG.days.map((d,i)=>a[i]?`<td class="chk">✓ ${fmtT(a[i].scanned_at)}${a[i].pending?' <span class="pend">⟳</span>':''}${a[i].method&&a[i].method!=='scan'?`<br><small>${esc(a[i].method)}</small>`:''} <button class="btn sm ghost" data-a="undo" data-code="${g.code}" data-day="${d.n}" title="Remove this check-in">${ic('undo')}</button></td>`:`<td class="chk no">—${d.n===S.day?` <button class="btn sm" data-a="mark" data-code="${g.code}">Check in</button>`:''}</td>`).join('')}
+    <td><span class="pill ${n===CFG.days.length?'both':n?'one':'none'}">${n===CFG.days.length?'Both days':n?`${n}/${CFG.days.length}`:'Not yet'}</span></td></tr>`}).join('')||`<tr><td colspan="6" class="muted" style="padding:24px;text-align:center">${S.guests.size?'No guests match.':'No guests yet — upload the list in Import.'}</td></tr>`}
+  </tbody></table></div>${L.length>600?`<div class="note">Showing the first 600 — search to narrow down.</div>`:''}`;
+}
+function vDash(){
+  const c=counts();const pct=(a,b)=>b?Math.round(a/b*100):0;
+  const feed=[...S.att.values()].sort((a,b)=>new Date(b.scanned_at)-new Date(a.scanned_at)).slice(0,20);
+  return`<div class="grid g6">
+    ${[['Guests',c.total,`${c.walk} walk-ins`],...CFG.days.map((d,i)=>[d.label,c.n[i],`${pct(c.n[i],c.total)}% of guests`]),['Both days',c.both,'certificate eligible'],['Waiting to sync',c.pend,'on this phone'],['Last sync',S.lastSync?fmtT(S.lastSync):'—',S.lastSync?ago(S.lastSync):'never']].map(([l,v,s])=>`<div class="card kpi"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s}</div></div>`).join('')}
+  </div>
+  <div class="grid g2 mt">
+    <div class="card"><h3>Attendance</h3>${CFG.days.map((d,i)=>`<div class="row" style="justify-content:space-between;margin-top:10px"><b>${d.label}</b><span class="muted">${c.n[i]} / ${c.total}</span></div><div class="bar"><div style="width:${pct(c.n[i],c.total)}%"></div></div>`).join('')}<div class="row" style="justify-content:space-between;margin-top:14px"><b>Both days</b><span class="muted">${c.both} / ${c.total}</span></div><div class="bar"><div style="width:${pct(c.both,c.total)}%"></div></div></div>
+    <div class="card"><h3>Latest check-ins<span class="sub">all doors · live</span></h3><div class="feed">${feed.map(x=>{const g=S.guests.get(x.code);return`<div class="it"><span style="color:var(--ok)">${ic('check')}</span><div><b>${esc(g?g.name:x.code)}</b><br><small class="muted">Day ${x.day} · ${esc(x.device||'')}${x.method&&x.method!=='scan'?' · '+esc(x.method):''}</small></div><span class="tm">${fmtT(x.scanned_at)}</span></div>`}).join('')||'<div class="muted" style="font-size:13px">No check-ins yet.</div>'}</div></div>
+  </div>
+  <div class="row mt"><button class="btn" data-a="refresh">${ic('refresh')} Refresh</button><button class="btn" data-a="export">${ic('download')} Export attendance (Excel)</button><span class="sp"></span><span class="muted" style="font-size:12.5px">Signed in as ${esc(S.user&&S.user.email||'')} · ${esc(deviceName())}</span><button class="btn sm ghost" data-a="rename">Rename phone</button><button class="btn sm ghost" data-a="logout">${ic('logout')} Sign out</button></div>`;
+}
+function vImport(){
+  return`<div class="grid g2">
+    <div class="card"><h3>${ic('upload')} Upload guest list</h3>
+      <div class="drop" id="drop" data-a="pick"><b>Drop results.xlsx here</b><div class="muted" style="font-size:13px;margin-top:4px">or tap to choose the file</div></div>
+      <div class="note">Use the <b>results.xlsx</b> created by the KODE sender — it contains each guest’s pass code, so the QR codes in their emails match. Uploading again updates guests; it never removes check-ins.</div>
+      <div id="impRes"></div>
+    </div>
+    <div class="card"><h3>Before the doors open</h3>
+      <div class="note" style="margin-top:0;font-size:13.5px;line-height:1.7">
+      1. Upload <b>results.xlsx</b> here (laptop).<br>
+      2. On every door phone: open this page, sign in, check it shows <b>${S.guests.size} guests</b>.<br>
+      3. Pick <b>Day 1</b> / <b>Day 2</b> at the top, tap <b>Start camera</b>.<br>
+      4. If the internet drops, keep scanning — check-ins are saved on the phone and sync automatically.<br>
+      5. Export attendance any time from Dashboard.</div>
+      <div class="row mt"><button class="btn" data-a="refresh">${ic('refresh')} Reload guest list</button><button class="btn" data-a="export">${ic('download')} Export attendance</button></div>
+    </div>
+  </div>`;
+}
+function after(v){
+  if(v==='scan'){bindFind()}
+  if(v==='guests'){const gq=$('#gq');gq.addEventListener('input',e=>{S.q=e.target.value;const p=e.target.selectionStart;render();const n=$('#gq');n.focus();n.setSelectionRange(p,p)});$('#gf').addEventListener('change',e=>{S.f=e.target.value;render()})}
+  if(v==='import'){const d=$('#drop');d.addEventListener('dragover',e=>{e.preventDefault();d.classList.add('over')});d.addEventListener('dragleave',()=>d.classList.remove('over'));d.addEventListener('drop',e=>{e.preventDefault();d.classList.remove('over');importFile(e.dataTransfer.files[0])})}
+}
+
+/* ================= Import / export ================= */
+function detectCols(row){const h=row.map(x=>String(x??'').toLowerCase().trim());const f=re=>h.findIndex(x=>re.test(x));return{name:f(/^(full\s*)?name$|^guest|^attendee|^participant|الاسم|^name/),first:f(/first/),last:f(/last|surname|family/),email:f(/e-?mail|بريد/),phone:f(/phone|mobile|number|whats|tel|cell|رقم|هاتف/),org:f(/company|organi[sz]ation|^org|hospital|institution|affiliation|شركة|جهة/),code:f(/pass\s*code|^code$|qr\s*code/),status:f(/^status$/),sent:f(/sent\s*at/)}}
+let pendingImport=null;
+async function importFile(file){
+  if(!file)return;
+  try{
+    const wb=XLSX.read(await file.arrayBuffer(),{type:'array'});const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''}).filter(r=>r.some(x=>String(x).trim()));
+    let hi=-1,c=null;for(let i=0;i<Math.min(10,rows.length);i++){const k=detectCols(rows[i]);if(k.name>=0||k.first>=0){hi=i;c=k;break}}
+    if(hi<0)throw new Error('Could not find a Name column');
+    const get=(r,i)=>i>=0?String(r[i]??'').trim():'';
+    const out=[];let noCode=0,skipped=0;
+    rows.slice(hi+1).forEach(r=>{let name=get(r,c.name);if(!name)name=[get(r,c.first),get(r,c.last)].filter(Boolean).join(' ');const code=get(r,c.code).toUpperCase();const st=get(r,c.status);
+      if(!name){skipped++;return}if(st==='Duplicate'){skipped++;return}
+      if(!/^KD-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code)){noCode++;return}
+      const row={code,name,email:get(r,c.email).toLowerCase()||null,phone:get(r,c.phone)||null,org:get(r,c.org)||null};
+      if(st==='Sent'){const s=get(r,c.sent);const m=s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4}),?\s*(\d{1,2}):(\d{2})/);row.pass_sent_at=m?new Date(+m[3],+m[2]-1,+m[1],+m[4],+m[5]).toISOString():new Date().toISOString()}
+      out.push(row)});
+    const isNew=out.filter(r=>!S.guests.has(r.code)).length;
+    pendingImport=out;
+    $('#impRes').innerHTML=`<div class="card mt" style="background:#0c0c0c"><b>${esc(file.name)}</b><div class="note" style="margin-top:6px">${out.length} guests with pass codes · <b>${isNew}</b> new · ${out.length-isNew} already uploaded (will be updated)${noCode?` · <span style="color:var(--warn)">${noCode} rows have no pass code — use results.xlsx from the sender</span>`:''}${skipped?` · ${skipped} skipped`:''}</div><button class="btn pri mt" data-a="doimport" ${out.length?'':'disabled'}>${ic('upload')} Upload ${out.length} guests</button></div>`;
+  }catch(e){toast('Couldn’t read that file: '+e.message)}
+}
+async function doImport(){
+  if(!pendingImport)return;const rows=pendingImport;const b=document.querySelector('[data-a=doimport]');if(b){b.disabled=true;b.textContent='Uploading…'}
+  try{await api.upsertGuests(rows);rows.forEach(r=>S.guests.set(r.code,{...S.guests.get(r.code),...r}));saveCache();pendingImport=null;toast(`${rows.length} guests uploaded`);await refresh(true);$('#impRes').innerHTML=`<div class="card mt" style="background:#0c0c0c"><b style="color:var(--ok)">✓ ${rows.length} guests are live.</b><div class="note" style="margin-top:6px">Every door phone will have them after its next refresh (within ~30 seconds, or tap Reload).</div></div>`}
+  catch(e){toast('Upload failed: '+(e.message||e));if(b){b.disabled=false;b.textContent='Try again'}}
+}
+function exportXlsx(){
+  const rows=[...S.guests.values()].sort((a,b)=>(a.name||'').localeCompare(b.name||'')).map(g=>{const a=attOf(g.code),n=a.filter(Boolean).length;const o={Name:g.name,Email:g.email||'',Mobile:g.phone||'',Organisation:g.org||'','Pass code':g.code,Source:g.walk_in?'Walk-in':'Invited'};CFG.days.forEach((d,i)=>{o[d.label]=a[i]?fmtDT(a[i].scanned_at):''});o['Days attended']=`${n}/${CFG.days.length}`;o['Certificate eligible']=n===CFG.days.length?'Yes':'No';return o});
+  const wb=XLSX.utils.book_new();const ws=XLSX.utils.json_to_sheet(rows);ws['!cols']=[28,32,18,28,16,10,18,18,14,18].map(w=>({wch:w}));XLSX.utils.book_append_sheet(wb,ws,'Attendance');
+  const c=counts();const sum=XLSX.utils.aoa_to_sheet([[CFG.eventName],['Exported',new Date().toLocaleString('en-GB')],[],['Guests',c.total],['Walk-ins',c.walk],...CFG.days.map((d,i)=>[d.label,c.n[i]]),['Both days (certificate eligible)',c.both]]);sum['!cols']=[{wch:34},{wch:24}];XLSX.utils.book_append_sheet(wb,sum,'Summary');
+  XLSX.writeFile(wb,`KODE-attendance-${new Date().toISOString().slice(0,16).replace(/[:T]/g,'-')}.xlsx`);
+}
+
+/* ================= Walk-in ================= */
+function openModal(h){$('#modal').innerHTML=`<button class="btn sm ghost x" data-a="close">${ic('x')}</button>`+h;$('#mbg').classList.add('on')}
+function closeModal(){$('#mbg').classList.remove('on')}
+function walkIn(){
+  const day=CFG.days.find(d=>d.n===S.day);
+  openModal(`<div class="eyebrow">Walk-in · ${esc(day.label)}</div><h2>Register at the door</h2><div class="muted" style="font-size:13px">Creates their pass and checks them in now.</div>
+  <form id="wf"><label class="l">Full name *</label><input class="input" name="name" required autocomplete="off"><label class="l">Mobile *</label><input class="input" name="phone" type="tel" required autocomplete="off"><label class="l">Email</label><input class="input" name="email" type="email" autocomplete="off"><label class="l">Organisation</label><input class="input" name="org" autocomplete="off"><button class="btn pri block mt" type="submit">${ic('plus')} Register & check in</button></form>`);
+  setTimeout(()=>{const i=document.querySelector('#wf [name=name]');i&&i.focus()},60);
+  $('#wf').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target);const name=String(f.get('name')).trim(),phone=String(f.get('phone')).trim(),email=String(f.get('email')||'').trim().toLowerCase(),org=String(f.get('org')||'').trim();
+    if(!name||!phone)return;
+    if(email&&!EMAIL_RE.test(email)){toast('That email looks wrong');return}
+    const pd=phone.replace(/\D/g,'');const dup=[...S.guests.values()].find(g=>(email&&g.email===email)||(pd.length>=7&&(g.phone||'').replace(/\D/g,'').endsWith(pd.slice(-9))));
+    if(dup){const a=S.att.get(K(dup.code,S.day));openModal(`<h2>Already on the list</h2><div class="muted">${esc(dup.name)} is registered with this ${dup.email===email&&email?'email':'mobile'}.</div><div class="row mt" style="justify-content:flex-end">${a?`<span class="muted">Checked in at ${fmtT(a.scanned_at)}</span>`:`<button class="btn pri" data-a="mark" data-code="${dup.code}">Check them in</button>`}</div>`);return}
+    const g={code:newCode(),name,phone,email:email||null,org:org||null,walk_in:true,pending:true};
+    S.guests.set(g.code,g);enqueue({t:'guest',row:{code:g.code,name,phone,email:g.email,org:g.org,walk_in:true}});
+    checkIn(g,'walk-in');saveCache();
+    openModal(`<div class="eyebrow">Walk-in registered${!navigator.onLine||S.netErr?' · saved on phone':''}</div><h2>${esc(name)} ✓</h2><div class="muted" style="font-size:13px">Checked in for ${esc(day.label)}. Ask them to photograph this QR — it’s their pass for ${CFG.days.length===2?'the other day':'every day'}.</div><div class="qrbox">${qrSvg(`KODE|${CFG.eventId}|${g.code}`)}</div><div style="text-align:center"><span class="code" style="font-size:15px">${g.code}</span></div><div class="row mt"><button class="btn block" data-a="close">Done</button><button class="btn pri block" data-a="walkin">${ic('plus')} Register another</button></div>`);
+    renderSide();
+  });
+}
+
+/* ================= Events ================= */
+document.addEventListener('click',e=>{
+  const d=e.target.closest('[data-day]');if(d){S.day=+d.dataset.day;LS.set('kode-day',S.day);const was=S.scanning;if(was)stopCam();render();if(was&&S.view==='scan')startCam();toast(`Now recording ${CFG.days.find(x=>x.n===S.day).label}`);return}
+  const el=e.target.closest('[data-a]');if(!el)return;const a=el.dataset.a;
+  if(a==='startcam')startCam();
+  if(a==='stopcam')stopCam();
+  if(a==='flip')flipCam();
+  if(a==='walkin')walkIn();
+  if(a==='close')closeModal();
+  if(a==='mark'){const g=S.guests.get(el.dataset.code);if(g){if(S.att.get(K(g.code,S.day))){toast('Already checked in');return}closeModal();checkIn(g,'manual');saveCache();S.findQ='';toast(`${g.name} checked in · Day ${S.day}`);if(S.view==='scan')renderSide();else render()}}
+  if(a==='undo'){const code=el.dataset.code,day=+el.dataset.day;const g=S.guests.get(code);if(el.dataset.c!=='1'){el.dataset.c='1';el.style.color='var(--bad)';toast(`Tap again to remove ${g?g.name:''} from Day ${day}`);setTimeout(()=>{el.dataset.c='';el.style.color=''},2500);return}undoCheckin(code,day)}
+  if(a==='refresh')refresh(false);
+  if(a==='export')exportXlsx();
+  if(a==='pick')$('#fileImport').click();
+  if(a==='doimport')doImport();
+  if(a==='logout'){api.signOut().then(()=>{stopCam();location.hash='';location.reload()})}
+  if(a==='rename'){openModal(`<h2>Name this phone</h2><div class="muted" style="font-size:13px">Shows on each check-in, e.g. “Main door”.</div><form id="rn"><input class="input mt" name="n" value="${esc(deviceName())}"><button class="btn pri block mt">Save</button></form>`);$('#rn').addEventListener('submit',ev=>{ev.preventDefault();const n=String(new FormData(ev.target).get('n')).trim();if(n)LS.set('kode-device',n);closeModal();render()})}
+});
+$('#net').addEventListener('click',()=>{flush();refresh(true)});
+$('#mbg').addEventListener('click',e=>{if(e.target.id==='mbg')closeModal()});
+$('#fileImport').addEventListener('change',e=>{importFile(e.target.files[0]);e.target.value=''});
+window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);S.view=TABS.some(t=>t[0]===h)?h:'scan';render()});
+window.addEventListener('online',()=>{renderNet();flush();refresh(true)});
+window.addEventListener('offline',renderNet);
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&S.scanning)stopCam()});
+window.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+// USB/Bluetooth handheld scanners type the code + Enter: capture it anywhere on the scan screen
+let kb='',kbT=0;window.addEventListener('keydown',e=>{if(S.view!=='scan'||$('#mbg').classList.contains('on')||(document.activeElement&&/INPUT|TEXTAREA/.test(document.activeElement.tagName)))return;const now=Date.now();if(now-kbT>80)kb='';kbT=now;if(e.key==='Enter'){if(kb.length>8){handleScan(kb,'scan')}kb='';return}if(e.key.length===1)kb+=e.key});
+
+/* ================= Boot ================= */
+async function boot(){
+  $('#loginEvent').textContent=CFG.eventName;
+  loadCache();
+  try{S.user=await api.session()}catch(e){S.user=null}
+  if(!S.user){$('#loginView').classList.remove('hide');$('#appView').classList.add('hide');return}
+  $('#loginView').classList.add('hide');$('#appView').classList.remove('hide');
+  const h=location.hash.slice(1);S.view=TABS.some(t=>t[0]===h)?h:'scan';
+  render();
+  await refresh(true);flush();
+  api.subscribe(liveChange);
+  setInterval(flush,4000);
+  setInterval(()=>{if(!S.queue.length)refresh(true)},30000);
+}
+$('#loginForm').addEventListener('submit',async e=>{
+  e.preventDefault();const f=new FormData(e.target);$('#loginErr').textContent='';const b=e.target.querySelector('button');b.disabled=true;b.textContent='Signing in…';
+  try{await api.signIn(String(f.get('email')).trim(),String(f.get('password')));location.reload()}
+  catch(err){$('#loginErr').textContent=/invalid/i.test(err.message||'')?'Wrong email or password.':(navigator.onLine?(err.message||'Sign-in failed'):'No internet — connect once to sign in.');b.disabled=false;b.textContent='Sign in'}
+});
+boot();
+window.__kode={S,handleScan,flush,refresh};
+</script>
+</body>
+</html>
