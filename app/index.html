@@ -227,6 +227,7 @@ const api=(()=>{
       async fetchAll(){fail();return{guests:db.guests.slice(),checkins:db.checkins.slice()}},
       async upsertGuests(rows){fail();rows.forEach(r=>{const i=db.guests.findIndex(g=>g.code===r.code);if(i>=0)db.guests[i]={...db.guests[i],...r};else db.guests.push({created_at:new Date().toISOString(),...r})});save()},
       async insertCheckins(rows){fail();rows.forEach(r=>{if(!db.guests.some(g=>g.code===r.code))throw new Error('fk');if(!db.checkins.some(c=>c.code===r.code&&c.day===r.day)){const row={id:Date.now()+Math.random(),...r};db.checkins.push(row);subs.forEach(f=>f({table:'checkins',type:'INSERT',row}))}});save()},
+      async getGuest(code){fail();return db.guests.find(g=>g.code===code)||null},
       async deleteCheckin(code,day){fail();db.checkins=db.checkins.filter(c=>!(c.code===code&&c.day===day));save()},
       subscribe(f){subs.push(f);return()=>{subs=subs.filter(x=>x!==f)}}};
   }
@@ -239,6 +240,7 @@ const api=(()=>{
     async fetchAll(){const[guests,checkins]=await Promise.all([all('guests','*'),all('checkins','code,day,scanned_at,method,device')]);return{guests,checkins}},
     async upsertGuests(rows){for(let i=0;i<rows.length;i+=500){const{error}=await sb.from('guests').upsert(rows.slice(i,i+500),{onConflict:'code'});if(error)throw error}},
     async insertCheckins(rows){const{error}=await sb.from('checkins').upsert(rows,{onConflict:'code,day',ignoreDuplicates:true});if(error)throw error},
+    async getGuest(code){const{data,error}=await sb.from('guests').select('*').eq('code',code).maybeSingle();if(error)throw error;return data},
     async deleteCheckin(code,day){const{error}=await sb.from('checkins').delete().eq('code',code).eq('day',day);if(error)throw error},
     subscribe(f){const ch=sb.channel('kode-live')
       .on('postgres_changes',{event:'*',schema:'public',table:'checkins'},p=>f({table:'checkins',type:p.eventType,row:p.new&&p.new.code?p.new:p.old}))
@@ -294,8 +296,19 @@ function handleScan(raw,method='scan'){
   const p=parseCode(raw);const day=CFG.days.find(d=>d.n===S.day);
   if(!p){feedback('bad','Not a KODE pass','This QR code was not issued for this event.');S.recent.unshift({t:new Date().toISOString(),name:'Unknown QR',type:'bad',day:S.day});return}
   if(p.event!==CFG.eventId){feedback('bad','Wrong event','This pass belongs to a different event.');return}
-  const g=S.guests.get(p.code);
-  if(!g){feedback('bad','Pass not found',`${p.code} isn’t on the guest list${S.guests.size?'':' (guest list not loaded on this phone yet)'}. Search by name or register as walk-in.`);S.recent.unshift({t:new Date().toISOString(),name:p.code,type:'bad',day:S.day});saveCache();renderSide();return}
+  let g=S.guests.get(p.code);
+  if(!g&&!S.lookingUp&&navigator.onLine){
+    // not in this phone's copy yet — ask the server directly (e.g. list uploaded a moment ago)
+    S.lookingUp=true;S.paused=true;
+    const to=new Promise(r=>setTimeout(()=>r('timeout'),3500));
+    Promise.race([api.getGuest(p.code),to]).then(row=>{if(row&&row!=='timeout'){S.guests.set(row.code,row);saveCache();refresh(true)}}).catch(()=>{}).finally(()=>{S.lookingUp=false;S.paused=false;S.lastCode=null;handleScanFound(raw,method,p)});
+    return;
+  }
+  handleScanFound(raw,method,p);
+}
+function handleScanFound(raw,method,p){
+  const day=CFG.days.find(d=>d.n===S.day);const g=S.guests.get(p.code);
+  if(!g){feedback('bad','Pass not found',`Code ${p.code} isn’t on the guest list (${S.guests.size} guests loaded on this phone). Search by name or register as walk-in.`);S.recent.unshift({t:new Date().toISOString(),name:p.code,type:'bad',day:S.day});saveCache();renderSide();return}
   const k=K(g.code,S.day),prev=S.att.get(k);
   if(prev){feedback('dup','Already checked in',`${g.name} was checked in for ${day.label} at ${fmtT(prev.scanned_at)}.`,g);S.recent.unshift({t:new Date().toISOString(),code:g.code,name:g.name,type:'dup',day:S.day});saveCache();renderSide();return}
   checkIn(g,method);saveCache();
