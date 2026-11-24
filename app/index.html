@@ -470,7 +470,7 @@ function vGuests(){
   const L=guestList();
   const c=counts();
   const opts=[['all',`All (${c.total})`],['d1',`Day 1 (${c.n[0]})`],['d2',`Day 2 (${c.n[1]})`],['both',`Both days (${c.both})`],['one','One day only'],['none','Not checked in'],['walk',`Walk-ins (${c.walk})`]];
-  return`<div class="toolbar"><input class="input" id="gq" placeholder="Search name, email, mobile, code…" value="${esc(S.q)}"><select class="input" id="gf" style="width:auto">${opts.map(([k,l])=>`<option value="${k}" ${S.f===k?'selected':''}>${l}</option>`).join('')}</select><span class="sp"></span><span class="muted" style="font-size:13px">${L.length} shown</span><button class="btn sm" data-a="badges">${ic('print')} Print badges</button><button class="btn sm" data-a="zip">${ic('zip')} QR images</button><button class="btn sm" data-a="export">${ic('download')} Excel</button></div>
+  return`<div class="toolbar"><input class="input" id="gq" placeholder="Search name, email, mobile, code…" value="${esc(S.q)}"><select class="input" id="gf" style="width:auto">${opts.map(([k,l])=>`<option value="${k}" ${S.f===k?'selected':''}>${l}</option>`).join('')}</select><span class="sp"></span><span class="muted" style="font-size:13px">${L.length} shown</span><button class="btn sm pri" data-a="addguest">${ic('plus')} Add guest</button><button class="btn sm" data-a="badges">${ic('print')} Print badges</button><button class="btn sm" data-a="zip">${ic('zip')} QR images</button><button class="btn sm" data-a="export">${ic('download')} Excel</button></div>
   <div class="tbl"><table><thead><tr><th>Guest</th><th class="hide-sm">Contact</th><th class="hide-sm">Pass</th>${CFG.days.map(d=>`<th>${d.label}</th>`).join('')}<th>Status</th><th>QR</th></tr></thead><tbody>
   ${L.slice(0,600).map(g=>{const a=attOf(g.code),n=a.filter(Boolean).length;return`<tr><td><div class="nm">${esc(g.name)}${g.walk_in?'<span class="tag">Walk-in</span>':''}</div><small>${esc(g.org||'')}</small></td><td class="hide-sm"><small>${esc(g.email||'')}<br>${esc(g.phone||'')}</small></td><td class="hide-sm"><span class="code">${esc(g.code)}</span></td>
     ${CFG.days.map((d,i)=>a[i]?`<td class="chk">✓ ${fmtT(a[i].scanned_at)}${a[i].pending?' <span class="pend">⟳</span>':''}${a[i].method&&a[i].method!=='scan'?`<br><small>${esc(a[i].method)}</small>`:''} <button class="btn sm ghost" data-a="undo" data-code="${g.code}" data-day="${d.n}" title="Remove this check-in">${ic('undo')}</button></td>`:`<td class="chk no">—${d.n===S.day?` <button class="btn sm" data-a="mark" data-code="${g.code}">Check in</button>`:''}</td>`).join('')}
@@ -541,7 +541,7 @@ async function doImport(){
   catch(e){toast('Upload failed: '+(e.message||e));if(b){b.disabled=false;b.textContent='Try again'}}
 }
 function exportXlsx(){
-  const rows=[...S.guests.values()].sort((a,b)=>(a.name||'').localeCompare(b.name||'')).map(g=>{const a=attOf(g.code),n=a.filter(Boolean).length;const o={Name:g.name,Email:g.email||'',Mobile:g.phone||'',Organisation:g.org||'','Pass code':g.code,'QR text':`KODE|${CFG.eventId}|${g.code}`,Source:g.walk_in?'Walk-in':'Invited'};CFG.days.forEach((d,i)=>{o[d.label]=a[i]?fmtDT(a[i].scanned_at):''});o['Days attended']=`${n}/${CFG.days.length}`;o['Certificate eligible']=n===CFG.days.length?'Yes':'No';return o});
+  const rows=[...S.guests.values()].sort((a,b)=>(a.name||'').localeCompare(b.name||'')).map(g=>{const a=attOf(g.code),n=a.filter(Boolean).length;const o={Name:g.name,Email:g.email||'',Mobile:g.phone||'',Organisation:g.org||'','Pass code':g.code,'QR text':`KODE|${CFG.eventId}|${g.code}`,Source:g.walk_in?'Walk-in':(g.pass_sent_at?'Emailed':'Added / no email')};CFG.days.forEach((d,i)=>{o[d.label]=a[i]?fmtDT(a[i].scanned_at):''});o['Days attended']=`${n}/${CFG.days.length}`;o['Certificate eligible']=n===CFG.days.length?'Yes':'No';return o});
   const wb=XLSX.utils.book_new();const ws=XLSX.utils.json_to_sheet(rows);ws['!cols']=[28,32,18,28,16,10,18,18,14,18].map(w=>({wch:w}));XLSX.utils.book_append_sheet(wb,ws,'Attendance');
   const c=counts();const sum=XLSX.utils.aoa_to_sheet([[CFG.eventName],['Exported',new Date().toLocaleString('en-GB')],[],['Guests',c.total],['Walk-ins',c.walk],...CFG.days.map((d,i)=>[d.label,c.n[i]]),['Both days (certificate eligible)',c.both]]);sum['!cols']=[{wch:34},{wch:24}];XLSX.utils.book_append_sheet(wb,sum,'Summary');
   XLSX.writeFile(wb,`KODE-attendance-${new Date().toISOString().slice(0,16).replace(/[:T]/g,'-')}.xlsx`);
@@ -606,20 +606,20 @@ async function downloadZip(){
 /* ================= Walk-in ================= */
 function openModal(h){$('#modal').innerHTML=`<button class="btn sm ghost x" data-a="close">${ic('x')}</button>`+h;$('#mbg').classList.add('on')}
 function closeModal(){$('#mbg').classList.remove('on')}
-function walkIn(){
+function walkIn(atDoor=true){
   const day=CFG.days.find(d=>d.n===S.day);
-  openModal(`<div class="eyebrow">Walk-in · ${esc(day.label)}</div><h2>Register at the door</h2><div class="muted" style="font-size:13px">Creates their pass and checks them in now.</div>
-  <form id="wf"><label class="l">Full name *</label><input class="input" name="name" required autocomplete="off"><label class="l">Mobile *</label><input class="input" name="phone" type="tel" required autocomplete="off"><label class="l">Email</label><input class="input" name="email" type="email" autocomplete="off"><label class="l">Organisation</label><input class="input" name="org" autocomplete="off"><button class="btn pri block mt" type="submit">${ic('plus')} Register & check in</button></form>`);
+  openModal(`<div class="eyebrow">${atDoor?`Walk-in · ${esc(day.label)}`:'New guest'}</div><h2>${atDoor?'Register at the door':'Add guest'}</h2><div class="muted" style="font-size:13px">Creates their personal QR pass and adds them to the guest list.</div>
+  <form id="wf"><label class="l">Full name *</label><input class="input" name="name" required autocomplete="off"><label class="l">Mobile</label><input class="input" name="phone" type="tel" autocomplete="off"><label class="l">Email</label><input class="input" name="email" type="email" autocomplete="off"><label class="l">Organisation</label><input class="input" name="org" autocomplete="off"><label class="row" style="margin-top:14px;gap:10px;font-weight:600;cursor:pointer"><input type="checkbox" name="checkin" ${atDoor?'checked':''} style="width:20px;height:20px"> Check them in now for ${esc(day.label)}</label><button class="btn pri block mt" type="submit">${ic('plus')} Create pass</button></form>`);
   setTimeout(()=>{const i=document.querySelector('#wf [name=name]');i&&i.focus()},60);
   $('#wf').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target);const name=String(f.get('name')).trim(),phone=String(f.get('phone')).trim(),email=String(f.get('email')||'').trim().toLowerCase(),org=String(f.get('org')||'').trim();
-    if(!name||!phone)return;
+    if(!name)return;const doCheck=!!f.get('checkin');
     if(email&&!EMAIL_RE.test(email)){toast('That email looks wrong');return}
     const pd=phone.replace(/\D/g,'');const dup=[...S.guests.values()].find(g=>(email&&g.email===email)||(pd.length>=7&&(g.phone||'').replace(/\D/g,'').endsWith(pd.slice(-9))));
     if(dup){const a=S.att.get(K(dup.code,S.day));openModal(`<h2>Already on the list</h2><div class="muted">${esc(dup.name)} is registered with this ${dup.email===email&&email?'email':'mobile'}.</div><div class="row mt" style="justify-content:flex-end">${a?`<span class="muted">Checked in at ${fmtT(a.scanned_at)}</span>`:`<button class="btn pri" data-a="mark" data-code="${dup.code}">Check them in</button>`}</div>`);return}
-    const g={code:newCode(),name,phone,email:email||null,org:org||null,walk_in:true,pending:true};
-    S.guests.set(g.code,g);enqueue({t:'guest',row:{code:g.code,name,phone,email:g.email,org:g.org,walk_in:true}});
-    checkIn(g,'walk-in');saveCache();
-    openModal(`<div class="eyebrow">Walk-in registered${!navigator.onLine||S.netErr?' · saved on phone':''}</div><h2>${esc(name)} ✓</h2><div class="muted" style="font-size:13px">Checked in for ${esc(day.label)}. Ask them to photograph this QR — it’s their pass for ${CFG.days.length===2?'the other day':'every day'}.</div><div class="qrbox">${qrSvg(`KODE|${CFG.eventId}|${g.code}`)}</div><div style="text-align:center"><span class="code" style="font-size:15px">${g.code}</span></div><div class="grid g2 mt"><button class="btn" data-a="print1" data-code="${g.code}">${ic('print')} Print badge</button><button class="btn pri" data-a="walkin">${ic('plus')} Register another</button></div>`);
+    const g={code:newCode(),name,phone:phone||null,email:email||null,org:org||null,walk_in:atDoor,pending:true};
+    S.guests.set(g.code,g);enqueue({t:'guest',row:{code:g.code,name,phone:g.phone,email:g.email,org:g.org,walk_in:atDoor}});
+    if(doCheck)checkIn(g,atDoor?'walk-in':'manual');saveCache();
+    openModal(`<div class="eyebrow">${atDoor?'Walk-in registered':'Guest added'}${!navigator.onLine||S.netErr?' · saved on phone':''}</div><h2>${esc(name)} ✓</h2><div class="muted" style="font-size:13px">${doCheck?`Checked in for ${esc(day.label)}. `:''}This QR is their pass for ${CFG.days.length===2?'both days':'every day'} — print their badge, or let them photograph it.</div><div class="qrbox">${qrSvg(`KODE|${CFG.eventId}|${g.code}`)}</div><div style="text-align:center"><span class="code" style="font-size:15px">${g.code}</span></div><div class="grid g2 mt"><button class="btn" data-a="print1" data-code="${g.code}">${ic('print')} Print badge</button><button class="btn" data-a="png" data-code="${g.code}">${ic('download')} QR image</button></div><button class="btn pri block mt" data-a="${atDoor?'walkin':'addguest'}">${ic('plus')} Add another</button>`);
     renderSide();
   });
 }
@@ -631,7 +631,8 @@ document.addEventListener('click',e=>{
   if(a==='startcam')startCam();
   if(a==='stopcam')stopCam();
   if(a==='flip')flipCam();
-  if(a==='walkin')walkIn();
+  if(a==='walkin')walkIn(true);
+  if(a==='addguest')walkIn(false);
   if(a==='close')closeModal();
   if(a==='mark'){const g=S.guests.get(el.dataset.code);if(g){if(S.att.get(K(g.code,S.day))){toast('Already checked in');return}closeModal();checkIn(g,'manual');saveCache();S.findQ='';toast(`${g.name} checked in · Day ${S.day}`);if(S.view==='scan')renderSide();else render()}}
   if(a==='undo'){const code=el.dataset.code,day=+el.dataset.day;const g=S.guests.get(code);if(el.dataset.c!=='1'){el.dataset.c='1';el.style.color='var(--bad)';toast(`Tap again to remove ${g?g.name:''} from Day ${day}`);setTimeout(()=>{el.dataset.c='';el.style.color=''},2500);return}undoCheckin(code,day)}
