@@ -152,6 +152,12 @@ td small{color:var(--muted)}
 .drop:hover,.drop.over{border-color:#888;background:rgba(255,255,255,.03)}
 .note{font-size:12.5px;color:var(--muted);margin-top:10px;line-height:1.5}
 #printArea{display:none}
+.qrsheet{display:flex;flex-wrap:wrap;gap:6mm;align-content:flex-start}
+.qrc{text-align:center;break-inside:avoid;page-break-inside:avoid;font-family:Inter,Arial,sans-serif;color:#111}
+.qrc svg{display:block;width:100%;height:auto}
+.qrc .qn{font-size:8pt;font-weight:600;margin-top:1mm;line-height:1.2;word-break:break-word}
+.qrc .qk{font-family:'JetBrains Mono',monospace;font-size:7pt;color:#444}
+.qrprev{width:120px;margin:12px auto;background:#fff;padding:8px;border-radius:8px}
 .bdg{background:#fff;color:#111;font-family:Inter,Arial,sans-serif;overflow:hidden;position:relative;-webkit-print-color-adjust:exact;print-color-adjust:exact;border:.3mm dashed #c8c8c8}
 .bdg .bh{background:#0a0a0a;color:#fff;text-align:center}
 .bdg .be{font-family:Montserrat,Arial,sans-serif;font-weight:800;line-height:1.15}
@@ -556,6 +562,7 @@ function badgeHtml(g,size){
     :`<div class="bb"><div class="bn ${cls}">${esc(g.name)}</div>${g.org?`<div class="bo">${esc(g.org)}</div>`:''}<div class="bq">${qrSvg(qrText(g))}</div><div class="bc">${esc(g.code)}</div></div><div class="bf">${esc(CFG.badge.footer)}</div>`}</div>`;
 }
 function printBadges(list,size){
+  if(size==='qr')return printQr(list,40,true);
   if(!list.length){toast('No guests to print');return}
   const per=size==='wallet'?10:4;let html='';
   for(let i=0;i<list.length;i+=per)html+=`<div class="sheet ${size}">${list.slice(i,i+per).map(g=>badgeHtml(g,size)).join('')}</div>`;
@@ -564,24 +571,33 @@ function printBadges(list,size){
   const go=()=>{try{window.print()}catch(e){toast('Printing isn’t available here')}};
   (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(()=>setTimeout(go,150));
 }
+function qrCell(g,mm,withName){return`<div class="qrc" style="width:${mm}mm">${qrSvg(qrText(g))}${withName?`<div class="qn">${esc(g.name)}</div><div class="qk">${esc(g.code)}</div>`:''}</div>`}
+function printQr(list,mm,withName){
+  if(!list.length){toast('No guests to print');return}
+  let pa=$('#printArea');if(!pa){pa=document.createElement('div');pa.id='printArea';document.body.appendChild(pa)}
+  pa.innerHTML=`<div class="qrsheet">${list.map(g=>qrCell(g,mm,withName)).join('')}</div>`;closeModal();
+  const go=()=>{try{window.print()}catch(e){toast('Printing isn’t available here')}};
+  (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(()=>setTimeout(go,150));
+}
 function openBadges(){
   const cur=guestList(),all=[...S.guests.values()].sort((a,b)=>(a.name||'').localeCompare(b.name||'')),walk=all.filter(g=>g.walk_in);
   const sample=cur[0]||all[0]||{name:'Dr. Sample Guest',org:'Hospital',code:'KD-SAMP-LE01'};
   openModal(`<h2>Print badges</h2><div class="muted" style="font-size:13px">Name, organisation and QR on each badge — print on A4, or choose “Save as PDF” to send to a print shop.</div>
-    <label class="l">Badge size</label><div class="seg" id="bsz"><button data-sz="a6" class="on">Large badge · 4 per A4</button><button data-sz="wallet">Card 85×55 · 10 per A4</button></div>
+    <label class="l">Badge size</label><div class="seg" id="bsz"><button data-sz="a6" class="on">Large badge · 4 per A4</button><button data-sz="wallet">Card 85×55 · 10 per A4</button><button data-sz="qr">QR only · 4 cm</button></div>
     <label class="l">Who</label><select class="input" id="bwho"><option value="all">All guests (${all.length})</option>${cur.length!==all.length?`<option value="cur">Current search / filter (${cur.length})</option>`:''}${walk.length?`<option value="walk">Walk-ins only (${walk.length})</option>`:''}</select>
     <div class="bdg-prev" id="bprev">${badgeHtml(sample,'a6')}</div>
     <button class="btn pri block" data-a="doprint">${ic('print')} Print / Save as PDF</button>
     <div class="note">In the print window choose <b>A4</b>, scale <b>100%</b> (or “Actual size”), and turn <b>Background graphics</b> on so the black header prints.</div>`);
   S.bsize='a6';
-  $('#bsz').addEventListener('click',e=>{const b=e.target.closest('[data-sz]');if(!b)return;S.bsize=b.dataset.sz;[...$('#bsz').children].forEach(x=>x.classList.toggle('on',x===b));$('#bprev').innerHTML=badgeHtml(sample,S.bsize)});
+  $('#bsz').addEventListener('click',e=>{const b=e.target.closest('[data-sz]');if(!b)return;S.bsize=b.dataset.sz;[...$('#bsz').children].forEach(x=>x.classList.toggle('on',x===b));$('#bprev').innerHTML=S.bsize==='qr'?`<div style="background:#fff;padding:10px;display:inline-block">${qrCell(sample,40,true)}</div>`:badgeHtml(sample,S.bsize)});
   S.bpick=()=>{const w=$('#bwho').value;return w==='cur'?cur:w==='walk'?walk:all};
 }
 function openQr(code){
   const g=S.guests.get(code);if(!g)return;
   openModal(`<div class="eyebrow">Guest pass</div><h2>${esc(g.name)}</h2><div class="muted" style="font-size:13px">${esc(g.org||'')}</div>
     <div class="qrbox">${qrSvg(qrText(g))}</div><div style="text-align:center"><span class="code" style="font-size:15px">${esc(g.code)}</span></div>
-    <div class="grid g2 mt"><button class="btn" data-a="png" data-code="${g.code}">${ic('download')} QR image</button><button class="btn pri" data-a="print1" data-code="${g.code}">${ic('print')} Print badge</button></div>`);
+    <div class="grid g2 mt"><button class="btn" data-a="png" data-code="${g.code}">${ic('download')} QR image</button><button class="btn pri" data-a="print1" data-code="${g.code}">${ic('print')} Print badge</button></div>
+    <div class="row mt" style="gap:8px"><button class="btn" style="flex:1" data-a="printqr" data-code="${g.code}">${ic('print')} Print QR only</button><select class="input" id="qrmm" style="width:auto;margin:0">${[3,4,5,6].map(c=>`<option value="${c*10}" ${c*10===+LS.get('kode-qrmm',40)?'selected':''}>${c} cm</option>`).join('')}</select></div>`);
 }
 function qrCanvas(g,px=900){
   const q=qrcode(0,'M');q.addData(qrText(g));q.make();const n=q.getModuleCount(),m=4,cell=Math.floor(px/(n+m*2)),W=cell*(n+m*2);
@@ -619,7 +635,7 @@ function walkIn(atDoor=true){
     const g={code:newCode(),name,phone:phone||null,email:email||null,org:org||null,walk_in:atDoor,pending:true};
     S.guests.set(g.code,g);enqueue({t:'guest',row:{code:g.code,name,phone:g.phone,email:g.email,org:g.org,walk_in:atDoor}});
     if(doCheck)checkIn(g,atDoor?'walk-in':'manual');saveCache();
-    openModal(`<div class="eyebrow">${atDoor?'Walk-in registered':'Guest added'}${!navigator.onLine||S.netErr?' · saved on phone':''}</div><h2>${esc(name)} ✓</h2><div class="muted" style="font-size:13px">${doCheck?`Checked in for ${esc(day.label)}. `:''}This QR is their pass for ${CFG.days.length===2?'both days':'every day'} — print their badge, or let them photograph it.</div><div class="qrbox">${qrSvg(`KODE|${CFG.eventId}|${g.code}`)}</div><div style="text-align:center"><span class="code" style="font-size:15px">${g.code}</span></div><div class="grid g2 mt"><button class="btn" data-a="print1" data-code="${g.code}">${ic('print')} Print badge</button><button class="btn" data-a="png" data-code="${g.code}">${ic('download')} QR image</button></div><button class="btn pri block mt" data-a="${atDoor?'walkin':'addguest'}">${ic('plus')} Add another</button>`);
+    openModal(`<div class="eyebrow">${atDoor?'Walk-in registered':'Guest added'}${!navigator.onLine||S.netErr?' · saved on phone':''}</div><h2>${esc(name)} ✓</h2><div class="muted" style="font-size:13px">${doCheck?`Checked in for ${esc(day.label)}. `:''}This QR is their pass for ${CFG.days.length===2?'both days':'every day'} — print their badge, or let them photograph it.</div><div class="qrbox">${qrSvg(`KODE|${CFG.eventId}|${g.code}`)}</div><div style="text-align:center"><span class="code" style="font-size:15px">${g.code}</span></div><div class="grid g2 mt"><button class="btn" data-a="print1" data-code="${g.code}">${ic('print')} Print badge</button><button class="btn" data-a="printqr" data-code="${g.code}">${ic('print')} Print QR only</button></div><button class="btn block mt" data-a="png" data-code="${g.code}">${ic('download')} QR image</button><button class="btn pri block mt" data-a="${atDoor?'walkin':'addguest'}">${ic('plus')} Add another</button>`);
     renderSide();
   });
 }
@@ -640,6 +656,7 @@ document.addEventListener('click',e=>{
   if(a==='export')exportXlsx();
   if(a==='qr')openQr(el.dataset.code);
   if(a==='png')downloadPng(el.dataset.code);
+  if(a==='printqr'){const g=S.guests.get(el.dataset.code);const mm=+(($('#qrmm')||{}).value||LS.get('kode-qrmm',40));LS.set('kode-qrmm',mm);if(g)printQr([g],mm,false)}
   if(a==='print1'){const g=S.guests.get(el.dataset.code);if(g)printBadges([g],LS.get('kode-bsize','a6'))}
   if(a==='badges')openBadges();
   if(a==='doprint'){LS.set('kode-bsize',S.bsize||'a6');printBadges(S.bpick?S.bpick():[],S.bsize||'a6')}
