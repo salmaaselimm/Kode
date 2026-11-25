@@ -642,7 +642,7 @@ function walkIn(atDoor=true){
 
 /* ================= Events ================= */
 document.addEventListener('click',e=>{
-  const d=e.target.closest('[data-day]');if(d){S.day=+d.dataset.day;LS.set('kode-day',S.day);const was=S.scanning;if(was)stopCam();render();if(was&&S.view==='scan')startCam();toast(`Now recording ${CFG.days.find(x=>x.n===S.day).label}`);return}
+  const d=e.target.closest('#daySeg [data-day]');if(d){S.day=+d.dataset.day;LS.set('kode-day',S.day);const was=S.scanning;if(was)stopCam();render();if(was&&S.view==='scan')startCam();toast(`Now recording ${CFG.days.find(x=>x.n===S.day).label}`);return}
   const el=e.target.closest('[data-a]');if(!el)return;const a=el.dataset.a;
   if(a==='startcam')startCam();
   if(a==='stopcam')stopCam();
