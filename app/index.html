@@ -163,6 +163,11 @@ td small{color:var(--muted)}
 .qrc.side .qn{font-family:Montserrat,Arial,sans-serif;font-weight:800;margin:0;line-height:1.15;color:#0a0a0a}
 .qrc.side .qk{margin-top:1.5mm}
 .qrsheet.side{display:grid;grid-template-columns:repeat(2,1fr);gap:8mm 6mm}
+.lbl{width:80mm;height:55mm;box-sizing:border-box;padding:2.5mm 3mm 2.5mm 1.5mm;display:flex;align-items:center;gap:2.5mm;overflow:hidden;break-after:page;page-break-after:always;background:#fff;color:#000;font-family:Inter,Arial,sans-serif}
+.lbl:last-child{break-after:auto;page-break-after:auto}
+.lbl .lq{width:47mm;flex:none}.lbl .lq svg{display:block;width:100%;height:auto}
+.lbl .lt{min-width:0;flex:1}.lbl .ln{font-family:Montserrat,Arial,sans-serif;font-weight:800;line-height:1.12;word-break:break-word;color:#000}
+.lbl .lk{font-family:'JetBrains Mono',monospace;font-size:6pt;margin-top:1.5mm;color:#000}
 .qrprev{width:120px;margin:12px auto;background:#fff;padding:8px;border-radius:8px}
 .bdg{background:#fff;color:#111;font-family:Inter,Arial,sans-serif;overflow:hidden;position:relative;-webkit-print-color-adjust:exact;print-color-adjust:exact;border:.3mm dashed #c8c8c8}
 .bdg .bh{background:#0a0a0a;color:#fff;text-align:center}
@@ -568,6 +573,8 @@ function badgeHtml(g,size){
     :`<div class="bb"><div class="bn ${cls}">${esc(g.name)}</div>${g.org?`<div class="bo">${esc(g.org)}</div>`:''}<div class="bq">${qrSvg(qrText(g))}</div><div class="bc">${esc(g.code)}</div></div><div class="bf">${esc(CFG.badge.footer)}</div>`}</div>`;
 }
 function printBadges(list,size){
+  if(size==='label')return printLabels(list);
+  setPage('');
   if(size==='qr')return printQr(list,40,true);
   if(!list.length){toast('No guests to print');return}
   const per=size==='wallet'?10:4;let html='';
@@ -580,7 +587,16 @@ function printBadges(list,size){
 const drName=(n,on)=>{n=(n||'').trim();return on&&!/^(dr|prof|professor|د)\b\.?/i.test(n)?'Dr. '+n:n};
 function qrCell(g,mm,withName,dr){const nm=drName(g.name,dr);const fs=Math.max(9,Math.round(mm*.42*(nm.length>26?.75:nm.length>18?.88:1)));
   return withName?`<div class="qrc side"><div class="qs" style="width:${mm}mm">${qrSvg(qrText(g))}</div><div class="qt"><div class="qn" style="font-size:${fs}pt">${esc(nm)}</div><div class="qk">${esc(g.code)}</div></div></div>`:`<div class="qrc" style="width:${mm}mm">${qrSvg(qrText(g))}</div>`}
-function printQr(list,mm,withName,dr=LS.get('kode-dr',true)){
+function lblHtml(g,dr){const nm=drName(g.name,dr),L=nm.length,fs=L>34?8.5:L>26?9.5:L>18?11:13;return`<div class="lbl"><div class="lq">${qrSvg(qrText(g))}</div><div class="lt"><div class="ln" style="font-size:${fs}pt">${esc(nm)}</div><div class="lk">${esc(g.code)}</div></div></div>`}
+function setPage(css){let st=$('#pageCss');if(!st){st=document.createElement('style');st.id='pageCss';document.head.appendChild(st)}st.textContent=css?`@media print{@page{${css}}}`:''}
+function printLabels(list,dr=LS.get('kode-dr',true)){
+  if(!list.length){toast('No guests to print');return}
+  let pa=$('#printArea');if(!pa){pa=document.createElement('div');pa.id='printArea';document.body.appendChild(pa)}
+  setPage('size:80mm 55mm;margin:0');pa.innerHTML=list.map(g=>lblHtml(g,dr)).join('');closeModal();
+  const go=()=>{try{window.print()}catch(e){toast('Printing isn’t available here')}};
+  (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(()=>setTimeout(go,150));
+}
+function printQr(list,mm,withName,dr=LS.get('kode-dr',true)){setPage('');
   if(!list.length){toast('No guests to print');return}
   let pa=$('#printArea');if(!pa){pa=document.createElement('div');pa.id='printArea';document.body.appendChild(pa)}
   pa.innerHTML=`<div class="qrsheet${withName&&list.length>1?' side':''}">${list.map(g=>qrCell(g,mm,withName,dr)).join('')}</div>`;closeModal();
@@ -591,13 +607,13 @@ function openBadges(){
   const cur=guestList(),all=[...S.guests.values()].sort((a,b)=>(a.name||'').localeCompare(b.name||'')),walk=all.filter(g=>g.walk_in);
   const sample=cur[0]||all[0]||{name:'Dr. Sample Guest',org:'Hospital',code:'KD-SAMP-LE01'};
   openModal(`<h2>Print badges</h2><div class="muted" style="font-size:13px">Name, organisation and QR on each badge — print on A4, or choose “Save as PDF” to send to a print shop.</div>
-    <label class="l">Badge size</label><div class="seg" id="bsz"><button data-sz="a6" class="on">Large badge · 4 per A4</button><button data-sz="wallet">Card 85×55 · 10 per A4</button><button data-sz="qr">QR + name · 4 cm</button></div><label class="row" style="margin-top:10px;gap:8px;cursor:pointer;font-size:13px"><input type="checkbox" id="bdr" ${LS.get('kode-dr',true)?'checked':''}> Add “Dr.” before names (QR + name only)</label>
+    <label class="l">Badge size</label><div class="seg" id="bsz"><button data-sz="a6" class="on">Large badge · 4 per A4</button><button data-sz="wallet">Card 85×55 · 10 per A4</button><button data-sz="label">Sticker 80×55 · 1 per label</button><button data-sz="qr">QR + name · A4</button></div><label class="row" style="margin-top:10px;gap:8px;cursor:pointer;font-size:13px"><input type="checkbox" id="bdr" ${LS.get('kode-dr',true)?'checked':''}> Add “Dr.” before names (stickers and QR + name)</label>
     <label class="l">Who</label><select class="input" id="bwho"><option value="all">All guests (${all.length})</option>${cur.length!==all.length?`<option value="cur">Current search / filter (${cur.length})</option>`:''}${walk.length?`<option value="walk">Walk-ins only (${walk.length})</option>`:''}</select>
     <div class="bdg-prev" id="bprev">${badgeHtml(sample,'a6')}</div>
     <button class="btn pri block" data-a="doprint">${ic('print')} Print / Save as PDF</button>
     <div class="note">In the print window choose <b>A4</b>, scale <b>100%</b> (or “Actual size”), and turn <b>Background graphics</b> on so the black header prints.</div>`);
   S.bsize='a6';
-  $('#bsz').addEventListener('click',e=>{const b=e.target.closest('[data-sz]');if(!b)return;S.bsize=b.dataset.sz;[...$('#bsz').children].forEach(x=>x.classList.toggle('on',x===b));$('#bprev').innerHTML=S.bsize==='qr'?`<div style="background:#fff;padding:10px">${qrCell(sample,30,true,LS.get('kode-dr',true))}</div>`:badgeHtml(sample,S.bsize)});
+  $('#bsz').addEventListener('click',e=>{const b=e.target.closest('[data-sz]');if(!b)return;S.bsize=b.dataset.sz;[...$('#bsz').children].forEach(x=>x.classList.toggle('on',x===b));$('#bprev').innerHTML=S.bsize==='label'?`<div style="display:inline-block;border:1px dashed #999">${lblHtml(sample,LS.get('kode-dr',true))}</div>`:S.bsize==='qr'?`<div style="background:#fff;padding:10px">${qrCell(sample,30,true,LS.get('kode-dr',true))}</div>`:badgeHtml(sample,S.bsize)});
   $('#bdr').addEventListener('change',e=>LS.set('kode-dr',e.target.checked));
   S.bpick=()=>{const w=$('#bwho').value;return w==='cur'?cur:w==='walk'?walk:all};
 }
@@ -606,7 +622,7 @@ function openQr(code){
   openModal(`<div class="eyebrow">Guest pass</div><h2>${esc(g.name)}</h2><div class="muted" style="font-size:13px">${esc(g.org||'')}</div>
     <div class="qrbox">${qrSvg(qrText(g))}</div><div style="text-align:center"><span class="code" style="font-size:15px">${esc(g.code)}</span></div>
     <div class="grid g2 mt"><button class="btn" data-a="png" data-code="${g.code}">${ic('download')} QR image</button><button class="btn pri" data-a="print1" data-code="${g.code}">${ic('print')} Print badge</button></div>
-    <div class="row mt" style="gap:8px"><button class="btn" style="flex:1" data-a="printqr" data-code="${g.code}">${ic('print')} Print QR + name</button><select class="input" id="qrmm" style="width:auto;margin:0">${[3,4,5,6].map(c=>`<option value="${c*10}" ${c*10===+LS.get('kode-qrmm',40)?'selected':''}>${c} cm</option>`).join('')}</select></div>
+    <div class="row mt" style="gap:8px"><button class="btn pri" style="flex:1" data-a="printqr" data-code="${g.code}">${ic('print')} Print QR + name</button><select class="input" id="qrmm" style="width:auto;margin:0"><option value="label" ${LS.get('kode-qrmm','label')==='label'?'selected':''}>Sticker 80×55</option>${[3,4,5,6].map(c=>`<option value="${c*10}" ${String(c*10)===String(LS.get('kode-qrmm','label'))?'selected':''}>A4 · ${c} cm</option>`).join('')}</select></div>
     <div class="row" style="gap:14px;margin-top:10px;font-size:13px"><label class="row" style="gap:6px;cursor:pointer"><input type="checkbox" id="qrname" ${LS.get('kode-qrname',true)?'checked':''}> Name next to QR</label><label class="row" style="gap:6px;cursor:pointer"><input type="checkbox" id="qrdr" ${LS.get('kode-dr',true)?'checked':''}> Add “Dr.”</label></div>`);
 }
 function qrCanvas(g,px=900){
@@ -666,7 +682,7 @@ document.addEventListener('click',e=>{
   if(a==='export')exportXlsx();
   if(a==='qr')openQr(el.dataset.code);
   if(a==='png')downloadPng(el.dataset.code);
-  if(a==='printqr'){const g=S.guests.get(el.dataset.code);const mm=+(($('#qrmm')||{}).value||LS.get('kode-qrmm',40));LS.set('kode-qrmm',mm);const nb=$('#qrname'),db=$('#qrdr');const wn=nb?nb.checked:LS.get('kode-qrname',true),dr=db?db.checked:LS.get('kode-dr',true);LS.set('kode-qrname',wn);LS.set('kode-dr',dr);if(g)printQr([g],mm,wn,dr)}
+  if(a==='printqr'){const g=S.guests.get(el.dataset.code);const mm=(($('#qrmm')||{}).value||LS.get('kode-qrmm','label'));LS.set('kode-qrmm',mm);const nb=$('#qrname'),db=$('#qrdr');const wn=nb?nb.checked:LS.get('kode-qrname',true),dr=db?db.checked:LS.get('kode-dr',true);LS.set('kode-qrname',wn);LS.set('kode-dr',dr);if(g){if(mm==='label')printLabels([g],dr);else printQr([g],+mm,wn,dr)}}
   if(a==='print1'){const g=S.guests.get(el.dataset.code);if(g)printBadges([g],LS.get('kode-bsize','a6'))}
   if(a==='badges')openBadges();
   if(a==='doprint'){LS.set('kode-bsize',S.bsize||'a6');printBadges(S.bpick?S.bpick():[],S.bsize||'a6')}
